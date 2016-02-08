@@ -172,6 +172,7 @@ int main(int narg, char *arg[])
     if(np!=1){
       for(i=0;i<sendcounts[0];i++){
         recvbuf[i] = sendbuf[i];
+        //        printf("recv %d\n",recvbuf[i]);
       }
     }
   } else {
@@ -185,7 +186,8 @@ int main(int narg, char *arg[])
     MPI_Scatterv(sendbuf,sendcounts,displs,MPI_LONG,recvbuf,localBufSpace,MPI_LONG,0,world);
   }
 
-  gsh = gs_setup(recvbuf,localBufSpace,&comm,0,gs_pairwise,1);
+  gsh = gs_setup(recvbuf,localBufSpace,&comm,0,gs_crystal_router,1);
+  printf("after setup, nid: %d\n",nid);
 #pragma acc enter data create(v[0:localBufSpace])
 #pragma acc enter data copyin(recvbuf[0:localBufSpace])
 
@@ -194,6 +196,12 @@ int main(int narg, char *arg[])
     v[i] = recvbuf[i];
   }
 
+  /* gs_irecv(v,dom,gs_add,0,gsh,0); */
+  /* printf("after irecv, nid: %d\n",nid); */
+  /* gs_isend(v,dom,gs_add,0,gsh,0); */
+  /* printf("after isend, nid: %d\n",nid); */
+  /* gs_wait(v,dom,gs_add,0,gsh,0); */
+  /* printf("after wait, nid: %d\n",nid); */
   gs(v,dom,gs_add,0,gsh,0);
 
 #pragma acc update host(v[0:localBufSpace])
@@ -214,7 +222,10 @@ int main(int narg, char *arg[])
     v[i] = recvbuf[i];
   }
 
-  gs(v,dom,gs_mul,0,gsh,0);
+  gs_irecv(v,dom,gs_mul,0,gsh,0);
+  gs_isend(v,dom,gs_mul,0,gsh,0);
+  gs_wait(v,dom,gs_mul,0,gsh,0);
+  //  gs(v,dom,gs_mul,0,gsh,0);
 
 #pragma acc update host(v[0:localBufSpace])
   fail = 0;

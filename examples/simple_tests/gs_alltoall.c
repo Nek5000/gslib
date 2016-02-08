@@ -7,8 +7,8 @@
 #include "../../src/name.h"
 #include "../../src/fail.h"
 #include "../../src/types.h"
-#include "../../src/comm.h"
 #include "../../src/mem.h"
+#include "../../src/comm.h"
 #include "../../src/gs_defs.h"
 #include "../../src/gs.h"
 
@@ -52,9 +52,9 @@ int main(int narg, char *arg[])
     }
   }
 
-  gsh = gs_setup(glo_num,np,&comm,0,gs_auto,1);
+  gsh = gs_setup(glo_num,np,&comm,0,gs_pairwise,1);
 
-  nsamples  = 10000;
+  nsamples  = 500000;
   localData = malloc(sizeof(int)*np);
   recvBuf = malloc(sizeof(int)*np);
 
@@ -66,7 +66,10 @@ int main(int narg, char *arg[])
       recvBuf[i] = nid+i;
     }
     
-    gs(recvBuf,gs_int,gs_add,0,gsh,0);
+       gs_irecv(recvBuf,gs_int,gs_add,0,gsh,0);
+       gs_isend(recvBuf,gs_int,gs_add,0,gsh,0);
+       gs_wait(recvBuf,gs_int,gs_add,0,gsh,0);
+//             gs(recvBuf,gs_int,gs_add,0,gsh,0);
 
     for(i=0;i<np;i++){
       recvBuf[i] = recvBuf[i] - localData[i];
