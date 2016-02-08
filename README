@@ -67,3 +67,45 @@ All of the preprocessor macros that affect compilation are:
   amg.c: AMG_BLOCK_ROWS   number of rows to read at a time (default=1200)
          GS_TIMING        record timings for the matrix multiplies
          GS_BARRIER       use a barrier to improve the quality of the timings
+
+
+
+Differences from JL listed below
+=====================
+  Descriptions:
+=====================
+
+This directory (src/jl2) includes a newly tuned gather-scatter routine updated by
+Matthew Otten (at Cornell), using the similar idea of OpenACC gather-scatter kernel
+previously done by Aaron Vose (Cray Inc) and Matthew Otten in this paper:
+       http://www.mcs.anl.gov/~mmin/hack_nekcem.pdf (pp.7, say version 15.0)
+
+This newer version (src/jl2), say 15.1, has the following features:
+
+      1. Keeps the same structure of James Lottes' original gs-routines;
+      2. Uses new map arrays (for effective use of vectorization/streaming on GPU);
+      3. Gives similar levels of performance on the CPU.
+
+=====================
+  How to use it:
+=====================
+
+To test with our newly tuned gather-scatter kernel: there would be nothing
+to change in the source code. You simply change our makefile to compile with src/jl2
+(instead of the current src/jl).
+
+For OpenACC GPU runs w/  GPUDirect: require "-DGPUDIRECT" option at compile time.
+For OpenACC GPU runs w/o GPUDirect: no additional option required.
+For CPU-only runs                 : no additional option required.
+
+=====================
+  Difference:
+=====================
+The only difference between (src/jl) vs. (src/jl2) is the following files:
+     src/jl2/gs.c
+     src/jl2/gs_local.c
+     src/jl2/gs_local.h
+     src/jl2/comm.c
+
+
+

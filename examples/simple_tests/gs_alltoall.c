@@ -3,14 +3,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "c99.h"
-#include "name.h"
-#include "fail.h"
-#include "types.h"
-#include "comm.h"
-#include "mem.h"
-#include "gs_defs.h"
-#include "gs.h"
+#include "../../src/c99.h"
+#include "../../src/name.h"
+#include "../../src/fail.h"
+#include "../../src/types.h"
+#include "../../src/comm.h"
+#include "../../src/mem.h"
+#include "../../src/gs_defs.h"
+#include "../../src/gs.h"
 
 typedef double T;
 const gs_dom dom = gs_double;

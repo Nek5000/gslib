@@ -15,8 +15,8 @@ CFLAGS+=-DUSE_NAIVE_BLAS
 #CFLAGS+=-DAMG_DUMP
 CFLAGS+=-DGS_TIMING -DGS_BARRIER
 
-#CFLAGS+=-O0 -g
-CFLAGS+=-O3 #-march=native
+CFLAGS+=-O0 -g
+#CFLAGS+=-O3 #-march=native
 
 #CFLAGS+=-W #-Wall -Wno-unused-function -Wno-unused-parameter
 #CFLAGS+=-Minform=warn
@@ -74,7 +74,7 @@ sarray_transfer_test: sarray_transfer.o sarray_sort.o sort.o fail.o crystal.o co
 
 gs_test: gs_test.o $(GS_OBJECTS);		@echo LINK $@; $(LINKCMD) $^ -o $@
 gs_test_old: gs_test_old.o $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
-gslib_test: gslib_test.o $(GS_OBJECTS);		@echo LINK $@; $(LINKCMD) $^ -o $@
+gslib_test: gslib_test.o $(GS_OBJECTS);		@echo LINK $@; $(LINKCMD) $^ -lm -o $@
 gs_alltoall: gs_alltoall.o $(GS_OBJECTS);		@echo LINK $@; $(LINKCMD) $^ -o $@
 gs_unique_test: gs_unique_test.o $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
 xxt_test: xxt_test.o $(CRS) $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
