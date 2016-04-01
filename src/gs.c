@@ -1627,6 +1627,24 @@ void gs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
   gs_aux(u,mode_vec,vn,dom,op,transpose,gsh,buf);
 }
 
+void gs_many_isend(void *u, unsigned vn, gs_dom dom, gs_op op,
+             unsigned transpose, struct gs_data *gsh, buffer *buf)
+{
+  gs_aux_isend((void*)u,mode_many,vn,dom,op,transpose,gsh,buf);
+}
+
+void gs_many_irecv(void *u, unsigned vn, gs_dom dom, gs_op op,
+             unsigned transpose, struct gs_data *gsh, buffer *buf)
+{
+  gs_aux_irecv((void*)u,mode_many,vn,dom,op,transpose,gsh,buf);
+}
+
+void gs_many_wait(void *u, unsigned vn, gs_dom dom, gs_op op,
+             unsigned transpose, struct gs_data *gsh, buffer *buf)
+{
+  gs_aux_wait((void*)u,mode_many,vn,dom,op,transpose,gsh,buf);
+}
+
 void gs_many(void *u, unsigned vn, gs_dom dom, gs_op op,
              unsigned transpose, struct gs_data *gsh, buffer *buf)
 {
@@ -1816,6 +1834,9 @@ static int map_size(const uint *map, int *t)
 #define cgs_wait  PREFIXED_NAME(gs_wait )
 #define cgs_vec   PREFIXED_NAME(gs_vec  )
 #define cgs_many  PREFIXED_NAME(gs_many )
+#define cgs_many_isend  PREFIXED_NAME(gs_many_irecv )
+#define cgs_many_irecv  PREFIXED_NAME(gs_many_isend )
+#define cgs_many_wait  PREFIXED_NAME(gs_many_wait )
 #define cgs_setup PREFIXED_NAME(gs_setup)
 #define cgs_free  PREFIXED_NAME(gs_free )
 
@@ -1828,6 +1849,9 @@ static int map_size(const uint *map, int *t)
 #define fgs_vec        FORTRAN_NAME(gs_op_vec    ,GS_OP_VEC    )
 #define fgs_many       FORTRAN_NAME(gs_op_many   ,GS_OP_MANY   )
 #define fgs_fields     FORTRAN_NAME(gs_op_fields ,GS_OP_FIELDS )
+#define fgs_fields_isend     FORTRAN_NAME(gs_op_fields_isend, GS_OP_FIELDS_ISEND)
+#define fgs_fields_irecv     FORTRAN_NAME(gs_op_fields_irecv, GS_OP_FIELDS_IRECV)
+#define fgs_fields_wait      FORTRAN_NAME(gs_op_fields_wait, GS_OP_FIELDS_WAIT)
 #define fgs_free       FORTRAN_NAME(gs_free      ,GS_FREE      )
 
 static struct gs_data **fgs_info = 0;
@@ -1954,6 +1978,66 @@ void fgs_wait(const sint *handle, void *u, const sint *dom, const sint *op,
 }
 
 
+void fgs_fields_isend(const sint *handle,
+                void *u, const sint *stride, const sint *n,
+                const sint *dom, const sint *op, const sint *transpose)
+{
+  size_t offset;
+  uint i;
+
+  fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
+  if(*n<0) return;
+
+    //  array_reserve(void*,&fgs_fields_array,*n);
+    //p = fgs_fields_array.ptr;
+    //offset = *stride * gs_dom_size[*dom-1];
+
+  //  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+  cgs_many_isend(u,*n,
+	   fgs_dom[*dom],(gs_op_t)(*op-1),
+	   *transpose!=0, fgs_info[*handle],0);
+
+}
+void fgs_fields_irecv(const sint *handle,
+                void *u, const sint *stride, const sint *n,
+                const sint *dom, const sint *op, const sint *transpose)
+{
+  size_t offset;
+  uint i;
+
+  fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
+  if(*n<0) return;
+
+    //  array_reserve(void*,&fgs_fields_array,*n);
+    //p = fgs_fields_array.ptr;
+    //offset = *stride * gs_dom_size[*dom-1];
+
+  //  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+  cgs_many_irecv(u,*n,
+	   fgs_dom[*dom],(gs_op_t)(*op-1),
+	   *transpose!=0, fgs_info[*handle],0);
+
+}
+void fgs_fields_wait(const sint *handle,
+                void *u, const sint *stride, const sint *n,
+                const sint *dom, const sint *op, const sint *transpose)
+{
+  size_t offset;
+  uint i;
+
+  fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
+  if(*n<0) return;
+
+    //  array_reserve(void*,&fgs_fields_array,*n);
+    //p = fgs_fields_array.ptr;
+    //offset = *stride * gs_dom_size[*dom-1];
+
+  //  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+  cgs_many_wait(u,*n,
+	   fgs_dom[*dom],(gs_op_t)(*op-1),
+	   *transpose!=0, fgs_info[*handle],0);
+
+}
 void fgs_fields(const sint *handle,
                 void *u, const sint *stride, const sint *n,
                 const sint *dom, const sint *op, const sint *transpose)
