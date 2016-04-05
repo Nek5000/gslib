@@ -1529,12 +1529,6 @@ static void gs_aux_irecv(
     acc = 1;
   }
 #endif
-  local_gather [mode](u,u,vn,gsh->map_local[0^transpose],dom,op,gsh->dstride,
-                      gsh->mf_nt[0^transpose],gsh->map_localf[0^transpose],
-		      gsh->m_size[0^transpose],acc);
-
-  if(transpose==0) init[mode](u,vn,gsh->flagged_primaries,dom,op,gsh->dstride,
-			      gsh->fp_m_nt,gsh->fp_mapf,gsh->fp_size,acc);
 
   gsh->r.exec_irecv(u,mode,vn,dom,op,transpose,gsh->r.data,&gsh->comm,buf->ptr,gsh->dstride,acc,gsh->r.buffer_size);
 }
@@ -1559,6 +1553,14 @@ static void gs_aux_isend(
   static gs_init_fun *const init[] =
     { &gs_init, &gs_init_vec, &gs_init_many, &init_noop };
   if(!buf) buf = &static_buffer;
+
+  local_gather [mode](u,u,vn,gsh->map_local[0^transpose],dom,op,gsh->dstride,
+                      gsh->mf_nt[0^transpose],gsh->map_localf[0^transpose],
+		      gsh->m_size[0^transpose],acc);
+
+  if(transpose==0) init[mode](u,vn,gsh->flagged_primaries,dom,op,gsh->dstride,
+			      gsh->fp_m_nt,gsh->fp_mapf,gsh->fp_size,acc);
+
 
   gsh->r.exec_isend(u,mode,vn,dom,op,transpose,gsh->r.data,&gsh->comm,buf->ptr,gsh->dstride,acc,gsh->r.buffer_size);
 
