@@ -31,6 +31,9 @@
 #define gs_setup   PREFIXED_NAME(gs_setup )
 #define gs_free    PREFIXED_NAME(gs_free  )
 #define gs_unique  PREFIXED_NAME(gs_unique)
+#define gs_many_isend   PREFIXED_NAME(gs_many_isend )
+#define gs_many_irecv   PREFIXED_NAME(gs_many_irecv )
+#define gs_many_wait    PREFIXED_NAME(gs_many_wait  )
 
 GS_DEFINE_DOM_SIZES()
 
@@ -1621,7 +1624,6 @@ void gs_wait(void *u, gs_dom dom, gs_op op, unsigned transpose,
   gs_aux_wait(u,mode_plain,1,dom,op,transpose,gsh,buf);
 }
 
-
 void gs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
             unsigned transpose, struct gs_data *gsh, buffer *buf)
 {
@@ -1829,6 +1831,9 @@ static int map_size(const uint *map, int *t)
 #undef gs_many
 #undef gs_vec
 #undef gs
+#undef gs_many_isend
+#undef gs_many_irecv
+#undef gs_many_wait
 #define cgs       PREFIXED_NAME(gs      )
 #define cgs_irecv PREFIXED_NAME(gs_irecv)
 #define cgs_isend PREFIXED_NAME(gs_isend)
