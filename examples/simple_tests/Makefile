@@ -3,8 +3,8 @@ CFLAGS+=-DMPI
 #CFLAGS+= -acc -ta=nvidia -Minfo=accel
 CFLAGS+=-DPREFIX=jl_
 CFLAGS+=-DNO_NEK_EXITT
-CFLAGS+=-DGLOBAL_LONG
-LDFLAGS+=-lm #-acc
+CFLAGS+=-DGLOBAL_LONG 
+LDFLAGS+=-lm -pg #-acc
 SRCLOC=../../src
 #CFLAGS+=-DPRINT_MALLOCS=1
 
@@ -15,7 +15,7 @@ CFLAGS+=-DUSE_NAIVE_BLAS
 #CFLAGS+=-DAMG_DUMP
 CFLAGS+=-DGS_TIMING -DGS_BARRIER
 
-CFLAGS+=-O0 -g
+CFLAGS+=-O3 -fast -pg
 #CFLAGS+=-O3 #-march=native
 
 #CFLAGS+=-W #-Wall -Wno-unused-function -Wno-unused-parameter

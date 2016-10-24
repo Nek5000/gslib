@@ -4,7 +4,7 @@ CFLAGS+=-DMPI
 CFLAGS+=-DPREFIX=jl_
 CFLAGS+=-DNO_NEK_EXITT
 CFLAGS+=-DGLOBAL_LONG
-LDFLAGS+=-lm #-acc
+LDFLAGS+=-lm -pg#-acc
 
 #CFLAGS+=-DPRINT_MALLOCS=1
 
@@ -15,7 +15,7 @@ CFLAGS+=-DUSE_NAIVE_BLAS
 #CFLAGS+=-DAMG_DUMP
 CFLAGS+=-DGS_TIMING -DGS_BARRIER
 
-CFLAGS+=-O0 -g
+CFLAGS+=-O3 -pg
 #CFLAGS+=-O3 #-march=native
 
 #CFLAGS+=-W #-Wall -Wno-unused-function -Wno-unused-parameter
