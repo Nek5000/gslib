@@ -3,6 +3,7 @@ CFLAGS+=-DMPI
 #CFLAGS+= -acc -ta=nvidia -Minfo=accel
 CFLAGS+=-DPREFIX=jl_
 CFLAGS+=-DNO_NEK_EXITT
+#CFLAGS+= -DNEW_GS_LOOPS #Enable this to use the new loops
 CFLAGS+=-DGLOBAL_LONG
 LDFLAGS+=-lm -pg#-acc
 
