@@ -25,6 +25,7 @@ CCCMD=$(CC) $(G) $(CFLAGS)
 LINKCMD=$(CC) $(G) $(LDFLAGS)
 #RLINKCMD = $(LD) -r
 all: gslib_test gs_alltoall
+deep_clean: ; @$(RM) $(TESTS) *.o *.s ../../src/*.o
 clean: ; @$(RM) $(TESTS) *.o *.s
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
