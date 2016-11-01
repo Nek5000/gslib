@@ -572,6 +572,7 @@ void gs_gather(void *out, const void *in, const unsigned vn,
                const uint *map, gs_dom dom, gs_op op, int dstride,
                int mf_nt, int *mapf, int m_size,int acc)
 {
+
 #define WITH_OP(T,OP) gather_##T##_##OP(out,in,1,map)
 #define WITH_DOMAIN(T) SWITCH_OP(T,op)
   SWITCH_DOMAIN(dom);
@@ -629,6 +630,7 @@ void gs_gather_many(void *out, const void *in, const unsigned vn,
   uint k;
   typedef void *ptr_to_void; typedef const void *ptr_to_const_void;
   const ptr_to_void *p = out; const ptr_to_const_void *q = in;
+
 #define WITH_OP(T,OP) for(k=0;k<vn;++k) gather_##T##_##OP(p[k],q[k],1,map)
 #define WITH_DOMAIN(T) SWITCH_OP(T,op)
   SWITCH_DOMAIN(dom);
