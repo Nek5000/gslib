@@ -78,8 +78,8 @@ int main(int narg, char *arg[])
     fgets(buffer,1024,inp);
     sscanf(buffer,"%d%d%d%d%d%d%d",&totalElements,&maxArray,&v2,&maxNp,&i,&j,&k);
     maxArray = maxArray+1; //Index off of 1, not 0
-    MPI_Bcast(&maxArray,1,MPI_INT,0,world);
 
+    MPI_Bcast(&maxArray,1,MPI_INT,0,world);
     duplicate_count = malloc(sizeof(int)*maxArray);
 
     //scanf("%d%d%d%d%d%d%d",&totalElements,&v1,&v2,&maxNp,&i,&j,&k);
@@ -176,8 +176,9 @@ int main(int narg, char *arg[])
       }
     }
   } else {
-    MPI_Recv(&localBufSpace,1,MPI_INT,0,0,world,MPI_STATUS_IGNORE);
+
     MPI_Bcast(&maxArray,1,MPI_INT,0,world);
+    MPI_Recv(&localBufSpace,1,MPI_INT,0,0,world,MPI_STATUS_IGNORE);
     duplicate_count = malloc(sizeof(int)*maxArray);
     MPI_Bcast(duplicate_count,maxArray,MPI_INT,0,world);
     //printf("Nid: %d maxEle: %d\n",nid,localBufSpace);
@@ -187,7 +188,7 @@ int main(int narg, char *arg[])
   }
 
   gsh = gs_setup(recvbuf,localBufSpace,&comm,0,gs_pairwise,1);
-  printf("after setup, nid: %d\n",nid);
+
 #pragma acc enter data create(v[0:localBufSpace])
 #pragma acc enter data copyin(recvbuf[0:localBufSpace])
 
@@ -205,16 +206,16 @@ int main(int narg, char *arg[])
   /* printf("after wait, nid: %d\n",nid); */
   gs(v,dom,gs_add,0,gsh,0);
 
-/* #pragma acc update host(v[0:localBufSpace]) */
-/*   fail = 0; */
-/*   //Check v */
-/*   for(i=0;i<localBufSpace;i++){ */
-/*     if(v[i]!=duplicate_count[recvbuf[i]]*recvbuf[i]){ */
-/*       printf("Add failure on core %d index %d\n",nid,i); */
-/*       printf("v[%d] %f recv %d %d\n",i,v[i],duplicate_count[recvbuf[i]],recvbuf[i]); */
-/*       fail = 1; */
-/*     } */
-/*   } */
+ #pragma acc update host(v[0:localBufSpace]) 
+   fail = 0; 
+   //Check v 
+   for(i=0;i<localBufSpace;i++){ 
+     if(v[i]!=duplicate_count[recvbuf[i]]*recvbuf[i]){ 
+       printf("Add failure on core %d index %d\n",nid,i); 
+       printf("v[%d] %f recv %d %d\n",i,v[i],duplicate_count[recvbuf[i]],recvbuf[i]); 
+       fail = 1; 
+     } 
+   } 
   
   //  if(fail==0) printf("Add success! on %d\n",nid);
   //Fill v
@@ -229,15 +230,15 @@ int main(int narg, char *arg[])
   gs(v,dom,gs_mul,0,gsh,0);
 
 /* #pragma acc update host(v[0:localBufSpace]) */
-/*   fail = 0; */
-/*   //Check v */
-/*   for(i=0;i<localBufSpace;i++){ */
-/*     if(v[i]!=pow(recvbuf[i],duplicate_count[recvbuf[i]])){ */
-/*       printf("Mult failure on core %d index %d\n",nid,i); */
-/*       printf("v[%d] %f recv %d %d\n",i,v[i],recvbuf[i],duplicate_count[recvbuf[i]]); */
-/*       fail = 1; */
-/*     } */
-/*   } */
+   fail = 0; 
+   //Check v 
+   for(i=0;i<localBufSpace;i++){ 
+     if(v[i]!=pow(recvbuf[i],duplicate_count[recvbuf[i]])){ 
+       printf("Mult failure on core %d index %d\n",nid,i); 
+       printf("v[%d] %f recv %d %d\n",i,v[i],recvbuf[i],duplicate_count[recvbuf[i]]); 
+       fail = 1; 
+     } 
+   } 
   
   //  if(fail==0) printf("Mult success! on %d\n",nid);
 
