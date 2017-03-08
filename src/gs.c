@@ -1471,7 +1471,6 @@ static void gs_aux(
 {
   int acc, i;
   char *bufPtr;
-
   static gs_scatter_fun *const local_scatter[] =
     { &gs_scatter, &gs_scatter_vec, &gs_scatter_many, &scatter_noop };
   static gs_gather_fun  *const local_gather [] =
@@ -1990,18 +1989,25 @@ void fgs_fields_isend(const sint *handle,
 {
   size_t offset;
   uint i;
+  void **p;
 
   fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
   if(*n<0) return;
 
-    //  array_reserve(void*,&fgs_fields_array,*n);
-    //p = fgs_fields_array.ptr;
-    //offset = *stride * gs_dom_size[*dom-1];
-
-  //  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+#ifdef NEW_GS_LOOPS
   cgs_many_isend(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
 	   *transpose!=0, fgs_info[*handle],0);
+#else
+  array_reserve(void*,&fgs_fields_array,*n);
+  p = fgs_fields_array.ptr;
+  offset = *stride * gs_dom_size[*dom-1];
+  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+
+  cgs_many_isend((void *const*)fgs_fields_array.ptr,*n,
+           (gs_dom)(*dom-1),(gs_op_t)(*op-1),
+           *transpose!=0, fgs_info[*handle],0);
+#endif
 
 }
 void fgs_fields_irecv(const sint *handle,
@@ -2010,18 +2016,21 @@ void fgs_fields_irecv(const sint *handle,
 {
   size_t offset;
   uint i;
-
-  fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
-  if(*n<0) return;
-
-    //  array_reserve(void*,&fgs_fields_array,*n);
-    //p = fgs_fields_array.ptr;
-    //offset = *stride * gs_dom_size[*dom-1];
-
-  //  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+  void **p;
+#ifdef NEW_GS_LOOPS
   cgs_many_irecv(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
 	   *transpose!=0, fgs_info[*handle],0);
+#else
+  array_reserve(void*,&fgs_fields_array,*n);
+  p = fgs_fields_array.ptr;
+  offset = *stride * gs_dom_size[*dom-1];
+  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+
+  cgs_many_irecv((void *const*)fgs_fields_array.ptr,*n,
+           (gs_dom)(*dom-1),(gs_op_t)(*op-1),
+           *transpose!=0, fgs_info[*handle],0);
+#endif
 
 }
 void fgs_fields_wait(const sint *handle,
@@ -2030,38 +2039,53 @@ void fgs_fields_wait(const sint *handle,
 {
   size_t offset;
   uint i;
+  void **p;
 
   fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
   if(*n<0) return;
 
-    //  array_reserve(void*,&fgs_fields_array,*n);
-    //p = fgs_fields_array.ptr;
-    //offset = *stride * gs_dom_size[*dom-1];
-
-  //  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+#ifdef NEW_GS_LOOPS
   cgs_many_wait(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
 	   *transpose!=0, fgs_info[*handle],0);
+#else
+  array_reserve(void*,&fgs_fields_array,*n);
+  p = fgs_fields_array.ptr;
+  offset = *stride * gs_dom_size[*dom-1];
+  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
 
+  cgs_many_wait((void *const*)fgs_fields_array.ptr,*n,
+           (gs_dom)(*dom-1),(gs_op_t)(*op-1),
+           *transpose!=0, fgs_info[*handle],0);
+#endif
 }
+
+
 void fgs_fields(const sint *handle,
                 void *u, const sint *stride, const sint *n,
                 const sint *dom, const sint *op, const sint *transpose)
 {
   size_t offset;
   uint i;
+  void **p;
 
   fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
   if(*n<0) return;
 
-    //  array_reserve(void*,&fgs_fields_array,*n);
-    //p = fgs_fields_array.ptr;
-    //offset = *stride * gs_dom_size[*dom-1];
-
-  //  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+#ifdef NEW_GS_LOOPS
   cgs_many(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
 	   *transpose!=0, fgs_info[*handle],0);
+#else
+  array_reserve(void*,&fgs_fields_array,*n);
+  p = fgs_fields_array.ptr;
+  offset = *stride * gs_dom_size[*dom-1];
+  for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
+
+  cgs_many((void *const*)fgs_fields_array.ptr,*n,
+           (gs_dom)(*dom-1),(gs_op_t)(*op-1),
+           *transpose!=0, fgs_info[*handle],0);
+#endif
 
 }
 
