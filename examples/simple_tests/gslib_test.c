@@ -191,53 +191,52 @@ int main(int narg, char *arg[])
 #pragma acc enter data create(v[0:localBufSpace])
 #pragma acc enter data copyin(recvbuf[0:localBufSpace])
 
-  for(k=0;k<50000;k++) {
+  for(k=0;k<1;k++) {
 #pragma acc parallel loop present(v[0:localBufSpace],recvbuf[0:localBufSpace])
-  for(i=0;i<localBufSpace;i++){
+    gs_irecv(v,dom,gs_add,0,gsh,0);
+    for(i=0;i<localBufSpace;i++){
     v[i] = recvbuf[i];
   }
 
-  /* gs_irecv(v,dom,gs_add,0,gsh,0); */
-  /* printf("after irecv, nid: %d\n",nid); */
-  /* gs_isend(v,dom,gs_add,0,gsh,0); */
-  /* printf("after isend, nid: %d\n",nid); */
-  /* gs_wait(v,dom,gs_add,0,gsh,0); */
-  /* printf("after wait, nid: %d\n",nid); */
-  gs(v,dom,gs_add,0,gsh,0);
+
+  gs_isend(v,dom,gs_add,0,gsh,0);
+  gs_wait(v,dom,gs_add,0,gsh,0);
+  //  gs(v,dom,gs_add,0,gsh,0);
 
 /* #pragma acc update host(v[0:localBufSpace]) */
-/*   fail = 0; */
-/*   //Check v */
-/*   for(i=0;i<localBufSpace;i++){ */
-/*     if(v[i]!=duplicate_count[recvbuf[i]]*recvbuf[i]){ */
-/*       printf("Add failure on core %d index %d\n",nid,i); */
-/*       printf("v[%d] %f recv %d %d\n",i,v[i],duplicate_count[recvbuf[i]],recvbuf[i]); */
-/*       fail = 1; */
-/*     } */
-/*   } */
+  fail = 0;
+  //Check v
+  for(i=0;i<localBufSpace;i++){
+    if(v[i]!=duplicate_count[recvbuf[i]]*recvbuf[i]){
+      printf("Add failure on core %d index %d\n",nid,i);
+      printf("v[%d] %f recv %d %d\n",i,v[i],duplicate_count[recvbuf[i]],recvbuf[i]);
+      fail = 1;
+    }
+  }
   
   //  if(fail==0) printf("Add success! on %d\n",nid);
   //Fill v
 #pragma acc parallel loop present(v[0:localBufSpace],recvbuf[0:localBufSpace])
+  gs_irecv(v,dom,gs_mul,0,gsh,0);
   for(i=0;i<localBufSpace;i++){
     v[i] = recvbuf[i];
   }
 
-  /* gs_irecv(v,dom,gs_mul,0,gsh,0); */
-  /* gs_isend(v,dom,gs_mul,0,gsh,0); */
-  /* gs_wait(v,dom,gs_mul,0,gsh,0); */
-  gs(v,dom,gs_mul,0,gsh,0);
+
+  gs_isend(v,dom,gs_mul,0,gsh,0);
+  gs_wait(v,dom,gs_mul,0,gsh,0);
+  //  gs(v,dom,gs_mul,0,gsh,0);
 
 /* #pragma acc update host(v[0:localBufSpace]) */
-/*   fail = 0; */
-/*   //Check v */
-/*   for(i=0;i<localBufSpace;i++){ */
-/*     if(v[i]!=pow(recvbuf[i],duplicate_count[recvbuf[i]])){ */
-/*       printf("Mult failure on core %d index %d\n",nid,i); */
-/*       printf("v[%d] %f recv %d %d\n",i,v[i],recvbuf[i],duplicate_count[recvbuf[i]]); */
-/*       fail = 1; */
-/*     } */
-/*   } */
+  fail = 0;
+  //Check v
+  for(i=0;i<localBufSpace;i++){
+    if(v[i]!=pow(recvbuf[i],duplicate_count[recvbuf[i]])){
+      printf("Mult failure on core %d index %d\n",nid,i);
+      printf("v[%d] %f recv %d %d\n",i,v[i],recvbuf[i],duplicate_count[recvbuf[i]]);
+      fail = 1;
+    }
+  }
   
   //  if(fail==0) printf("Mult success! on %d\n",nid);
 

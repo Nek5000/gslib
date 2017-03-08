@@ -15,7 +15,7 @@ CFLAGS+=-DUSE_NAIVE_BLAS
 #CFLAGS+=-DAMG_DUMP
 CFLAGS+=-DGS_TIMING -DGS_BARRIER
 
-CFLAGS+=-O3 -fast -pg
+CFLAGS+=-O3 -pg
 #CFLAGS+=-O3 #-march=native
 
 #CFLAGS+=-W #-Wall -Wno-unused-function -Wno-unused-parameter
