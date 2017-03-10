@@ -516,7 +516,7 @@ static void pw_exec(
 
 static void pw_exec_irecv(
   void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
-  unsigned transpose, const void *execdata, const struct comm *comm, 
+  unsigned transpose, const void *execdata, const struct comm *comm,
   char *buf,int dstride,int acc,int bufSize)
 {
   const struct pw_data *pwd = execdata;
@@ -530,14 +530,15 @@ static void pw_exec_irecv(
   int i;
 
 /* post receives */
-  //  printf("r:pwe: %d %lX %lX %d:\n",pwd->comm[recv].n,(pwd->comm[recv].p),(pwd->comm[recv].size),pwd->comm[recv].total);
-  //printf("s:pwe: %d %lX %lX %d:\n",pwd->comm[send].n,(pwd->comm[send].p),(pwd->comm[send].size),pwd->comm[send].total);
+  /* printf("r:pwe: %d %lX %lX %d:\n",pwd->comm[recv].n,(pwd->comm[recv].p),(pwd->comm[recv].size),pwd->comm[recv].total); */
+  /* printf("s:pwe: %d %lX %lX %d:\n",pwd->comm[send].n,(pwd->comm[send].p),(pwd->comm[send].size),pwd->comm[send].total); */
+
   sendbuf = pw_exec_recvs(buf,unit_size,comm,&pwd->comm[recv],pwd->req);
 }
 
 static void pw_exec_isend(
   void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
-  unsigned transpose, const void *execdata, const struct comm *comm, 
+  unsigned transpose, const void *execdata, const struct comm *comm,
   char *buf,int dstride,int acc,int bufSize)
 {
   const struct pw_data *pwd = execdata;
@@ -561,10 +562,7 @@ static void pw_exec_isend(
   scatter_to_buf[mode](sendbuf,data,vn,pwd->map[send],dom,dstride,pwd->mf_nt[send],
                        pwd->mapf[send],pwd->mf_size[send],acc);
 
-  double* t = data;
-
 #pragma acc update host(sendbuf[0:unit_size*bufSize/2]) if(acc)
-  
   /* post sends */
   pw_exec_sends(sendbuf,unit_size,comm,&pwd->comm[send],
                 &pwd->req[pwd->comm[recv].n]);
@@ -573,7 +571,7 @@ static void pw_exec_isend(
 
 static void pw_exec_wait(
   void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
-  unsigned transpose, const void *execdata, const struct comm *comm, 
+  unsigned transpose, const void *execdata, const struct comm *comm,
   char *buf,int dstride,int acc,int bufSize)
 {
   const struct pw_data *pwd = execdata;
@@ -590,7 +588,6 @@ static void pw_exec_wait(
 #pragma acc update device(buf[0:unit_size*bufSize/2]) if(acc)
 
 //#pragma update device(pwd->map[recv],pwd->mapf[recv])
-
   /* gather using recv buffer */
   gather_from_buf[mode](data,buf,vn,pwd->map[recv],dom,op,dstride,pwd->mf_nt[recv],
                         pwd->mapf[recv],pwd->mf_size[recv],acc);
@@ -1512,7 +1509,6 @@ static void gs_aux_irecv(
 {
   int acc, i;
   char *bufPtr;
-
   static gs_scatter_fun *const local_scatter[] =
     { &gs_scatter, &gs_scatter_vec, &gs_scatter_many, &scatter_noop };
   static gs_gather_fun  *const local_gather [] =
@@ -1520,7 +1516,7 @@ static void gs_aux_irecv(
   static gs_init_fun *const init[] =
     { &gs_init, &gs_init_vec, &gs_init_many, &init_noop };
   if(!buf) buf = &static_buffer;
-  bufPtr = buf->ptr;
+  //  bufPtr = buf->ptr;
 #pragma acc exit data delete(bufPtr)
   buffer_reserve(buf,vn*gs_dom_size[dom]*gsh->r.buffer_size);
   bufPtr = buf->ptr;
@@ -1533,6 +1529,7 @@ static void gs_aux_irecv(
 #endif
 
   gsh->r.exec_irecv(u,mode,vn,dom,op,transpose,gsh->r.data,&gsh->comm,buf->ptr,gsh->dstride,acc,gsh->r.buffer_size);
+
 }
 
 static void gs_aux_isend(
@@ -1559,7 +1556,6 @@ static void gs_aux_isend(
   local_gather [mode](u,u,vn,gsh->map_local[0^transpose],dom,op,gsh->dstride,
                       gsh->mf_nt[0^transpose],gsh->map_localf[0^transpose],
 		      gsh->m_size[0^transpose],acc);
-
   if(transpose==0) init[mode](u,vn,gsh->flagged_primaries,dom,op,gsh->dstride,
 			      gsh->fp_m_nt,gsh->fp_mapf,gsh->fp_size,acc);
 
@@ -1589,11 +1585,9 @@ static void gs_aux_wait(
   if(!buf) buf = &static_buffer;
 
   gsh->r.exec_wait(u,mode,vn,dom,op,transpose,gsh->r.data,&gsh->comm,buf->ptr,gsh->dstride,acc,gsh->r.buffer_size);
-
   local_scatter[mode](u,u,vn,gsh->map_local[1^transpose],dom,gsh->dstride,
                       gsh->mf_nt[1^transpose],gsh->map_localf[1^transpose],
-		      gsh->m_size[1^transpose],acc);
-
+                      gsh->m_size[1^transpose],acc);
 }
 
 void gs(void *u, gs_dom dom, gs_op op, unsigned transpose,
@@ -1603,7 +1597,7 @@ void gs(void *u, gs_dom dom, gs_op op, unsigned transpose,
 }
 
 /*------------------------------------------------------------
-   GS nonblocking 
+   GS nonblocking
 -------------------------------------------------------------*/
 void gs_irecv(void *u, gs_dom dom, gs_op op, unsigned transpose,
         struct gs_data *gsh, buffer *buf)
@@ -1634,6 +1628,7 @@ void gs_many_isend(void *u, unsigned vn, gs_dom dom, gs_op op,
 {
   gs_aux_isend((void*)u,mode_many,vn,dom,op,transpose,gsh,buf);
 }
+
 
 void gs_many_irecv(void *u, unsigned vn, gs_dom dom, gs_op op,
              unsigned transpose, struct gs_data *gsh, buffer *buf)
@@ -1839,8 +1834,8 @@ static int map_size(const uint *map, int *t)
 #define cgs_wait  PREFIXED_NAME(gs_wait )
 #define cgs_vec   PREFIXED_NAME(gs_vec  )
 #define cgs_many  PREFIXED_NAME(gs_many )
-#define cgs_many_isend  PREFIXED_NAME(gs_many_irecv )
-#define cgs_many_irecv  PREFIXED_NAME(gs_many_isend )
+#define cgs_many_isend  PREFIXED_NAME(gs_many_isend )
+#define cgs_many_irecv  PREFIXED_NAME(gs_many_irecv )
 #define cgs_many_wait  PREFIXED_NAME(gs_many_wait )
 #define cgs_setup PREFIXED_NAME(gs_setup)
 #define cgs_free  PREFIXED_NAME(gs_free )
@@ -1853,6 +1848,9 @@ static int map_size(const uint *map, int *t)
 #define fgs_wait       FORTRAN_NAME(gs_op_wait   ,GS_OP_WAIT   )
 #define fgs_vec        FORTRAN_NAME(gs_op_vec    ,GS_OP_VEC    )
 #define fgs_many       FORTRAN_NAME(gs_op_many   ,GS_OP_MANY   )
+#define fgs_many_irecv       FORTRAN_NAME(gs_op_many_irecv   ,GS_OP_MANY_IRECV   )
+#define fgs_many_isend       FORTRAN_NAME(gs_op_many_isend   ,GS_OP_MANY_ISEND   )
+#define fgs_many_wait       FORTRAN_NAME(gs_op_many_wait   ,GS_OP_MANY_WAIT   )
 #define fgs_fields     FORTRAN_NAME(gs_op_fields ,GS_OP_FIELDS )
 #define fgs_fields_isend     FORTRAN_NAME(gs_op_fields_isend, GS_OP_FIELDS_ISEND)
 #define fgs_fields_irecv     FORTRAN_NAME(gs_op_fields_irecv, GS_OP_FIELDS_IRECV)
@@ -1919,7 +1917,7 @@ void fgs_vec(const sint *handle, void *u, const sint *n,
 {
   fgs_check_parms(*handle,*dom,*op,"gs_op_vec",__LINE__);
   cgs_vec(u,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
-          fgs_info[*handle],0);
+          fgs_info[*handle],NULL);
 }
 
 void fgs_many(const sint *handle, void *u1, void *u2, void *u3,
@@ -1930,28 +1928,90 @@ void fgs_many(const sint *handle, void *u1, void *u2, void *u3,
   void *uu[6];
   uu[0]=u1,uu[1]=u2,uu[2]=u3,uu[3]=u4,uu[4]=u5,uu[5]=u6;
   fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
+
+#ifdef NEW_GS_LOOPS
   // Temporary patch for fgs_many - cgs_many has memory errors with the new
   // format
   for(i=0;i<*n;i++) {
-    cgs(uu[i],fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0);
+    cgs(uu[i],fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
   }
-
-  //cgs_many(uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
-  //         fgs_info[*handle],0);
+#else
+  cgs_many(uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+          fgs_info[*handle],NULL);
+#endif
 }
 
+void fgs_many_irecv(const sint *handle, void *u1, void *u2, void *u3,
+              void *u4, void *u5, void *u6, const sint *n,
+              const sint *dom, const sint *op, const sint *transpose)
+{
+  int i;
+  void *uu[6];
+  uu[0]=u1,uu[1]=u2,uu[2]=u3,uu[3]=u4,uu[4]=u5,uu[5]=u6;
+  fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
+
+#ifdef NEW_GS_LOOPS
+  // Temporary patch for fgs_many - cgs_many has memory errors with the new
+  // format
+  for(i=0;i<*n;i++) {
+    cgs_irecv(uu[i],fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
+  }
+#else
+  cgs_many_irecv(uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+           fgs_info[*handle],NULL);
+#endif
+}
+
+void fgs_many_isend(const sint *handle, void *u1, void *u2, void *u3,
+              void *u4, void *u5, void *u6, const sint *n,
+              const sint *dom, const sint *op, const sint *transpose)
+{
+  int i;
+  void *uu[6];
+  uu[0]=u1,uu[1]=u2,uu[2]=u3,uu[3]=u4,uu[4]=u5,uu[5]=u6;
+  fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
+
+#ifdef NEW_GS_LOOPS
+  // Temporary patch for fgs_many - cgs_many has memory errors with the new
+  // format
+  for(i=0;i<*n;i++) {
+    cgs_isend(uu[i],fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
+  }
+#else
+  cgs_many_isend(uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+           fgs_info[*handle],NULL);
+#endif
+}
+
+void fgs_many_wait(const sint *handle, void *u1, void *u2, void *u3,
+              void *u4, void *u5, void *u6, const sint *n,
+              const sint *dom, const sint *op, const sint *transpose)
+{
+  int i;
+  void *uu[6];
+  uu[0]=u1,uu[1]=u2,uu[2]=u3,uu[3]=u4,uu[4]=u5,uu[5]=u6;
+  fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
+
+#ifdef NEW_GS_LOOPS
+  // Temporary patch for fgs_many - cgs_many has memory errors with the new
+  // format
+  for(i=0;i<*n;i++) {
+    cgs_wait(uu[i],fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
+  }
+#else
+  cgs_many_wait(uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+           fgs_info[*handle],NULL);
+#endif
+}
 
 static struct array fgs_fields_array = null_array;
-
-
-
 
 void fgs(const sint *handle, void *u, const sint *dom, const sint *op,
          const sint *transpose)
 {
   fgs_check_parms(*handle,*dom,*op,"gs_op",__LINE__);
 
-  cgs(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0);
+  cgs(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
 
 }
 
@@ -1960,7 +2020,7 @@ void fgs_isend(const sint *handle, void *u, const sint *dom, const sint *op,
 {
   fgs_check_parms(*handle,*dom,*op,"gs_op",__LINE__);
 
-  cgs_isend(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0);
+  cgs_isend(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
 
 }
 
@@ -1969,7 +2029,7 @@ void fgs_irecv(const sint *handle, void *u, const sint *dom, const sint *op,
 {
   fgs_check_parms(*handle,*dom,*op,"gs_op",__LINE__);
 
-  cgs_irecv(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0);
+  cgs_irecv(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
 
 }
 
@@ -1978,7 +2038,7 @@ void fgs_wait(const sint *handle, void *u, const sint *dom, const sint *op,
 {
   fgs_check_parms(*handle,*dom,*op,"gs_op",__LINE__);
 
-  cgs_wait(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0);
+  cgs_wait(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],NULL);
 
 }
 
@@ -1997,7 +2057,7 @@ void fgs_fields_isend(const sint *handle,
 #ifdef NEW_GS_LOOPS
   cgs_many_isend(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
-	   *transpose!=0, fgs_info[*handle],0);
+	   *transpose!=0, fgs_info[*handle],NULL);
 #else
   array_reserve(void*,&fgs_fields_array,*n);
   p = fgs_fields_array.ptr;
@@ -2006,7 +2066,7 @@ void fgs_fields_isend(const sint *handle,
 
   cgs_many_isend((void *const*)fgs_fields_array.ptr,*n,
            (gs_dom)(*dom-1),(gs_op_t)(*op-1),
-           *transpose!=0, fgs_info[*handle],0);
+           *transpose!=0, fgs_info[*handle],NULL);
 #endif
 
 }
@@ -2020,16 +2080,17 @@ void fgs_fields_irecv(const sint *handle,
 #ifdef NEW_GS_LOOPS
   cgs_many_irecv(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
-	   *transpose!=0, fgs_info[*handle],0);
+	   *transpose!=0, fgs_info[*handle],NULL);
 #else
   array_reserve(void*,&fgs_fields_array,*n);
   p = fgs_fields_array.ptr;
+
   offset = *stride * gs_dom_size[*dom-1];
   for(i=*n;i;--i) *p++ = u, u = (char*)u + offset;
 
   cgs_many_irecv((void *const*)fgs_fields_array.ptr,*n,
            (gs_dom)(*dom-1),(gs_op_t)(*op-1),
-           *transpose!=0, fgs_info[*handle],0);
+           *transpose!=0, fgs_info[*handle],NULL);
 #endif
 
 }
@@ -2047,7 +2108,7 @@ void fgs_fields_wait(const sint *handle,
 #ifdef NEW_GS_LOOPS
   cgs_many_wait(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
-	   *transpose!=0, fgs_info[*handle],0);
+	   *transpose!=0, fgs_info[*handle],NULL);
 #else
   array_reserve(void*,&fgs_fields_array,*n);
   p = fgs_fields_array.ptr;
@@ -2056,7 +2117,7 @@ void fgs_fields_wait(const sint *handle,
 
   cgs_many_wait((void *const*)fgs_fields_array.ptr,*n,
            (gs_dom)(*dom-1),(gs_op_t)(*op-1),
-           *transpose!=0, fgs_info[*handle],0);
+           *transpose!=0, fgs_info[*handle],NULL);
 #endif
 }
 
@@ -2075,7 +2136,7 @@ void fgs_fields(const sint *handle,
 #ifdef NEW_GS_LOOPS
   cgs_many(u,*n,
 	   fgs_dom[*dom],(gs_op_t)(*op-1),
-	   *transpose!=0, fgs_info[*handle],0);
+	   *transpose!=0, fgs_info[*handle],NULL);
 #else
   array_reserve(void*,&fgs_fields_array,*n);
   p = fgs_fields_array.ptr;
@@ -2084,7 +2145,7 @@ void fgs_fields(const sint *handle,
 
   cgs_many((void *const*)fgs_fields_array.ptr,*n,
            (gs_dom)(*dom-1),(gs_op_t)(*op-1),
-           *transpose!=0, fgs_info[*handle],0);
+           *transpose!=0, fgs_info[*handle],NULL);
 #endif
 
 }
