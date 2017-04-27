@@ -54,7 +54,7 @@ lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP)
 
 tests: $(TESTS) ;
 
-clean: ; $(RM) *.o *.s *.a
+clean: ; $(RM) *.o *.s *.a $(TESTS)
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 
