@@ -1,11 +1,12 @@
-MPI ?= 0
+MPI ?= 1
 ADDUS ?= 0
-LIBNAME ?= gsserial
+LIBNAME ?= gs
 PREFIX ?= gslib
 CBLAS ?= 0
 
-ifneq (0,$(MPI))
-  LIBNAME = gs
+ifeq (0,$(MPI))
+  LIBNAME = gsserial
+else
   G+=-DMPI
 endif
 
@@ -13,12 +14,8 @@ ifneq (0,$(ADDUS))
   G+=-DUNDERSCORE
 endif
 
-ifneq (0,$(CBLAS))
-  G+=-DUSE_CBLAS
-endif
-
 G+=-DPREFIX=$(PREFIX)
-
+G+=-DUSE_NAIVE_BLAS
 G+=-DGLOBAL_LONG_LONG
 G+=-DAMG_BLOCK_ROWS=2400
 #G+=-DPRINT_MALLOCS=1
@@ -32,10 +29,10 @@ TESTS=sort_test sort_test2 sarray_sort_test spchol_test \
       comm_test crystal_test sarray_transfer_test \
       gs_test gs_test_old gs_unique_test \
       xxt_test xxt_test2 crs_test \
-#      findpts_el_2_test findpts_el_2_test2 \
-#      findpts_el_3_test findpts_el_3_test2 \
-#      findpts_local_test findpts_test
-#      poly_test poly_test2 lob_bnd_test obbox_test \
+      findpts_el_2_test findpts_el_2_test2 \
+      findpts_el_3_test findpts_el_3_test2 \
+      findpts_local_test findpts_test \
+      poly_test poly_test2 lob_bnd_test obbox_test
 
 GS=gs.o sort.o sarray_transfer.o sarray_sort.o \
    gs_local.o fail.o crystal.o comm.o tensor.o
@@ -54,7 +51,7 @@ lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP)
 
 tests: $(TESTS) ;
 
-clean: ; $(RM) *.o *.s *.a $(TESTS)
+clean: ; $(RM) *.o *.s *.a
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 
