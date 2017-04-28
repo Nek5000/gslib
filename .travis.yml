@@ -36,7 +36,6 @@ matrix:
     - env: TEST=findpts_el_2_test2    NP=2
     - env: TEST=gs_test_old           NP=2
 
-
 install: true
 
 script:
