@@ -34,7 +34,7 @@ env:
 matrix:
   allow_failures:
     - env: TEST=findpts_el_2_test2
-    - env: TEST=gs_test
+    - env: TEST=gs_test_old
 
 
 install: true
