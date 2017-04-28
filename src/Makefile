@@ -22,7 +22,7 @@ CPPFLAGS += -DPREFIX=$(PREFIX) -DUSE_NAIVE_BLAS -DGLOBAL_LONG_LONG -DAMG_BLOCK_R
 # CPPFLAGS += -DUSE_NAIVE_BLAS
 
 CPPFLAGS += -I.
-LDLIBS += -l$(LIBNAME)
+LDLIBS += -l$(LIBNAME) -lm
 LDFLAGS += -L. 
 
 RAND_TESTS = obbox_test findpts_el_2_test2 findpts_el_2_test findpts_el_3_test2 findpts_el_3_test \
