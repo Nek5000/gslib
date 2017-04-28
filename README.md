@@ -7,11 +7,11 @@
 
 # Build Instructions
 
-The build system relies on GNU Make with the `make` command. To compile with MPI support just run:
+The build system relies on GNU Make with the `make` command. To compile gslib just run:
 
 ```
 cd src
-make CC=mpicc CFLAGS="-O2" MPI=1  ADDUS=1
+make CC=mpicc CFLAGS="-O2" ADDUS=1
 ```
 
 This will create a library called `libgs.a`. They key `ADDUS` determines the name mangling (add underscore) for the Fortran interface. 
@@ -19,5 +19,3 @@ This will create a library called `libgs.a`. They key `ADDUS` determines the nam
 # Interface
 
 tbd
-
-
