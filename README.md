@@ -20,4 +20,5 @@ This will create a library called `libgs.a`. They key `ADDUS` determines the nam
 # Applications
 
 **\[1]&#160;[Nek5000](https://nek5000.mcs.anl.gov/)**: Nek5000 is the open-source, highly-scalable, spectral element code.
+
 **\[2]&#160;[Nektar++](http://www.nektar.info)**: Nektar++ is the open-source spectral/hp element code.
