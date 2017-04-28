@@ -31,6 +31,12 @@ env:
     - TEST=xxt_test              NP=3
     - TEST=xxt_test2             NP=2
 
+matrix:
+  allow_failures:
+    - env: TEST=findpts_el_2_test2
+    - env: TEST=gs_test
+
+
 install: true
 
 script:
