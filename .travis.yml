@@ -7,33 +7,33 @@ before_install:
 
 env:
   matrix:
-    - TEST=comm_test
-    - TEST=crs_test
-    - TEST=crystal_test
-    - TEST=findpts_el_2_test
-    - TEST=findpts_el_2_test2
-    - TEST=findpts_el_3_test
-    - TEST=findpts_el_3_test2
-    - TEST=findpts_local_test
-    - TEST=findpts_test
-    - TEST=gs_test
-    - TEST=gs_test_old
-    - TEST=gs_unique_test
-    - TEST=lob_bnd_test
-    - TEST=obbox_test
-    - TEST=poly_test
-    - TEST=poly_test2
-    - TEST=sarray_sort_test
-    - TEST=sarray_transfer_test
-    - TEST=sort_test
-    - TEST=sort_test2
-    - TEST=spchol_test
-    - TEST=xxt_test
-    - TEST=xxt_test2
+    - TEST=comm_test             NP=2
+    - TEST=crs_test              NP=2
+    - TEST=crystal_test          NP=2
+    - TEST=findpts_el_2_test     NP=2
+    - TEST=findpts_el_2_test2    NP=2
+    - TEST=findpts_el_3_test     NP=2
+    - TEST=findpts_el_3_test2    NP=2
+    - TEST=findpts_local_test    NP=2
+    - TEST=findpts_test          NP=2
+    - TEST=gs_test               NP=2
+    - TEST=gs_test_old           NP=2
+    - TEST=gs_unique_test        NP=2
+    - TEST=lob_bnd_test          NP=2
+    - TEST=obbox_test            NP=2
+    - TEST=poly_test             NP=2
+    - TEST=poly_test2            NP=2
+    - TEST=sarray_sort_test      NP=2
+    - TEST=sarray_transfer_test  NP=2
+    - TEST=sort_test             NP=2
+    - TEST=sort_test2            NP=2
+    - TEST=spchol_test           NP=2
+    - TEST=xxt_test              NP=3
+    - TEST=xxt_test2             NP=2
 
 install: true
 
 script:
   - cd $ROOT_DIR/src
   - make CC=mpicc $TEST
-  - mpiexec -np 2 ./$TEST
+  - mpiexec -np $NP ./$TEST
