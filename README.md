@@ -16,6 +16,14 @@ make CC=mpicc CFLAGS="-O2"
 
 This will create a library called `libgs.a`. They key `ADDUS` determines the name mangling (add underscore) for the Fortran interface. 
 
-# Interface
+# Interface for gs
+
+tbd
+
+# Interface for XXT/AMG solver
+
+tbd
+
+# Interface for interpolation
 
 tbd
