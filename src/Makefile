@@ -1,5 +1,5 @@
 MPI ?= 1
-ADDUS ?= 0
+ADDUS ?= 1
 LIBNAME ?= gs
 PREFIX ?= gslib
 CBLAS ?= 0
@@ -51,7 +51,7 @@ lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP)
 
 tests: $(TESTS) ;
 
-clean: ; $(RM) *.o *.s *.a
+clean: ; $(RM) *.o *.s *.a $(TESTS)
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 
