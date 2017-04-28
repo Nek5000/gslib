@@ -1,5 +1,7 @@
 # GSLIB 
 
+[![Build Status](https://travis-ci.org/gslib/gslib.svg?branch=master)](https://travis-ci.org/gslib/gslib)
+
 * Gather/Scatter for nearest neighbor data exchange
 * XXT solver (parallel direct solver)
 * AMG solver 
