@@ -50,6 +50,7 @@ static void gather_array_##T##_##OP( \
 {                                                             \
   const T e = gs_identity_##T[op];                            \
   int i; \
+  _Pragma("acc parallel loop present(out) if(acc)")\
   for(i=0;i<n;i++) out[i]=e;                                       \
 }
 
@@ -76,14 +77,17 @@ static void gather_##T##_##OP( \
   int dstride_in=1; \
   if(in_stride==1) dstride_in=dstride; \
   for(k=0;k<vn;++k) {                                                        \
+_Pragma("acc parallel loop gang vector present(out,in,mapf[0:2*mf_nt],map[0:m_size]) async(k+1) if(acc)") \
     for(i=0;i<mf_nt;i++) {                                                   \
       T t=out[map[mapf[i*2]]+k*dstride];                                     \
+_Pragma("acc loop seq")						\
       for(j=0;j<mapf[i*2+1];j++) {                                           \
         GS_DO_##OP(t,in[in_stride*map[mapf[i*2]+j+1]+k*dstride_in]);         \
       }                                                                      \
       out[map[mapf[i*2]]+k*dstride] = t;                                 \
     }                                                                        \
   }                                                                          \
+_Pragma("acc wait")							\
 }
 
 /*------------------------------------------------------------------------------
@@ -100,13 +104,16 @@ static void scatter_##T( \
   if(in_stride==1)  dstride_in=dstride;                            \
   if(out_stride==1) dstride_out=dstride;                           \
   for(k=0;k<vn;++k) {                                              \
+_Pragma("acc parallel loop gang vector present(map[0:m_size],in,mapf[0:2*mf_nt],out) async(k+1) if(acc)") \
     for(i=0;i<mf_nt;i++) {                                         \
       T t=in[in_stride*map[mapf[i*2]]+k*dstride_in];       \
+_Pragma("acc loop seq")					   \
       for(j=0;j<mapf[i*2+1];j++) {                                 \
         out[out_stride*map[mapf[i*2]+j+1]+k*dstride_out] = t;          \
       }                                                            \
     }                                                              \
   }                                                                \
+_Pragma("acc wait")						   \
 }
 
 /*------------------------------------------------------------------------------
@@ -118,12 +125,15 @@ static void scatter_##T( \
 {                                                       \
   uint i,j,k; const T e = gs_identity_##T[op];		\
   for(k=0;k<vn;++k) {\
+_Pragma("acc parallel loop gang vector present(map[0:m_size],mapf[0:2*mf_nt],out) async(k+1) if(acc)")\
     for(i=0;i<mf_nt;i++){\
+_Pragma("acc loop seq")\
       for(j=0;j<mapf[i*2+1];j++) {\
         out[map[mapf[i*2+1]]+k*dstride] = e;\
       }\
     }\
   }\
+_Pragma("acc wait")\
 }
 
 #define DEFINE_PROCS(T) \
