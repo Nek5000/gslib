@@ -41,7 +41,7 @@ G+=-DGLOBAL_LONG_LONG
 #G+=-DPRINT_MALLOCS=1
 #G+=-DGS_TIMING -DGS_BARRIER
 
-CCCMD=$(CC) -O2 $(G) $(CFLAGS)
+CCCMD=$(CC) $(G) $(CFLAGS)
 LINKCMD=$(CC) $(G) -L./ -l$(LIBNAME) $(LDFLAGS)
 
 TESTS=sort_test sort_test2 sarray_sort_test spchol_test \
@@ -60,23 +60,25 @@ AMG=amg.o
 FWRAPPER=fcrystal.o fcrs.o findpts.o
 INTP=findpts_local.o obbox.o poly.o lob_bnd.o findpts_el_3.o findpts_el_2.o
 
-.PHONY: all lib cmds deps tests clean objects odepinfo
+.PHONY: all lib deps tests clean objects odepinfo
 
 all : lib tests
 
 lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP)
-	ar cr lib$(LIBNAME).a $?
+	$(AR) cr lib$(LIBNAME).a $?
 	ranlib lib$(LIBNAME).a
 
-tests: $(TESTS) ;
+tests: $(TESTS)
 
-clean: ; $(RM) *.o *.s *.a *_test *_test2
+clean: ; $(RM) *.o *.s *.a $(TESTS)
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 
 deps: ; ./cdep.py *.c > makefile.cdep;
 
 odepinfo: deps objects; @./odep_info.py *.o
+
+$(TESTS): % : %.o | lib
 
 -include makefile.cdep
 
