@@ -33,7 +33,7 @@ void test(const struct comm *const comm)
   
   slong *xgid=0; double *xg=0; struct gs_data *gsh;
   
-  struct crs_xxt_data *crs;
+  struct crs_data *crs;
 
   w = ceil(sqrt(comm->np)); gn = (w+1)*(w+1);
   
