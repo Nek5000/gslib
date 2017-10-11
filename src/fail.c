@@ -7,9 +7,24 @@
 #include "types.h"
 #include "comm.h"
 
+#ifdef USE_USR_EXIT
+#define userExitHandler FORTRAN_NAME(userExitHandler,USEREXITHANDLER)
+uint userExit = 1;
+extern void userExitHandler(int status);
+#else
+uint userExit = 0;
+void userExitHandler(int status) {};
+#endif
+
 void die(int status)
 {
-  if(comm_gbl_id==0) exit(status); else for(;;) ;
+  if (userExit) {
+  	userExitHandler(status);
+    	while(1);
+  } else {
+    	exit(status); 
+    	while(1);
+  }
 }
 
 void vdiagnostic(const char *prefix, const char *file, unsigned line,
