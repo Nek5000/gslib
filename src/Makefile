@@ -45,7 +45,7 @@ G+=-DGLOBAL_LONG_LONG
 #G+=-DGS_TIMING -DGS_BARRIER
 
 CCCMD=$(CC) $(CFLAGS) $(G)
-LINKCMD=$(CC) $(CFLAGS) $(G) -L./ -l$(LIBNAME) $(LDFLAGS)
+LINKCMD=$(CC) $(CFLAGS) $(G) $^ -o $@ -L./ -l$(LIBNAME) -lm $(LDFLAGS)
 
 TESTS=sort_test sort_test2 sarray_sort_test spchol_test \
       comm_test crystal_test sarray_transfer_test \
@@ -67,7 +67,7 @@ INTP=findpts_local.o obbox.o poly.o lob_bnd.o findpts_el_3.o findpts_el_2.o
 
 all : lib tests
 
-lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP)
+lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP) rand_elt_test.o
 	@$(AR) cr lib$(LIBNAME).a $?
 	@ranlib lib$(LIBNAME).a
 
@@ -82,6 +82,7 @@ deps: ; ./cdep.py *.c > makefile.cdep;
 odepinfo: deps objects; @./odep_info.py *.o
 
 $(TESTS): % : %.o | lib
+	$(LINKCMD)
 
 -include makefile.cdep
 
@@ -94,32 +95,3 @@ objects: $(OBJECTS) ;
 #	$(CC) -lgmp -lm gen_poly_imp.c -o gen_poly_imp;
 #	./gen_poly_imp > poly_imp.h;
 #	$(RM) gen_poly_imp
-
-CRS=$(AMG)
-
-sort_test: sort_test.o ; $(LINKCMD) $^ -o $@
-sort_test2: sort_test2.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-sarray_sort_test: sarray_sort_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-spchol_test: spchol_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-comm_test: comm_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-crystal_test: crystal_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-sarray_transfer_test: sarray_transfer_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-
-gs_test: gs_test.o $(GS_OBJECTS);		@echo LINK $@; $(LINKCMD) $^ -o $@
-gs_test_old: gs_test_old.o $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
-gs_unique_test: gs_unique_test.o $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
-xxt_test: xxt_test.o $(CRS) $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
-xxt_test2: xxt_test2.o $(CRS) $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
-crs_test: crs_test.o $(CRS) $(GS_OBJECTS);	@echo LINK $@; $(LINKCMD) $^ -o $@
-
-poly_test2: poly_test2.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-poly_test: poly_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-lob_bnd_test: lob_bnd_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-obbox_test: rand_elt_test.o obbox_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-findpts_el_2_test2: rand_elt_test.o findpts_el_2_test2.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-findpts_el_2_test: findpts_el_2_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-findpts_el_3_test2: rand_elt_test.o findpts_el_3_test2.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-findpts_el_3_test: findpts_el_3_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-findpts_local_test: rand_elt_test.o findpts_local_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-findpts_test: rand_elt_test.o findpts_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-
