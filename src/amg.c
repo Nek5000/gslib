@@ -26,6 +26,10 @@
 #  define AMG_BLOCK_ROWS 2400
 #endif
 
+#ifndef AMG_MAX_ROWS
+#  define AMG_MAX_ROWS 12000 
+#endif
+
 #include "amg_io.h"
 
 static double get_time(void)
@@ -918,7 +922,7 @@ static void read_data_mpiio(struct crs_data *const data,
   dclose(f);
 
   if(pid==0) 
-    printf("AMG: preading through rows %lu ... ",tn);
+    printf("AMG: preading through rows ... ");
 
   struct sfile fs = {0,0};
   struct sfile fsm[3] = {{0,0},{0,0},{0,0}};
@@ -930,20 +934,20 @@ static void read_data_mpiio(struct crs_data *const data,
   if(code != 0) 
     die(1);
 
-  array_init(double, &read_buffer, 6*AMG_BLOCK_ROWS);
-  row_lens = tmalloc(uint, 5*AMG_BLOCK_ROWS);
-  id_proc = row_lens + 3*AMG_BLOCK_ROWS;
-  id_perm = id_proc + AMG_BLOCK_ROWS;
-  array_reserve(struct id_data, &id_buffer, AMG_BLOCK_ROWS);
+  array_init(double, &read_buffer, 6*AMG_MAX_ROWS);
+  row_lens = tmalloc(uint, 5*AMG_MAX_ROWS);
+  id_proc = row_lens + 3*AMG_MAX_ROWS;
+  id_perm = id_proc + AMG_MAX_ROWS;
+  array_reserve(struct id_data, &id_buffer, AMG_MAX_ROWS);
 
   /* assign rows to proc */
   unsigned nr = tn/data->comm.np;
   for(i = 0; i < tn%data->comm.np;++i)
     if(i == pid) nr++; 
 
-  if(nr>AMG_BLOCK_ROWS) {
+  if(nr>AMG_MAX_ROWS) {
     if(pid==0)
-      fail(1,__FILE__,__LINE__,"AMG: AMG_BLOCK_ROWS too small!");
+      fail(1,__FILE__,__LINE__,"AMG: AMG_MAX_ROWS too small!");
     die(1);
   }
 
