@@ -2,13 +2,11 @@ MPI ?= 1
 MPIIO ?= 1
 ADDUS ?= 1
 USREXIT ?= 0
-LIBNAME ?= gsserial
-PREFIX ?= gslib_
-FPREFIX ?= fgslib_
+LIBNAME ?= gs
 BLAS ?= 0
+CFLAGS ?= -O2
 
 ifneq (0,$(MPI))
-  LIBNAME = gs
   G+=-DMPI
 endif
 
@@ -23,7 +21,7 @@ ifneq (0,$(ADDUS))
 endif
 
 ifneq (0,$(USREXIT))
-  G+=-DUSE_USER_EXIT
+  G+=-DUSE_USR_EXIT
 endif
 
 ifeq (0,$(BLAS))
@@ -34,15 +32,20 @@ ifeq (1,$(BLAS))
   G+=-DUSE_CBLAS
 endif
 
-G+=-DPREFIX=$(PREFIX)
-G+=-DFPREFIX=$(FPREFIX)
-G+=-DGLOBAL_LONG_LONG
+ifneq ($(PREFIX),)
+  G+=-DPREFIX=$(PREFIX)
+endif
 
+ifneq ($(FPREFIX),)
+  G+=-DFPREFIX=$(FPREFIX)
+endif
+
+G+=-DGLOBAL_LONG_LONG
 #G+=-DPRINT_MALLOCS=1
 #G+=-DGS_TIMING -DGS_BARRIER
 
-CCCMD=$(CC) $(G) $(CFLAGS)
-LINKCMD=$(CC) $(G) -L./ -l$(LIBNAME) $(LDFLAGS)
+CCCMD=$(CC) $(CFLAGS) $(G)
+LINKCMD=$(CC) $(CFLAGS) $(G) -L./ -l$(LIBNAME) $(LDFLAGS)
 
 TESTS=sort_test sort_test2 sarray_sort_test spchol_test \
       comm_test crystal_test sarray_transfer_test \
@@ -65,12 +68,12 @@ INTP=findpts_local.o obbox.o poly.o lob_bnd.o findpts_el_3.o findpts_el_2.o
 all : lib tests
 
 lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP)
-	$(AR) cr lib$(LIBNAME).a $?
-	ranlib lib$(LIBNAME).a
+	@$(AR) cr lib$(LIBNAME).a $?
+	@ranlib lib$(LIBNAME).a
 
 tests: $(TESTS)
 
-clean: ; $(RM) *.o *.s *.a $(TESTS)
+clean: ; @$(RM) *.o *.s *.a $(TESTS)
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 

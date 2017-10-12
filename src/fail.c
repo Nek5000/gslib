@@ -8,17 +8,17 @@
 #include "comm.h"
 
 #ifdef USE_USR_EXIT
-#define userExitHandler FORTRAN_NAME(userExitHandler,USEREXITHANDLER)
-uint userExit = 1;
+#define userExitHandler FORTRAN_NAME(userexithandler,USEREXITHANDLER)
+#define USEREXIT 1
 extern void userExitHandler(int status);
 #else
-uint userExit = 0;
+#define USEREXIT 0
 void userExitHandler(int status) {};
 #endif
 
 void die(int status)
 {
-  if (userExit) {
+  if (USEREXIT) {
   	userExitHandler(status);
     	while(1);
   } else {
