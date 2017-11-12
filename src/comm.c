@@ -140,6 +140,41 @@ comm_allreduce_byhand:
 #endif
 }
 
+void comm_iallreduce(comm_req *req, const struct comm *com, gs_dom dom, gs_op op,
+                          void *v, uint vn, void *buf)
+{
+  if(vn==0) return;
+#ifdef MPI
+  {
+    MPI_Datatype mpitype;
+    MPI_Op mpiop;
+    #define DOMAIN_SWITCH() do { \
+      switch(dom) { case gs_double:    mpitype=MPI_DOUBLE;    break; \
+                    case gs_float:     mpitype=MPI_FLOAT;     break; \
+                    case gs_int:       mpitype=MPI_INT;       break; \
+                    case gs_long:      mpitype=MPI_LONG;      break; \
+     WHEN_LONG_LONG(case gs_long_long: mpitype=MPI_LONG_LONG; break;) \
+                  default:        goto comm_allreduce_byhand; \
+      } \
+    } while(0)
+    DOMAIN_SWITCH();
+    #undef DOMAIN_SWITCH
+    switch(op) { case gs_add: mpiop=MPI_SUM;  break;
+                 case gs_mul: mpiop=MPI_PROD; break;
+                 case gs_min: mpiop=MPI_MIN;  break;
+                 case gs_max: mpiop=MPI_MAX;  break;
+                 default:        goto comm_allreduce_byhand;
+    }
+    MPI_Iallreduce(v,buf,vn,mpitype,mpiop,com->c,req);
+    return;
+  }
+#endif
+#ifdef MPI
+comm_allreduce_byhand:
+  allreduce_imp(com,dom,op, v,vn, buf);
+#endif
+}
+
 double comm_dot(const struct comm *comm, double *v, double *w, uint n)
 {
   double s=tensor_dot(v,w,n),b;

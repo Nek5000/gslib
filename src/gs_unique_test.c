@@ -30,7 +30,22 @@ static void test(const struct comm *comm)
   for(i=0;i<np*2;++i) out += sprintf(out, " %+d", (int)glindex[i]);
   sprintf(out," ]"), puts(buf);
 
+  /* non-blocking api */
+  if(comm->id==0) printf("\nTesting non-blocking api ...\n");
+  for(i=0;i<np;++i) glindex[2*i+1]=glindex[2*i]=i+1;
+  gsh=gs_setup(glindex,np*2,comm,1,gs_all_reduce,1);
+  for(i=0;i<np;++i) glindex[2*i+1]=glindex[2*i]=id;
+  gs_irecv(glindex,gs_slong,gs_add,0,gsh,0);
+  gs_isend(glindex,gs_slong,gs_add,0,gsh,0);
+  gs_wait(glindex,gs_slong,gs_add,0,gsh,0);
+  gs_free(gsh);
 
+  out = buf+sprintf(buf, "%03d own : [", (int)comm->id);
+  for(i=0;i<np*2;++i) out += sprintf(out, " %+d", (int)glindex[i]);
+  sprintf(out," ]"), puts(buf);
+
+  /* blocking api */
+  if(comm->id==0) printf("\nTesting blocking api ...\n");
   for(i=0;i<np;++i) glindex[2*i+1]=glindex[2*i]=i+1;
   gsh=gs_setup(glindex,np*2,comm,1,gs_auto,1);
   for(i=0;i<np;++i) glindex[2*i+1]=glindex[2*i]=id;

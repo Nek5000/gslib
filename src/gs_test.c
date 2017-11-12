@@ -26,17 +26,34 @@ static void test(const struct comm *comm)
   id[np+1] = comm->id+1;
   id[np+2] = comm->id+1;
   id[np+3] = np-comm->id;
-  gsh = gs_setup(id,np+4,comm,0,gs_auto,1);
+  gsh = gs_setup(id,np+4,comm,0,gs_all_reduce,1);
   free(id);
   
+  /* non-blocking api */
+  if(comm->id==0) printf("\nTesting non-blocking api ...\n");
+  for(i=0;i<np+4;++i) v[i] = 1;
+  gs_irecv(v,dom,gs_add,0,gsh,0);
+  gs_isend(v,dom,gs_add,0,gsh,0);
+  gs_wait (v,dom,gs_add,0,gsh,0);
+  if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
+  if(comm->id==0) printf("\n");
+
+  for(i=0;i<np+4;++i) v[i] = 1;
+  gs_irecv(v,dom,gs_add,1,gsh,0);
+  gs_isend(v,dom,gs_add,1,gsh,0);
+  gs_wait (v,dom,gs_add,1,gsh,0);
+  if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
+
+  /* blocking api */
+  if(comm->id==0) printf("\nTesting blocking api ...\n");
   for(i=0;i<np+4;++i) v[i] = 1;
   gs(v,dom,gs_add,0,gsh,0);
   if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
   if(comm->id==0) printf("\n");
+
   for(i=0;i<np+4;++i) v[i] = 1;
   gs(v,dom,gs_add,1,gsh,0);
   if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
-
   gs_free(gsh);
   free(v);
 }
