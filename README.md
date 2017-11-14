@@ -13,11 +13,9 @@ The build system relies on GNU Make with the `make` command. To compile gslib ju
 
 ```
 cd src
-make CC=mpicc CFLAGS="-O2"
+make CC=mpicc
+make PREFIX=<install path> install
 ```
-
-This will create a library called `libgs.a`. They key `ADDUS` determines the name mangling (add underscore) for the Fortran interface. 
-
 
 # Applications
 
