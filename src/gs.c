@@ -54,7 +54,7 @@ static void init_noop(
 
 struct gs_topology {
   ulong total_shared; /* number of globally unique shared ids */
-  struct array nz; /* array of nonzero_id's, grouped by id, 
+  struct array nz; /* array of nonzero_id's, grouped by id,
                       sorted by primary index, then flag, then index */
   struct array sh; /* array of shared_id's, arbitrary ordering */
   struct array pr; /* array of primary_shared_id's */
@@ -271,7 +271,7 @@ static void make_topology_unique(struct gs_topology *top, slong *id,
   sarray_sort(struct nonzero_id,nz->ptr,nz->n, primary,0, buf);
 
   /* assign owner among shared primaries */
-  
+
   /* create sentinel with i = -1 */
   array_reserve(struct shared_id,sh,sh->n+1);
   ((struct shared_id*)sh->ptr)[sh->n].i = -(uint)1;
@@ -522,7 +522,7 @@ static struct pw_data *pw_setup_aux(struct array *sh, buffer *buf,
 {
   struct pw_data *pwd = tmalloc(struct pw_data,1);
   *mem_size = sizeof(struct pw_data);
-  
+
   /* default behavior: receive only remotely unflagged data */
   *mem_size+=pw_comm_setup(&pwd->comm[0],sh, FLAGS_REMOTE, buf);
   pwd->map[0] = pw_map_setup(sh, buf, mem_size);
@@ -530,7 +530,7 @@ static struct pw_data *pw_setup_aux(struct array *sh, buffer *buf,
   /* default behavior: send only locally unflagged data */
   *mem_size+=pw_comm_setup(&pwd->comm[1],sh, FLAGS_LOCAL, buf);
   pwd->map[1] = pw_map_setup(sh, buf, mem_size);
-  
+
   pwd->req = tmalloc(comm_req,pwd->comm[0].n+pwd->comm[1].n);
   *mem_size += (pwd->comm[0].n+pwd->comm[1].n)*sizeof(comm_req);
   pwd->buffer_size = pwd->comm[0].total + pwd->comm[1].total;
@@ -675,7 +675,7 @@ static void crl_work_init(struct array *cw, struct array *sh,
     w->id=aid, w->p=ap, w->ri=ari, w->si=asi;                \
     ++w, ++cw_n;                                             \
   } while(0)
-  
+
   for(s=sh->ptr,se=s+sh->n;s!=se;++s) {
     int send = (s->flags&send_mask)==0;
     int recv = (s->flags&recv_mask)==0;
@@ -687,7 +687,7 @@ static void crl_work_init(struct array *cw, struct array *sh,
     if(send) CW_ADD(s->id,s->p,s->ri,s->i);
   }
   cw->n=cw_n;
-#undef CW_ADD  
+#undef CW_ADD
 }
 
 static uint crl_maps(struct cr_stage *stage, struct array *cw, buffer *buf)
@@ -783,12 +783,12 @@ static uint cr_learn(struct array *cw, struct cr_stage *stage,
                                     stage->p2,tag);
     comm_isend(&req[0],comm,nsend,2*sizeof(uint),stage->p1,tag);
     comm_wait(req,1+stage->nrecvn),++tag;
-    
+
     stage->size_r1 = nrecv[0][1], stage->size_r2 = nrecv[1][1];
     stage->size_r = stage->size_r1 + stage->size_r2;
     stage->size_total = stage->size_r + stage->size_sk;
     if(stage->size_total>size_max) size_max=stage->size_total;
-    
+
     array_reserve(struct crl_id,cw,cw->n+nrecv[0][0]+nrecv[1][0]);
     wrecv[0] = cw->ptr, wrecv[0] += cw->n, wrecv[1] = wrecv[0]+nrecv[0][0];
     wsend = cw->ptr, wsend += nkeep;
@@ -808,7 +808,7 @@ static uint cr_learn(struct array *cw, struct cr_stage *stage,
     memmove(wsend,wrecv[0],(nrecv[0][0]+nrecv[1][0])*sizeof(struct crl_id));
     cw->n += nrecv[0][0] + nrecv[1][0];
     cw->n -= nsend[0];
-    
+
     if(id<bh) n=nl; else n-=nl,bl=bh;
     ++stage;
   }
@@ -824,10 +824,10 @@ static struct cr_data *cr_setup_aux(
   struct array cw = null_array;
   struct cr_data *crd = tmalloc(struct cr_data,1);
   *mem_size = sizeof(struct cr_data);
-  
+
   /* default behavior: receive only remotely unflagged data */
   /* default behavior: send only locally unflagged data */
-  
+
   *mem_size += cr_schedule(crd,comm);
 
   sarray_sort(struct shared_id,sh->ptr,sh->n, i,0, buf);
@@ -835,11 +835,11 @@ static struct cr_data *cr_setup_aux(
   size_max[0]=cr_learn(&cw,crd->stage[0],comm,buf, mem_size);
   crl_work_init(&cw,sh, FLAGS_REMOTE, comm->id);
   size_max[1]=cr_learn(&cw,crd->stage[1],comm,buf, mem_size);
-  
+
   crd->stage_buffer_size = size_max[1]>size_max[0]?size_max[1]:size_max[0];
 
   array_free(&cw);
-  
+
   crd->buffer_size = 2*crd->stage_buffer_size;
   return crd;
 }
@@ -931,7 +931,7 @@ static struct allreduce_data *allreduce_setup_aux(
 {
   struct allreduce_data *ard = tmalloc(struct allreduce_data,1);
   *mem_size = sizeof(struct allreduce_data);
-  
+
   /* default behavior: reduce only unflagged data, copy to all */
   ard->map_to_buf  [0] = allreduce_map_setup(pr,1,1, mem_size);
   ard->map_from_buf[0] = allreduce_map_setup(pr,0,0, mem_size);
@@ -939,7 +939,7 @@ static struct allreduce_data *allreduce_setup_aux(
   /* transpose behavior: reduce all data, copy to unflagged */
   ard->map_to_buf  [1] = allreduce_map_setup(pr,0,1, mem_size);
   ard->map_from_buf[1] = allreduce_map_setup(pr,1,0, mem_size);
-  
+
   ard->buffer_size = total_shared*2;
   return ard;
 }
@@ -990,7 +990,7 @@ static void auto_setup(struct gs_remote *r, struct gs_topology *top,
                        const struct comm *comm, buffer *buf)
 {
   pw_setup(r, top,comm,buf);
-  
+
   if(comm->np>1) {
     const char *name = "pairwise";
     struct gs_remote r_alt;
@@ -1002,7 +1002,7 @@ static void auto_setup(struct gs_remote *r, struct gs_topology *top,
       if(comm->id==0) \
         printf("%g %g %g\n",time[i][0],time[i][1],time[i][2]); \
     } while(0)
-    
+
     #define DRY_RUN_CHECK(str,new_name) do { \
       DRY_RUN(1,&r_alt,str); \
       if(time[1][2]<time[0][2]) \
@@ -1016,7 +1016,7 @@ static void auto_setup(struct gs_remote *r, struct gs_topology *top,
 
     cr_setup(&r_alt, top,comm,buf);
     DRY_RUN_CHECK(      "crystal router                ", "crystal router");
-    
+
     if(top->total_shared<100000) {
       allreduce_setup(&r_alt, top,comm,buf);
       DRY_RUN_CHECK(    "all reduce                    ", "allreduce");
@@ -1098,7 +1098,7 @@ static void gs_setup_aux(struct gs_data *gsh, const slong *id, uint n,
 
   struct gs_topology top;
   struct crystal cr;
-  
+
   crystal_init(&cr,&gsh->comm);
 
   get_topology(&top, id,n, &cr);
@@ -1263,7 +1263,7 @@ void fgs_fields(const sint *handle,
   size_t offset;
   void **p;
   uint i;
-  
+
   fgs_check_parms(*handle,*dom,*op,"gs_op_fields",__LINE__);
   if(*n<0) return;
 
