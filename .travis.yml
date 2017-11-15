@@ -14,6 +14,7 @@ env:
     - TEST=findpts_el_2_test2    NP=2
     - TEST=findpts_el_3_test     NP=2
     - TEST=findpts_el_3_test2    NP=2
+    - TEST=findpts_el_2_test2    NP=2
     - TEST=findpts_local_test    NP=2
     - TEST=findpts_test          NP=2
     - TEST=gs_test               NP=2
@@ -31,14 +32,9 @@ env:
     - TEST=xxt_test              NP=3
     - TEST=xxt_test2             NP=2
 
-matrix:
-  allow_failures:
-    - env: TEST=findpts_el_2_test2    NP=2
-    - env: TEST=gs_test_old           NP=2
-
 install: true
 
 script:
-  - cd $ROOT_DIR/src
-  - make CC=mpicc $TEST
-  - mpiexec -np $NP ./$TEST
+  - cd $ROOT_DIR
+  - make CC=mpicc tests/$TEST
+  - mpiexec -np $NP ./tests/$TEST
