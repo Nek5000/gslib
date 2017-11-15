@@ -84,8 +84,8 @@ lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP) $(SRCDIR)/rand_elt_test.o
 	@ranlib $(SRCDIR)/lib$(LIBNAME).a
 
 install: lib
-	@mkdir -p $(INSTALL_ROOT)
-	@cp -v $(SRCDIR)/lib$(LIBNAME).a $(INSTALL_ROOT) 
+	@mkdir -p $(INSTALL_ROOT) 2>/dev/null
+	@cp -v $(SRCDIR)/lib$(LIBNAME).a $(INSTALL_ROOT) 2>/dev/null 
 
 tests: $(TESTS)
 
