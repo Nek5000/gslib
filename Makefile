@@ -61,13 +61,12 @@ LINKCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G) $^ -o $@ -L$(SRCDIR) -l$(LIBNAME) -lm $
 
 TESTS=$(TESTDIR)/sort_test $(TESTDIR)/sort_test2 $(TESTDIR)/sarray_sort_test $(TESTDIR)/spchol_test \
       $(TESTDIR)/comm_test $(TESTDIR)/crystal_test $(TESTDIR)/sarray_transfer_test \
-      $(TESTDIR)/gs_test $(TESTDIR)/gs_unique_test \
+      $(TESTDIR)/gs_test $(TESTDIR)/gs_unique_test $(TESTDIR)/gs_test_gop \
       $(TESTDIR)/xxt_test $(TESTDIR)/xxt_test2 $(TESTDIR)/crs_test \
       $(TESTDIR)/findpts_el_2_test $(TESTDIR)/findpts_el_2_test2 \
       $(TESTDIR)/findpts_el_3_test $(TESTDIR)/findpts_el_3_test2 \
       $(TESTDIR)/findpts_local_test $(TESTDIR)/findpts_test \
       $(TESTDIR)/poly_test $(TESTDIR)/poly_test2 $(TESTDIR)/lob_bnd_test $(TESTDIR)/obbox_test \
-      $(TESTDIR)/gs_test_gop_nonblocking
 
 GS=$(SRCDIR)/gs.o $(SRCDIR)/sort.o $(SRCDIR)/sarray_transfer.o $(SRCDIR)/sarray_sort.o \
    $(SRCDIR)/gs_local.o $(SRCDIR)/fail.o $(SRCDIR)/crystal.o $(SRCDIR)/comm.o $(SRCDIR)/tensor.o

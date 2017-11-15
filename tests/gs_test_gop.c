@@ -21,10 +21,11 @@ void gop_init(struct comm *gop_comm, comm_ext world) {
 
   const long long gop_id = 1;
 
-  gop_handle = gs_setup(&gop_id, 1, gop_comm, 0, gs_all_reduce, 0);
+  gop_handle = gs_setup(&gop_id, 1, gop_comm, 0, gs_pairwise, 0);
 }
 //------------------------------------------------------------------------------
-void gop(void *u, gs_dom dom, gs_op op, unsigned transpose) {
+void igop(void *u, gs_dom dom, gs_op op, unsigned transpose) {
+  // In a real case, these calls will be split across other code
   gs_irecv(u, dom, op, transpose, gop_handle, NULL);
   gs_isend(u, dom, op, transpose, gop_handle, NULL);
   gs_wait (u, dom, op, transpose, gop_handle, NULL);
@@ -36,9 +37,9 @@ void gop_free(struct comm* gop_comm) {
   gs_free(gop_handle);
 }
 //------------------------------------------------------------------------------
-int test_min(int rank) {
+int test_imin(int rank) {
   int min = rank;
-  gop(&min, gs_int, gs_min, 0);
+  igop(&min, gs_int, gs_min, 0);
 
   if (rank == 0) printf("\ngop min test: ");
   if (min == 0) {
@@ -50,9 +51,9 @@ int test_min(int rank) {
   }
 }
 //------------------------------------------------------------------------------
-int test_max(int rank) {
+int test_imax(int rank) {
   int max = rank;
-  gop(&max, gs_int, gs_max, 0);
+  igop(&max, gs_int, gs_max, 0);
 
   if (rank == 0) printf("\ngop max test: ");
   if (max == np-1) {
@@ -64,13 +65,31 @@ int test_max(int rank) {
   }
 }
 //------------------------------------------------------------------------------
-int test_add(int rank) {
+int test_iadd(int rank) {
   int sum = rank;
-  gop(&sum, gs_int, gs_add, 0);
+  igop(&sum, gs_int, gs_add, 0);
   sum *= 2;
 
   if (rank == 0) printf("\ngop add test: ");
   if (sum == np*(np-1)) {
+    if (rank == 0) printf("[Passed]");
+    return 0;
+  } else {
+    if (rank == 0) printf("[Failed]");
+    return 1;
+  }
+}
+//------------------------------------------------------------------------------
+int test_imul(int rank) {
+  int mul = rank + 1;
+  igop(&mul, gs_int, gs_mul, 0);
+
+  int answer=1;
+  for(int i = 2; i <= np; i++) {
+    answer*=i;
+  }
+  if (rank == 0) printf("\ngop mul test: ");
+  if (mul == answer) {
     if (rank == 0) printf("[Passed]");
     return 0;
   } else {
@@ -95,11 +114,14 @@ int main(int narg, char *arg[])
 
   gop_init(&comm,world);
 
-  result  = test_min(rank);
-  result += test_max(rank);
-  result += test_add(rank);
+  result  = test_imin(rank);
+  result += test_imax(rank);
+  result += test_iadd(rank);
+  result += test_imul(rank);
 
   gop_free(&comm);
+
+  if (rank == 0) printf("\n");
 
 #ifdef MPI
   MPI_Finalize();

@@ -1,9 +1,9 @@
 language: c
 
-before_install: 
+before_install:
    - export ROOT_DIR=`pwd`
    - sudo apt-get update -qq
-   - sudo apt-get install -y mpich2 libmpich2-dev 
+   - sudo apt-get install -y mpich2 libmpich2-dev
 
 env:
   matrix:
@@ -19,6 +19,7 @@ env:
     - TEST=findpts_test          NP=2
     - TEST=gs_test               NP=2
     - TEST=gs_test_old           NP=2
+    - TEST=gs_test_gop           NP=2
     - TEST=gs_unique_test        NP=2
     - TEST=lob_bnd_test          NP=2
     - TEST=obbox_test            NP=2
