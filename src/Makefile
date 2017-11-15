@@ -54,7 +54,8 @@ TESTS=sort_test sort_test2 sarray_sort_test spchol_test \
       findpts_el_2_test findpts_el_2_test2 \
       findpts_el_3_test findpts_el_3_test2 \
       findpts_local_test findpts_test \
-      poly_test poly_test2 lob_bnd_test obbox_test
+      poly_test poly_test2 lob_bnd_test obbox_test \
+      gs_test_gop_nonblocking
 
 GS=gs.o sort.o sarray_transfer.o sarray_sort.o \
    gs_local.o fail.o crystal.o comm.o tensor.o
