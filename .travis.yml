@@ -19,6 +19,7 @@ env:
     - TEST=findpts_test          NP=2
     - TEST=gs_test               NP=2
     - TEST=gs_test_old           NP=2
+    - TEST=gs_test_gop_blocking  NP=2
     - TEST=gs_unique_test        NP=2
     - TEST=lob_bnd_test          NP=2
     - TEST=obbox_test            NP=2
