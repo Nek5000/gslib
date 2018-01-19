@@ -84,8 +84,8 @@ int test_imul(int rank) {
   int mul = rank + 1;
   igop(&mul, gs_int, gs_mul, 0);
 
-  int answer=1;
-  for(int i = 2; i <= np; i++) {
+  int answer=1, i;
+  for(i = 2; i <= np; i++) {
     answer*=i;
   }
   if (rank == 0) printf("\ngop mul test: ");
