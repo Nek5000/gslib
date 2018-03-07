@@ -1,5 +1,5 @@
 CC=mpicc #-std=c99 --pedantic
-CFLAGS+=-DMPI 
+CFLAGS+=-DMPI
 #CFLAGS+= -acc -ta=nvidia -Minfo=accel
 CFLAGS+=-DPREFIX=jl_
 CFLAGS+=-DNO_NEK_EXITT
@@ -92,4 +92,3 @@ findpts_el_3_test2: tensor.o rand_elt_test.o lob_bnd.o fail.o comm.o gs_local.o 
 findpts_el_3_test: poly.o fail.o comm.o tensor.o gs_local.o findpts_el_3.o findpts_el_3_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
 findpts_local_test: rand_elt_test.o lob_bnd.o fail.o comm.o tensor.o gs_local.o poly.o findpts_local.o sort.o sarray_sort.o obbox.o findpts_el_3.o findpts_el_2.o findpts_local_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
 findpts_test: sarray_transfer.o sort.o rand_elt_test.o lob_bnd.o poly.o findpts.o sarray_sort.o findpts_local.o obbox.o tensor.o findpts_el_3.o findpts_el_2.o fail.o crystal.o comm.o gs_local.o findpts_test.o ; @echo LINK $@; $(LINKCMD) $^ -o $@
-
