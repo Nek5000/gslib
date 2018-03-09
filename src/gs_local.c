@@ -1,5 +1,5 @@
-#ifdef NEW_GS_LOOPS
-/* 
+#if defined NEW_GS_LOOPS || defined _OPENACC
+/*
  * Use new, vectorizable loops, if we set the option at compile time.
  * These loops are currently slower than the old loops.
  * FIXME: I have ifdef'd the whole file. This is much more
@@ -255,7 +255,7 @@ void gs_gather(void *out, const void *in, const unsigned vn,
 }
 
 void gs_scatter(void *out, const void *in, const unsigned vn,
-                const uint *map, gs_dom dom,int dstride, int mf_nt, 
+                const uint *map, gs_dom dom,int dstride, int mf_nt,
                 int* mapf,int m_size, int acc)
 {
 #define WITH_DOMAIN(T) scatter_##T(out,1,in,1,map,dstride,mf_nt,mapf,vn,m_size,acc)
@@ -264,7 +264,7 @@ void gs_scatter(void *out, const void *in, const unsigned vn,
 }
 
 void gs_init(void *out, const unsigned vn, const uint *map,
-             gs_dom dom, gs_op op,int dstride, int mf_nt, 
+             gs_dom dom, gs_op op,int dstride, int mf_nt,
 	     int *mapf, int m_size, int acc)
 {
 #define WITH_DOMAIN(T) init_##T(out,map,op,dstride,mf_nt,mapf,vn,m_size,acc)
@@ -591,7 +591,7 @@ void gs_gather(void *out, const void *in, const unsigned vn,
 }
 
 void gs_scatter(void *out, const void *in, const unsigned vn,
-                const uint *map, gs_dom dom,int dstride, int mf_nt, 
+                const uint *map, gs_dom dom,int dstride, int mf_nt,
                 int* mapf,int m_size, int acc)
 {
 #define WITH_DOMAIN(T) scatter_##T(out,1,in,1,map)
@@ -600,7 +600,7 @@ void gs_scatter(void *out, const void *in, const unsigned vn,
 }
 
 void gs_init(void *out, const unsigned vn, const uint *map,
-             gs_dom dom, gs_op op,int dstride, int mf_nt, 
+             gs_dom dom, gs_op op,int dstride, int mf_nt,
 	     int *mapf, int m_size, int acc)
 {
 #define WITH_DOMAIN(T) init_##T(out,map,op)
