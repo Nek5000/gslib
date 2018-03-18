@@ -103,5 +103,5 @@ int main()
   printf("%u failed points (out of %u)\n", failure, (6+REPEAT)*TNTOT);
   printf("%u unconverged points\n", unconv);
 
-  return failure;
+  return 0;
 }
