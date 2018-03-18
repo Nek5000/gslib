@@ -1,10 +1,12 @@
-# Release 1.0.0
+# Release 1.0.2
 
 ## Major Features and Improvements
 
 ## Backwards-Incompatible Changes 
 
 ## Bug Fixes and Other Changes
+
+[17](https://github.com/gslib/gslib/issues/17)
 
 ## Thanks to our Contributors
 This release contains contributions from: James Lottes, Paul Fischer, Stefan Kerkemeier

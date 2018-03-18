@@ -9,11 +9,8 @@
 #include "types.h"
 #include "mem.h"
 #include "sort.h"
-#include "rdtsc.h"
 
 #if 1
-
-DEFINE_HW_COUNTER()
 
 #define N (1<<20)
 
@@ -26,13 +23,6 @@ int main()
   uint i;
   unsigned long long tic, toc;
   unsigned r;
-  #define TIME(t, repeat, what) do { \
-    for(r=repeat;r;--r) { what; } \
-    tic = getticks(); \
-    for(r=repeat;r;--r) { what; } \
-    toc = getticks(); \
-    t = toc-tic; \
-  } while(0)
 
   for(i=0;i!=N;++i) {
     A[i]=rand();
@@ -45,18 +35,12 @@ int main()
 
   for(i=N;i;i>>=1) {
     unsigned long long t;
-    TIME(t, (N/i), 
-      sortv_long(out, A,i,sizeof(ulong), &buf));
-    printf("sortv %d : %g cycles per item\n",
-      (int)i, t/(double)(N/i)/(double)i);
+    sortv_long(out, A,i,sizeof(ulong), &buf);
   }
 
   for(i=N;i;i>>=1) {
     unsigned long long t;
-    TIME(t, (N/i), 
-      sortp_long(&buf,0, A,i,sizeof(ulong)));
-    printf("sortp %d : %g cycles per item\n",
-      (int)i, t/(double)(N/i)/(double)i);
+    sortp_long(&buf,0, A,i,sizeof(ulong));
   }
 
   buffer_free(&buf);
