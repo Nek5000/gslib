@@ -1244,7 +1244,7 @@ struct nonblocking_private {
   buffer *buf;
 };
 
-typedef struct nonblocking_private nblkng;
+typedef struct nonblocking_private* nblkng;
 
 static nblkng *nblkng_dict;
 static int nblkng_max = 0;
@@ -1263,12 +1263,14 @@ void igs(void *u, gs_dom dom, gs_op op, unsigned transpose,
   if(nblkng_n==nblkng_max) nblkng_max+=nblkng_max/2+1,
                      nblkng_dict=trealloc(nblkng,nblkng_dict,nblkng_max);
 
-  nblkng_dict[nblkng_n].u = u;
-  nblkng_dict[nblkng_n].dom = dom;
-  nblkng_dict[nblkng_n].op = op;
-  nblkng_dict[nblkng_n].transpose = transpose;
-  nblkng_dict[nblkng_n].gsh = gsh;
-  nblkng_dict[nblkng_n].buf = buf;
+  nblkng_dict[nblkng_n] = tmalloc(struct nonblocking_private, 1);
+
+  nblkng_dict[nblkng_n]->u = u;
+  nblkng_dict[nblkng_n]->dom = dom;
+  nblkng_dict[nblkng_n]->op = op;
+  nblkng_dict[nblkng_n]->transpose = transpose;
+  nblkng_dict[nblkng_n]->gsh = gsh;
+  nblkng_dict[nblkng_n]->buf = buf;
 
   *handle = nblkng_n++;
   nblkng_count++;
@@ -1279,15 +1281,18 @@ void igs(void *u, gs_dom dom, gs_op op, unsigned transpose,
 
 void gs_wait(int handle)
 {
-  if(handle < nblkng_n)
-    gs_aux_wait(nblkng_dict[handle].u,
+  if(handle < nblkng_n) {
+    gs_aux_wait(nblkng_dict[handle]->u,
 	        mode_plain,
 	        1,
-	        nblkng_dict[handle].dom,
-	        nblkng_dict[handle].op,
-	        nblkng_dict[handle].transpose,
-	        nblkng_dict[handle].gsh,
-	        nblkng_dict[handle].buf);
+	        nblkng_dict[handle]->dom,
+	        nblkng_dict[handle]->op,
+	        nblkng_dict[handle]->transpose,
+	        nblkng_dict[handle]->gsh,
+	        nblkng_dict[handle]->buf);
+    free(nblkng_dict[handle]);
+    nblkng_dict[handle] = 0;
+  }
 
   nblkng_count--;
   if(nblkng_count == 0) {
