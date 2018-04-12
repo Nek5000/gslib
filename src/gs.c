@@ -1292,9 +1292,9 @@ void gs_wait(int handle)
 	        nblkng_dict[handle]->buf);
     free(nblkng_dict[handle]);
     nblkng_dict[handle] = 0;
+    nblkng_count--;
   }
 
-  nblkng_count--;
   if(nblkng_count == 0) {
     free(nblkng_dict);
     nblkng_dict = 0;
