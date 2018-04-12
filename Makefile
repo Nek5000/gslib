@@ -70,7 +70,7 @@ TESTS=$(TESTDIR)/sort_test $(TESTDIR)/sort_test2 $(TESTDIR)/sarray_sort_test \
       $(TESTDIR)/crs_test $(TESTDIR)/findpts_el_2_test \
       $(TESTDIR)/findpts_el_2_test2 $(TESTDIR)/findpts_el_3_test \
       $(TESTDIR)/findpts_el_3_test2 $(TESTDIR)/findpts_local_test \
-      $(TESTDIR)/findpts_test $(TESTDIR)/poly_test $(TESTDIR)/poly_test2 \
+      $(TESTDIR)/findpts_test $(TESTDIR)/poly_test \
       $(TESTDIR)/lob_bnd_test $(TESTDIR)/obbox_test
 
 GS=$(SRCDIR)/gs.o $(SRCDIR)/sort.o $(SRCDIR)/sarray_transfer.o \

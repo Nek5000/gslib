@@ -9,10 +9,10 @@ fcrs.o: fcrs.c crs.h comm.h mem.h types.h fail.h name.h c99.h
 fcrystal.o: fcrystal.c sarray_transfer.h sarray_sort.h sort.h crystal.h comm.h mem.h types.h fail.h name.h c99.h
 findpts.o: findpts.c findpts_imp.h findpts_imp.h sarray_sort.h sort.h sarray_transfer.h crystal.h comm.h gs_defs.h findpts_local.h findpts_el.h obbox.h poly.h mem.h fail.h types.h name.h c99.h
 findpts_el_2.o: findpts_el_2.c poly.h tensor.h mem.h types.h fail.h name.h c99.h
-findpts_el_2_test2.o: findpts_el_2_test2.c rdtsc.h rand_elt_test.h findpts_el.h obbox.h lob_bnd.h poly.h tensor.h mem.h fail.h name.h types.h c99.h
+findpts_el_2_test2.o: findpts_el_2_test2.c rand_elt_test.h findpts_el.h obbox.h lob_bnd.h poly.h tensor.h mem.h fail.h name.h types.h c99.h
 findpts_el_2_test.o: findpts_el_2_test.c findpts_el.h poly.h mem.h fail.h types.h name.h c99.h
 findpts_el_3.o: findpts_el_3.c poly.h tensor.h mem.h types.h fail.h name.h c99.h
-findpts_el_3_test2.o: findpts_el_3_test2.c rdtsc.h rand_elt_test.h findpts_el.h obbox.h lob_bnd.h poly.h tensor.h mem.h fail.h name.h types.h c99.h
+findpts_el_3_test2.o: findpts_el_3_test2.c rand_elt_test.h findpts_el.h obbox.h lob_bnd.h poly.h tensor.h mem.h fail.h name.h types.h c99.h
 findpts_el_3_test.o: findpts_el_3_test.c findpts_el.h poly.h mem.h fail.h types.h name.h c99.h
 findpts_local.o: findpts_local.c findpts_local_imp.h findpts_local_imp.h findpts_el.h sarray_sort.h sort.h poly.h obbox.h mem.h fail.h name.h types.h c99.h
 findpts_local_test.o: findpts_local_test.c rand_elt_test.h findpts_local.h findpts_el.h obbox.h poly.h types.h mem.h fail.h name.h c99.h
@@ -28,7 +28,6 @@ lob_bnd_test.o: lob_bnd_test.c lob_bnd.h poly.h tensor.h mem.h fail.h name.h typ
 obbox.o: obbox.c lob_bnd.h poly.h tensor.h mem.h types.h fail.h name.h c99.h
 obbox_test.o: obbox_test.c rand_elt_test.h obbox.h lob_bnd.h poly.h mem.h fail.h name.h types.h c99.h
 poly.o: poly.c poly_imp.h mem.h types.h fail.h name.h c99.h
-poly_test2.o: poly_test2.c rdtsc.h poly.h mem.h fail.h name.h types.h c99.h
 poly_test.o: poly_test.c poly.h types.h name.h c99.h
 rand_elt_test.o: rand_elt_test.c lob_bnd.h poly.h name.h types.h c99.h
 sarray_sort.o: sarray_sort.c sort.h mem.h fail.h types.h name.h c99.h
@@ -36,7 +35,7 @@ sarray_sort_test.o: sarray_sort_test.c sarray_sort.h sort.h mem.h types.h fail.h
 sarray_transfer.o: sarray_transfer.c sort.h crystal.h mem.h comm.h types.h fail.h name.h c99.h
 sarray_transfer_test.o: sarray_transfer_test.c sarray_transfer.h crystal.h sarray_sort.h sort.h mem.h comm.h types.h fail.h name.h c99.h
 sort.o: sort.c sort_imp.h sort_imp.h sort_imp.h mem.h types.h fail.h name.h c99.h
-sort_test2.o: sort_test2.c rdtsc.h sort.h mem.h types.h fail.h name.h c99.h
+sort_test2.o: sort_test2.c sort.h mem.h types.h fail.h name.h c99.h
 sort_test.o: sort_test.c sort.h mem.h types.h fail.h name.h c99.h
 sparse_cholesky.o: sparse_cholesky.c sort.h mem.h types.h fail.h name.h c99.h
 spchol_test.o: spchol_test.c sparse_cholesky.h mem.h types.h fail.h name.h c99.h
