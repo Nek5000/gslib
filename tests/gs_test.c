@@ -32,16 +32,15 @@ static void test(const struct comm *comm)
   /* non-blocking api */
   if(comm->id==0) printf("\nTesting non-blocking api ...\n");
   for(i=0;i<np+4;++i) v[i] = 1;
-  gs_irecv(v,dom,gs_add,0,gsh,0);
-  gs_isend(v,dom,gs_add,0,gsh,0);
-  gs_wait (v,dom,gs_add,0,gsh,0);
+  int handle;
+  igs(v,dom,gs_add,0,gsh,0,&handle);
+  gs_wait (handle);
   if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
   if(comm->id==0) printf("\n");
 
   for(i=0;i<np+4;++i) v[i] = 1;
-  gs_irecv(v,dom,gs_add,1,gsh,0);
-  gs_isend(v,dom,gs_add,1,gsh,0);
-  gs_wait (v,dom,gs_add,1,gsh,0);
+  igs(v,dom,gs_add,1,gsh,0,&handle);
+  gs_wait (handle);
   if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
 
   /* blocking api */

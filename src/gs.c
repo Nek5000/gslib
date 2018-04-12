@@ -1235,30 +1235,68 @@ static void gs_aux_wait(
 /*------------------------------------------------------------------------------
   GS interface - blocking and non-blocking
 ------------------------------------------------------------------------------*/
+struct nonblocking_private {
+  void *u;
+  gs_dom dom;
+  gs_op op;
+  unsigned transpose;
+  struct gs_data *gsh;
+  buffer *buf;
+};
+
+typedef struct nonblocking_private nblkng;
+
+static nblkng *nblkng_dict;
+static int nblkng_max = 0;
+static int nblkng_n = 0;
+static int nblkng_count = 0;
+
 void gs(void *u, gs_dom dom, gs_op op, unsigned transpose,
         struct gs_data *gsh, buffer *buf)
 {
   gs_aux(u,mode_plain,1,dom,op,transpose,gsh,buf);
 }
 
-void gs_irecv(void *u, gs_dom dom, gs_op op, unsigned transpose,
-        struct gs_data *gsh, buffer *buf)
+void igs(void *u, gs_dom dom, gs_op op, unsigned transpose,
+        struct gs_data *gsh, buffer *buf, int *handle)
 {
-  gs_aux_irecv(u,mode_plain,1,dom,op,transpose,gsh,buf);
-}
+  if(nblkng_n==nblkng_max) nblkng_max+=nblkng_max/2+1,
+                     nblkng_dict=trealloc(nblkng,nblkng_dict,nblkng_max);
 
-void gs_isend(void *u, gs_dom dom, gs_op op, unsigned transpose,
-        struct gs_data *gsh, buffer *buf)
-{
+  nblkng_dict[nblkng_n].u = u;
+  nblkng_dict[nblkng_n].dom = dom;
+  nblkng_dict[nblkng_n].op = op;
+  nblkng_dict[nblkng_n].transpose = transpose;
+  nblkng_dict[nblkng_n].gsh = gsh;
+  nblkng_dict[nblkng_n].buf = buf;
+
+  *handle = nblkng_n++;
+  nblkng_count++;
+
+  gs_aux_irecv(u,mode_plain,1,dom,op,transpose,gsh,buf);
   gs_aux_isend(u,mode_plain,1,dom,op,transpose,gsh,buf);
 }
 
-void gs_wait(void *u, gs_dom dom, gs_op op, unsigned transpose,
-        struct gs_data *gsh, buffer *buf)
+void gs_wait(int handle)
 {
-  gs_aux_wait(u,mode_plain,1,dom,op,transpose,gsh,buf);
-}
+  if(handle < nblkng_n)
+    gs_aux_wait(nblkng_dict[handle].u,
+	        mode_plain,
+	        1,
+	        nblkng_dict[handle].dom,
+	        nblkng_dict[handle].op,
+	        nblkng_dict[handle].transpose,
+	        nblkng_dict[handle].gsh,
+	        nblkng_dict[handle].buf);
 
+  nblkng_count--;
+  if(nblkng_count == 0) {
+    free(nblkng_dict);
+    nblkng_dict = 0;
+    nblkng_max = 0;
+    nblkng_n = 0;
+  }
+}
 /*------------------------------------------------------------------------------
   GS_VEC interface - blocking and non-blocking
 ------------------------------------------------------------------------------*/

@@ -26,9 +26,9 @@ void gop_init(struct comm *gop_comm, comm_ext world) {
 //------------------------------------------------------------------------------
 void igop(void *u, gs_dom dom, gs_op op, unsigned transpose) {
   // In a real case, these calls will be split across other code
-  gs_irecv(u, dom, op, transpose, gop_handle, NULL);
-  gs_isend(u, dom, op, transpose, gop_handle, NULL);
-  gs_wait (u, dom, op, transpose, gop_handle, NULL);
+  int handle;
+  igs(u, dom, op, transpose, gop_handle, NULL, &handle);
+  gs_wait (handle);
 }
 //------------------------------------------------------------------------------
 void gop_free(struct comm* gop_comm) {
