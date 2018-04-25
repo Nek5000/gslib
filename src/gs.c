@@ -1237,11 +1237,13 @@ static void gs_aux_wait(
 ------------------------------------------------------------------------------*/
 struct nonblocking_private {
   void *u;
+  gs_mode mode;
   gs_dom dom;
   gs_op op;
   unsigned transpose;
   struct gs_data *gsh;
   buffer *buf;
+  unsigned vn;
 };
 
 typedef struct nonblocking_private* nblkng;
@@ -1271,6 +1273,8 @@ void igs(void *u, gs_dom dom, gs_op op, unsigned transpose,
   nblkng_dict[nblkng_n]->transpose = transpose;
   nblkng_dict[nblkng_n]->gsh = gsh;
   nblkng_dict[nblkng_n]->buf = buf;
+  nblkng_dict[nblkng_n]->mode = mode_plain;
+  nblkng_dict[nblkng_n]->vn = 1;
 
   *handle = nblkng_n++;
   nblkng_count++;
@@ -1283,8 +1287,8 @@ void gs_wait(int handle)
 {
   if(handle < nblkng_n) {
     gs_aux_wait(nblkng_dict[handle]->u,
-	        mode_plain,
-	        1,
+	        nblkng_dict[handle]->mode,
+	        nblkng_dict[handle]->vn,
 	        nblkng_dict[handle]->dom,
 	        nblkng_dict[handle]->op,
 	        nblkng_dict[handle]->transpose,
@@ -1311,8 +1315,8 @@ void gs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
   gs_aux(u,mode_vec,vn,dom,op,transpose,gsh,buf);
 }
 
-void igs_vec(void *u, gs_dom dom, gs_op op, unsigned transpose,
-        struct gs_data *gsh, buffer *buf, int *handle)
+void igs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
+            unsigned transpose, struct gs_data *gsh, buffer *buf, int *handle)
 {
   if(nblkng_n==nblkng_max) nblkng_max+=nblkng_max/2+1,
                      nblkng_dict=trealloc(nblkng,nblkng_dict,nblkng_max);
@@ -1325,36 +1329,14 @@ void igs_vec(void *u, gs_dom dom, gs_op op, unsigned transpose,
   nblkng_dict[nblkng_n]->transpose = transpose;
   nblkng_dict[nblkng_n]->gsh = gsh;
   nblkng_dict[nblkng_n]->buf = buf;
+  nblkng_dict[nblkng_n]->vn = vn;
+  nblkng_dict[nblkng_n]->mode = mode_vec;
 
   *handle = nblkng_n++;
   nblkng_count++;
 
-  gs_aux_irecv(u,mode_vec,1,dom,op,transpose,gsh,buf);
-  gs_aux_isend(u,mode_vec,1,dom,op,transpose,gsh,buf);
-}
-
-void gs_vec_wait(int handle)
-{
-  if(handle < nblkng_n) {
-    gs_aux_wait(nblkng_dict[handle]->u,
-	        mode_vec,
-	        1,
-	        nblkng_dict[handle]->dom,
-	        nblkng_dict[handle]->op,
-	        nblkng_dict[handle]->transpose,
-	        nblkng_dict[handle]->gsh,
-	        nblkng_dict[handle]->buf);
-    free(nblkng_dict[handle]);
-    nblkng_dict[handle] = 0;
-    nblkng_count--;
-  }
-
-  if(nblkng_count == 0) {
-    free(nblkng_dict);
-    nblkng_dict = 0;
-    nblkng_max = 0;
-    nblkng_n = 0;
-  }
+  gs_aux_irecv(u,mode_vec,vn,dom,op,transpose,gsh,buf);
+  gs_aux_isend(u,mode_vec,vn,dom,op,transpose,gsh,buf);
 }
 /*------------------------------------------------------------------------------
   GS_MANY interface - blocking and non-blocking
@@ -1365,8 +1347,8 @@ void gs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
   gs_aux((void*)u,mode_many,vn,dom,op,transpose,gsh,buf);
 }
 
-void igs_many(void *u, gs_dom dom, gs_op op, unsigned transpose,
-        struct gs_data *gsh, buffer *buf, int *handle)
+void igs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
+             unsigned transpose, struct gs_data *gsh, buffer *buf, int *handle)
 {
   if(nblkng_n==nblkng_max) nblkng_max+=nblkng_max/2+1,
                      nblkng_dict=trealloc(nblkng,nblkng_dict,nblkng_max);
@@ -1379,37 +1361,16 @@ void igs_many(void *u, gs_dom dom, gs_op op, unsigned transpose,
   nblkng_dict[nblkng_n]->transpose = transpose;
   nblkng_dict[nblkng_n]->gsh = gsh;
   nblkng_dict[nblkng_n]->buf = buf;
+  nblkng_dict[nblkng_n]->vn = vn;
+  nblkng_dict[nblkng_n]->mode = mode_many;
 
   *handle = nblkng_n++;
   nblkng_count++;
 
-  gs_aux_irecv(u,mode_many,1,dom,op,transpose,gsh,buf);
-  gs_aux_isend(u,mode_many,1,dom,op,transpose,gsh,buf);
+  gs_aux_irecv(u,mode_many,vn,dom,op,transpose,gsh,buf);
+  gs_aux_isend(u,mode_many,vn,dom,op,transpose,gsh,buf);
 }
 
-void gs_many_wait(int handle)
-{
-  if(handle < nblkng_n) {
-    gs_aux_wait(nblkng_dict[handle]->u,
-	        mode_many,
-	        1,
-	        nblkng_dict[handle]->dom,
-	        nblkng_dict[handle]->op,
-	        nblkng_dict[handle]->transpose,
-	        nblkng_dict[handle]->gsh,
-	        nblkng_dict[handle]->buf);
-    free(nblkng_dict[handle]);
-    nblkng_dict[handle] = 0;
-    nblkng_count--;
-  }
-
-  if(nblkng_count == 0) {
-    free(nblkng_dict);
-    nblkng_dict = 0;
-    nblkng_max = 0;
-    nblkng_n = 0;
-  }
-}
 /*------------------------------------------------------------------------------
   Main Setup
 ------------------------------------------------------------------------------*/
