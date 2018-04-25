@@ -134,6 +134,14 @@ void igs(void *u, gs_dom dom, gs_op op, unsigned transpose,
         struct gs_data *gsh, buffer *buf, int *handle);
 void gs_wait(int handle);
 
+void igs_vec(void *u, gs_dom dom, gs_op op, unsigned transpose,
+        struct gs_data *gsh, buffer *buf, int *handle);
+void gs_vec_wait(int handle);
+
+void igs_many(void *u, gs_dom dom, gs_op op, unsigned transpose,
+        struct gs_data *gsh, buffer *buf, int *handle);
+void gs_many_wait(int handle);
+
 void gs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
             unsigned transpose, struct gs_data *gsh, buffer *buf);
 void gs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
