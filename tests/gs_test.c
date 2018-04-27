@@ -14,7 +14,7 @@
 typedef double T;
 const gs_dom dom = gs_double;
 
-static void test(const struct comm *comm)
+static void test_allreduce(const struct comm *comm)
 {
   struct gs_data *gsh;
   const uint np = comm->np;
@@ -28,7 +28,7 @@ static void test(const struct comm *comm)
   id[np+3] = np-comm->id;
   gsh = gs_setup(id,np+4,comm,0,gs_all_reduce,1);
   free(id);
-  
+
   /* non-blocking api */
   if(comm->id==0) printf("\nTesting non-blocking api ...\n");
   for(i=0;i<np+4;++i) v[i] = 1;
@@ -57,11 +57,53 @@ static void test(const struct comm *comm)
   free(v);
 }
 
+static void test_pairwise(const struct comm *comm)
+{
+  struct gs_data *gsh;
+  const uint np = comm->np;
+  slong *id = tmalloc(slong,np+4);
+  T *v = tmalloc(T,np+4);
+  uint i;
+  id[0] = -(slong)(np+10+3*comm->id);
+  for(i=0;i<np;++i) id[i+1] = -(sint)(i+1);
+  id[np+1] = comm->id+1;
+  id[np+2] = comm->id+1;
+  id[np+3] = np-comm->id;
+  gsh = gs_setup(id,np+4,comm,0,gs_pairwise,1);
+  free(id);
+
+  /* non-blocking api */
+  if(comm->id==0) printf("\nTesting non-blocking api ...\n");
+  for(i=0;i<np+4;++i) v[i] = 1;
+  int handle;
+  igs(v,dom,gs_add,0,gsh,0,&handle);
+  gs_wait (handle);
+  if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
+  if(comm->id==0) printf("\n");
+
+  for(i=0;i<np+4;++i) v[i] = 1;
+  igs(v,dom,gs_add,1,gsh,0,&handle);
+  gs_wait (handle);
+  if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
+
+  /* blocking api */
+  if(comm->id==0) printf("\nTesting blocking api ...\n");
+  for(i=0;i<np+4;++i) v[i] = 1;
+  gs(v,dom,gs_add,0,gsh,0);
+  if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
+  if(comm->id==0) printf("\n");
+
+  for(i=0;i<np+4;++i) v[i] = 1;
+  gs(v,dom,gs_add,1,gsh,0);
+  if(comm->id==0) for(i=0;i<np+4;++i) printf("%g\n",v[i]);
+  gs_free(gsh);
+  free(v);
+}
 int main(int narg, char *arg[])
 {
   comm_ext world; int np;
   struct comm comm;
-  
+
 #ifdef MPI
   MPI_Init(&narg,&arg);
   world = MPI_COMM_WORLD;
@@ -72,8 +114,9 @@ int main(int narg, char *arg[])
 
   comm_init(&comm,world);
 
-  test(&comm);
-  
+  test_allreduce(&comm);
+  test_pairwise(&comm);
+
   comm_free(&comm);
 
 #ifdef MPI
