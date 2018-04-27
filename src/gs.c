@@ -1355,7 +1355,7 @@ void igs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
 
   nblkng_dict[nblkng_n] = tmalloc(struct nonblocking_private, 1);
 
-  nblkng_dict[nblkng_n]->u = u;
+  nblkng_dict[nblkng_n]->u = (void *)u;
   nblkng_dict[nblkng_n]->dom = dom;
   nblkng_dict[nblkng_n]->op = op;
   nblkng_dict[nblkng_n]->transpose = transpose;
@@ -1367,8 +1367,8 @@ void igs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
   *handle = nblkng_n++;
   nblkng_count++;
 
-  gs_aux_irecv(u,mode_many,vn,dom,op,transpose,gsh,buf);
-  gs_aux_isend(u,mode_many,vn,dom,op,transpose,gsh,buf);
+  gs_aux_irecv((void *)u,mode_many,vn,dom,op,transpose,gsh,buf);
+  gs_aux_isend((void *)u,mode_many,vn,dom,op,transpose,gsh,buf);
 }
 
 /*------------------------------------------------------------------------------
