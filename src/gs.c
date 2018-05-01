@@ -1473,12 +1473,20 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 #define cgs_many  PREFIXED_NAME(gs_many )
 #define cgs_setup PREFIXED_NAME(gs_setup)
 #define cgs_free  PREFIXED_NAME(gs_free )
+#define cigs      PREFIXED_NAME(igs     )
+#define cigs_vec  PREFIXED_NAME(igs_vec )
+#define cigs_many PREFIXED_NAME(igs_many)
+#define cgs_wait  PREFIXED_NAME(gs_wait )
 
 #define fgs_setup_pick FORTRAN_NAME(gs_setup_pick,GS_SETUP_PICK)
 #define fgs_setup      FORTRAN_NAME(gs_setup     ,GS_SETUP     )
 #define fgs            FORTRAN_NAME(gs_op        ,GS_OP        )
 #define fgs_vec        FORTRAN_NAME(gs_op_vec    ,GS_OP_VEC    )
 #define fgs_many       FORTRAN_NAME(gs_op_many   ,GS_OP_MANY   )
+#define figs           FORTRAN_NAME(igs_op       ,IGS_OP       )
+#define figs_vec       FORTRAN_NAME(igs_op_vec   ,IGS_OP_VEC   )
+#define figs_many      FORTRAN_NAME(igs_op_many  ,IGS_OP_MANY  )
+#define fgs_wait       FORTRAN_NAME(gs_op_wait   ,GS_OP_WAIT   )
 #define fgs_fields     FORTRAN_NAME(gs_op_fields ,GS_OP_FIELDS )
 #define fgs_free       FORTRAN_NAME(gs_free      ,GS_FREE      )
 
@@ -1530,12 +1538,27 @@ void fgs(const sint *handle, void *u, const sint *dom, const sint *op,
   cgs(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0);
 }
 
+void figs(const sint *handle, void *u, const sint *dom, const sint *op,
+         const sint *transpose, int *wait)
+{
+  fgs_check_parms(*handle,*dom,*op,"gs_op",__LINE__);
+  cigs(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0,wait);
+}
+
 void fgs_vec(const sint *handle, void *u, const sint *n,
              const sint *dom, const sint *op, const sint *transpose)
 {
   fgs_check_parms(*handle,*dom,*op,"gs_op_vec",__LINE__);
   cgs_vec(u,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
           fgs_info[*handle],0);
+}
+
+void figs_vec(const sint *handle, void *u, const sint *n,
+             const sint *dom, const sint *op, const sint *transpose, int *wait)
+{
+  fgs_check_parms(*handle,*dom,*op,"gs_op_vec",__LINE__);
+  cigs_vec(u,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+          fgs_info[*handle],0,wait);
 }
 
 void fgs_many(const sint *handle, void *u1, void *u2, void *u3,
@@ -1547,6 +1570,23 @@ void fgs_many(const sint *handle, void *u1, void *u2, void *u3,
   fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
   cgs_many((void *const*)uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
            fgs_info[*handle],0);
+}
+
+void figs_many(const sint *handle, void *u1, void *u2, void *u3,
+              void *u4, void *u5, void *u6, const sint *n,
+              const sint *dom, const sint *op, const sint *transpose,
+	      int *wait)
+{
+  void *uu[6];
+  uu[0]=u1,uu[1]=u2,uu[2]=u3,uu[3]=u4,uu[4]=u5,uu[5]=u6;
+  fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
+  cigs_many((void *const*)uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+           fgs_info[*handle],0,wait);
+}
+
+void fgs_wait(int *handle)
+{
+  cgs_wait(*handle);
 }
 
 static struct array fgs_fields_array = null_array;
