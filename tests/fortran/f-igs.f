@@ -28,7 +28,8 @@
       endif
 
       neighbors=count-1
-      call gs_setup(handle,id,neighbors,mpi_comm_world,np)
+!     gs_pairwise
+      call gs_setup_pick(handle,id,neighbors,mpi_comm_world,np,1)
 
       if(np.eq.1) then
         answer(1)=1.0
