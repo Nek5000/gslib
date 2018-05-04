@@ -119,6 +119,10 @@
 #define gs         PREFIXED_NAME(gs       )
 #define gs_vec     PREFIXED_NAME(gs_vec   )
 #define gs_many    PREFIXED_NAME(gs_many  )
+#define igs        PREFIXED_NAME(igs      )
+#define igs_vec    PREFIXED_NAME(igs_vec  )
+#define igs_many   PREFIXED_NAME(igs_many )
+#define gs_wait    PREFIXED_NAME(gs_wait  )
 #define gs_setup   PREFIXED_NAME(gs_setup )
 #define gs_free    PREFIXED_NAME(gs_free  )
 #define gs_unique  PREFIXED_NAME(gs_unique)
@@ -132,6 +136,15 @@ void gs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
             unsigned transpose, struct gs_data *gsh, buffer *buf);
 void gs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
              unsigned transpose, struct gs_data *gsh, buffer *buf);
+
+void igs(void *u, gs_dom dom, gs_op op, unsigned transpose,
+        struct gs_data *gsh, buffer *buf, int *handle);
+void igs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
+            unsigned transpose, struct gs_data *gsh, buffer *buf, int *handle);
+void igs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
+             unsigned transpose, struct gs_data *gsh, buffer *buf, int *handle);
+void gs_wait(int handle);
+
 struct gs_data *gs_setup(const slong *id, uint n, const struct comm *comm,
                          int unique, gs_method method, int verbose);
 void gs_free(struct gs_data *gsh);
