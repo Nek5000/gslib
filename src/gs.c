@@ -1168,6 +1168,7 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 
 #undef gs_op
 
+#undef gs_unique
 #undef gs_free
 #undef gs_setup
 #undef gs_many
@@ -1178,6 +1179,7 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 #define cgs_many  PREFIXED_NAME(gs_many )
 #define cgs_setup PREFIXED_NAME(gs_setup)
 #define cgs_free  PREFIXED_NAME(gs_free )
+#define cgs_unique  PREFIXED_NAME(gs_unique)
 
 #define fgs_setup_pick FORTRAN_NAME(gs_setup_pick,GS_SETUP_PICK)
 #define fgs_setup      FORTRAN_NAME(gs_setup     ,GS_SETUP     )
@@ -1186,6 +1188,7 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 #define fgs_many       FORTRAN_NAME(gs_op_many   ,GS_OP_MANY   )
 #define fgs_fields     FORTRAN_NAME(gs_op_fields ,GS_OP_FIELDS )
 #define fgs_free       FORTRAN_NAME(gs_free      ,GS_FREE      )
+#define fgs_unique     FORTRAN_NAME(gs_unique    ,GS_UNIQUE    )
 
 static struct gs_data **fgs_info = 0;
 static int fgs_max = 0;
@@ -1284,3 +1287,12 @@ void fgs_free(const sint *handle)
   fgs_info[*handle] = 0;
 }
 
+void fgs_unique(slong id[], const sint *n, const MPI_Fint *c, const sint *np)
+{
+  struct comm *comm;
+  uint un = *n;
+  comm = tmalloc(struct comm, 1);
+  comm_init_check(comm, *c, *np);
+  cgs_unique(id, un, comm);
+  free(comm);
+}
