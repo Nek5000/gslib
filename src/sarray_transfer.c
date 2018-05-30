@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "c99.h"
 #include "name.h"
 #include "fail.h"
@@ -27,7 +28,7 @@ static void pack_int(
 
 #define PACK_BODY() do {                                                  \
   uint dummy, *len_ptr=&dummy;                                            \
-  uint i, p,lp = -(uint)1, len=0;                                         \
+  uint i, p,lp = UINT_MAX, len=0;                                         \
   uint *restrict out = buffer_reserve(data, n*(row_size+3)*sizeof(uint)); \
   for(i=0;i<n;++i) {                                                      \
     const char *row = input + size*perm[i];                               \
