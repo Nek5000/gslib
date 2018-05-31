@@ -1,5 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
+#include <limits.h>
 
 /* 
   Define the integer types used throughout the code,
@@ -26,6 +27,11 @@
 
   Since the long long type is not ISO C90, it is never
   used unless explicitly asked for.
+
+  The POSIX-standard limits.h header provides the
+  LLONG_MAX and LLONG_MIN macros, which will be
+  preferentially used.  
+
 */
 
 #if defined(USE_LONG_LONG) || defined(GLOBAL_LONG_LONG)

@@ -1,8 +1,8 @@
 #include <stdio.h>
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "c99.h"
 #include "name.h"
 #include "fail.h"
@@ -89,8 +89,8 @@ struct nonzero_id {
 static void nonzero_ids(struct array *nz,
                         const slong *id, const uint n, buffer *buf)
 {
-  ulong last_id = -(ulong)1;
-  uint i, primary = -(uint)1;
+  ulong last_id = ULONG_MAX;
+  uint i, primary = UINT_MAX;
   struct nonzero_id *row, *end;
   array_init(struct nonzero_id,nz,n), end=row=nz->ptr;
   for(i=0;i<n;++i) {
@@ -168,7 +168,7 @@ static void shared_ids_aux(struct array *sh, struct array *pr, uint pr_n,
   const struct shared_id_work *w, *we;
   struct shared_id *s;
   struct primary_shared_id *p;
-  ulong last_id = -(ulong)1;
+  ulong last_id = ULONG_MAX;
   /* translate work array to output arrays */
   sarray_sort(struct shared_id_work,wa->ptr,wa->n, id,1, buf);
   array_init(struct shared_id,sh,wa->n), sh->n=wa->n, s=sh->ptr;
@@ -193,7 +193,7 @@ static ulong shared_ids(struct array *sh, struct array *pr,
                         const struct array *nz, struct crystal *cr)
 {
   struct array un; struct unique_id *un_row, *un_end, *other;
-  ulong last_id = -(ulong)1;
+  ulong last_id = ULONG_MAX;
   ulong ordinal[2], n_shared=0, scan_buf[2];
   struct array wa; struct shared_id_work *w;
   uint n_unique;
@@ -217,7 +217,7 @@ static ulong shared_ids(struct array *sh, struct array *pr,
            and ordinal[0] of those are seen by work procs of lower rank;
      i.e., this work processor sees the range ordinal[0] + (0,n_shared-1) */
   /* construct list of shared ids */
-  last_id = -(ulong)1;
+  last_id = ULONG_MAX;
   array_init(struct shared_id_work,&wa,un.n), wa.n=0, w=wa.ptr;
   for(un_row=un.ptr,un_end=un_row+un.n;un_row!=un_end;++un_row) {
     ulong id = un_row->id;
@@ -277,7 +277,7 @@ static void make_topology_unique(struct gs_topology *top, slong *id,
 
   /* create sentinel with i = -1 */
   array_reserve(struct shared_id,sh,sh->n+1);
-  ((struct shared_id*)sh->ptr)[sh->n].i = -(uint)1;
+  ((struct shared_id*)sh->ptr)[sh->n].i = UINT_MAX;
   /* in the sorted list of procs sharing a given id,
      the owner is chosen to be the j^th unflagged proc,
      where j = id mod (length of list) */
@@ -310,7 +310,7 @@ static void make_topology_unique(struct gs_topology *top, slong *id,
   sh->n = out - ((struct shared_id*)sh->ptr);
 
   /* set primary_shared_id flags to match */
-  ((struct shared_id*)sh->ptr)[sh->n].i = -(uint)1;
+  ((struct shared_id*)sh->ptr)[sh->n].i = UINT_MAX;
   sarray_sort(struct shared_id,sh->ptr,sh->n, id,1, buf);
   sarray_sort(struct primary_shared_id,pr->ptr,pr->n, id,1, buf);
   q=pr->ptr;
@@ -349,12 +349,12 @@ static const uint *local_map(const struct array *nz, const int ignore_flagged,
       *p++ = row->i;                                               \
       for(other=row+1;other!=end&&other->id==row_id&&cond;++other) \
         any=1, *p++ = other->i;                                    \
-      if(any) *p++ = -(uint)1; else --p;                           \
+      if(any) *p++ = UINT_MAX; else --p;                           \
       row=other;                                                   \
     } while(0)
   if(ignore_flagged) DO_SET(other->flag==0); else DO_SET(1);
 #undef DO_SET
-  *p = -(uint)1;
+  *p = UINT_MAX;
   return map;
 }
 
@@ -367,7 +367,7 @@ static const uint *flagged_primaries_map(const struct array *nz, uint *mem_size)
   p = map = tmalloc(uint,count); *mem_size += count*sizeof(uint);
   for(row=nz->ptr,end=row+nz->n;row!=end;++row)
     if(row->i==row->primary && row->flag==1) *p++ = row->i;
-  *p = -(uint)1;
+  *p = UINT_MAX;
   return map;
 }
 
@@ -521,13 +521,13 @@ static void pw_exec_wait(
 static uint pw_comm_setup(struct pw_comm_data *data, struct array *sh,
                           const unsigned flags_mask, buffer *buf)
 {
-  uint n=0,count=0, lp=-(uint)1, mem_size=0;
+  uint n=0,count=0, lp=UINT_MAX, mem_size=0;
   struct shared_id *s, *se;
   /* sort by remote processor and id (a globally consistent ordering) */
   sarray_sort_2(struct shared_id,sh->ptr,sh->n, p,0, id,1, buf);
   /* assign index into buffer */
   for(s=sh->ptr,se=s+sh->n;s!=se;++s) {
-    if(s->flags&flags_mask) { s->bi = -(uint)1; continue; }
+    if(s->flags&flags_mask) { s->bi = UINT_MAX; continue; }
     s->bi = count++;
     if(s->p!=lp) lp=s->p, ++n;
   }
@@ -535,7 +535,7 @@ static uint pw_comm_setup(struct pw_comm_data *data, struct array *sh,
   data->p = tmalloc(uint,2*n); mem_size+=2*n*sizeof(uint);
   data->size = data->p + n;
   data->total = count;
-  n = 0, lp=-(uint)1;
+  n = 0, lp=UINT_MAX;
   for(s=sh->ptr,se=s+sh->n;s!=se;++s) {
     if(s->flags&flags_mask) continue;
     if(s->p!=lp) {
@@ -561,20 +561,20 @@ static const uint *pw_map_setup(struct array *sh, buffer *buf, uint *mem_size)
   count=1;
   for(s=sh->ptr,se=s+sh->n;s!=se;) {
     uint i=s->i;
-    if(s->bi==-(uint)1) { ++s; continue; }
+    if(s->bi==UINT_MAX) { ++s; continue; }
     count+=3;
-    for(++s;s!=se&&s->i==i;++s) if(s->bi!=-(uint)1) ++count;
+    for(++s;s!=se&&s->i==i;++s) if(s->bi!=UINT_MAX) ++count;
   }
   /* write map */
   p = map = tmalloc(uint,count); *mem_size += count*sizeof(uint);
   for(s=sh->ptr,se=s+sh->n;s!=se;) {
     uint i=s->i;
-    if(s->bi==-(uint)1) { ++s; continue; }
+    if(s->bi==UINT_MAX) { ++s; continue; }
     *p++ = i, *p++ = s->bi;
-    for(++s;s!=se&&s->i==i;++s) if(s->bi!=-(uint)1) *p++ = s->bi;
-    *p++ = -(uint)1;
+    for(++s;s!=se&&s->i==i;++s) if(s->bi!=UINT_MAX) *p++ = s->bi;
+    *p++ = UINT_MAX;
   }
-  *p = -(uint)1;
+  *p = UINT_MAX;
   return map;
 }
 
@@ -727,7 +727,7 @@ static void crl_work_init(struct array *cw, struct array *sh,
                           const unsigned send_mask, uint this_p)
 {
   const unsigned recv_mask = send_mask^(FLAGS_REMOTE|FLAGS_LOCAL);
-  uint last_i=-(uint)1; int added_myself;
+  uint last_i=UINT_MAX; int added_myself;
   uint cw_n = 0, cw_max = cw->max;
   struct crl_id *w = cw->ptr;
   struct shared_id *s, *se;
@@ -776,10 +776,10 @@ static uint crl_maps(struct cr_stage *stage, struct array *cw, buffer *buf)
     *gp++ = bi;
     for(other=w+1;other!=we&&other->bi==bi;++other)
       if(other->si!=si) si=other->si, any=1, *gp++ = si;
-    if(any) *gp++ = -(uint)1; else --gp;
-    *sp++ = -(uint)1;
+    if(any) *gp++ = UINT_MAX; else --gp;
+    *sp++ = UINT_MAX;
   }
-  *sp=-(uint)1, *gp=-(uint)1;
+  *sp=UINT_MAX, *gp=UINT_MAX;
   return mem_size;
 }
 
@@ -1027,13 +1027,13 @@ static const uint *allreduce_map_setup(
   if(to_buf) {
     for(p=pr->ptr,pe=p+pr->n;p!=pe;++p)
       if((p->flag&flags_mask)==0)
-        *m++ = p->i, *m++ = p->ord, *m++ = -(uint)1;
+        *m++ = p->i, *m++ = p->ord, *m++ = UINT_MAX;
   } else {
     for(p=pr->ptr,pe=p+pr->n;p!=pe;++p)
       if((p->flag&flags_mask)==0)
-        *m++ = p->ord, *m++ = p->i, *m++ = -(uint)1;
+        *m++ = p->ord, *m++ = p->i, *m++ = UINT_MAX;
   }
-  *m=-(uint)1;
+  *m=UINT_MAX;
   return map;
 }
 
