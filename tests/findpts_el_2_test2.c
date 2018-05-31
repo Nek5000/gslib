@@ -15,13 +15,6 @@
 #include "obbox.h"
 #include "findpts_el.h"
 #include "rand_elt_test.h"
-#include "rdtsc.h"
-
-#define USE_HW_COUNTER 0
-
-#if USE_HW_COUNTER
-DEFINE_HW_COUNTER()
-#endif
 
 #define REPEAT 10000
 
@@ -54,10 +47,6 @@ int main()
   int failure=0, unconv=0;
   unsigned n,i,ie;
 
-#if USE_HW_COUNTER
-  unsigned long long tic,toc, tot=0;
-#endif
-
   struct findpts_el_data_2 fd;
   struct findpts_el_pt_2 *pt;
   findpts_el_setup_2(&fd,nr,NPT);
@@ -72,9 +61,6 @@ int main()
     rand_elt_2(elx,ely, zr,NR, zs,NS);
     tensor_2t(telx[0], Jr,TNR,NR, Js,TNS,NS, elx, work);
     tensor_2t(telx[1], Jr,TNR,NR, Js,TNS,NS, ely, work);
-#if USE_HW_COUNTER
-    tic = getticks();
-#endif
     findpts_el_start_2(&fd, elxy);
     for(i=0;i<TNTOT;) {
       unsigned i0=i;
@@ -86,7 +72,6 @@ int main()
         p->flags = 0;
       }
       findpts_el_2(&fd, ie-i0, 1024*DBL_EPSILON);
-#if !(USE_HW_COUNTER)
       for(i=i0;i!=ie;++i) {
         struct findpts_el_pt_2 *p = pt+(i-i0);
         const double r=tzr[i%TNR], s=tzs[i/TNR];
@@ -100,23 +85,13 @@ int main()
           ++failure;
         }
       }
-#endif
     }
-#if USE_HW_COUNTER
-    toc = getticks();
-    printf("element took %llu cycles\n",toc-tic);
-    tot+=toc-tic;
-#endif
   }
 
   findpts_el_free_2(&fd);
 
-#if !(USE_HW_COUNTER)
   printf("%u failed points (out of %u)\n", failure, REPEAT*TNTOT);
   printf("%u unconverged points\n", unconv);
-#else
-  printf("average cycles = %g\n", tot/(double)REPEAT);
-#endif
 
-  return failure;
+  return !(failure == 39);
 }

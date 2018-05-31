@@ -12,7 +12,6 @@
 The build system relies on GNU Make with the `make` command. To compile gslib just run:
 
 ```
-cd src
 make CC=mpicc
 make PREFIX=<install path> install
 ```

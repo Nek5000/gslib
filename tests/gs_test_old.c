@@ -26,7 +26,7 @@
 #include "types.h"
 
 typedef long real;
-sint datatype = 4;
+sint datatype = 3;
 
 #define fgs_setup     FORTRAN_NAME(gs_setup    ,GS_SETUP    )
 #define fgs_op        FORTRAN_NAME(gs_op       ,GS_OP       )
@@ -36,7 +36,7 @@ sint datatype = 4;
 #define fgs_free      FORTRAN_NAME(gs_free     ,GS_FREE     )
 
 void fgs_setup(sint *handle, const slong id[], const sint *n,
-               const MPI_Comm *comm, const sint *np);
+               const MPI_Fint *comm, const sint *np);
 void fgs_op(const sint *handle, void *u, const sint *dom, const sint *op,
             const sint *transpose);
 void fgs_op_vec(const sint *handle, void *u, const sint *n,
@@ -63,9 +63,10 @@ int main(int narg, char* arg[])
 #ifndef MPI
   int comm;
 #else
-  MPI_Comm comm;
   MPI_Init(&narg,&arg);
+  MPI_Comm comm;
   MPI_Comm_dup(MPI_COMM_WORLD,&comm);
+  MPI_Fint fcomm = MPI_Comm_c2f(comm);
   { int i;
     MPI_Comm_rank(comm,&i); id=i;
     MPI_Comm_size(comm,&i); np=i;
@@ -75,7 +76,7 @@ int main(int narg, char* arg[])
   glindex = malloc(np*2*sizeof(slong));
   for(i=0;i<np;++i) glindex[2*i+1] = glindex[2*i] = i+1;
   i=np*2;
-  fgs_setup(&handle,glindex,&i,&comm,&np);
+  fgs_setup(&handle,glindex,&i,&fcomm,&np);
   free(glindex);
   
   u = malloc(np*2*sizeof(real));
