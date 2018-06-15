@@ -4,6 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <sys/stat.h>
+#include <limits.h>
 #include "c99.h"
 #include "name.h"
 #include "types.h"
@@ -328,7 +329,7 @@ static void amg_setup_mat(
   const uint i0, const uint j0, struct gnz *const p, const uint nz,
   buffer *buf)
 {
-  slong *id = ids->ptr; ulong last_id = -(ulong)1;
+  slong *id = ids->ptr; ulong last_id = ULONG_MAX;
   const uint ne = ids->n;
   uint k,i=0,ie=nloc;
   sarray_sort(struct gnz,p,nz, j,1, buf); /* sort by col */
@@ -677,10 +678,10 @@ static int find_id(
   for(p=data->work.ptr,p_end=p+data->work.n;p!=p_end;++p) {
     while(q!=q_end && q->id<p->id) ++q;
     if(q==q_end) break;
-    if(q->id!=p->id) not_found=1,p->p=-(uint)1;
+    if(q->id!=p->id) not_found=1,p->p=UINT_MAX;
     else p->p=q->p;
   }
-  for(;p!=p_end;++p) not_found=1,p->p=-(uint)1;
+  for(;p!=p_end;++p) not_found=1,p->p=UINT_MAX;
   
   /* send back */
   sarray_transfer(struct find_id_work,&data->work,wp,0,data->cr);
@@ -1141,14 +1142,14 @@ static void mat_list_nonlocal_sorted(
   const struct rnz *p, *const e=(const struct rnz*)mat->ptr+mat->n;
   uint count; struct labelled_rid *out, *end;
   #define BUILD_LIST(k) do { \
-    last_rid.p=-(uint)1,last_rid.i=-(uint)1; \
+    last_rid.p=UINT_MAX,last_rid.i=UINT_MAX; \
     for(count=0,p=mat->ptr;p!=e;++p) { \
       if(p->k.p==pid || rid_equal(last_rid,p->k)) continue; \
       last_rid=p->k; ++count; \
     } \
     array_init(struct labelled_rid, nonlocal_id, count); \
     nonlocal_id->n=count; out=nonlocal_id->ptr; \
-    last_rid.p=-(uint)1,last_rid.i=-(uint)1; \
+    last_rid.p=UINT_MAX,last_rid.i=UINT_MAX; \
     for(p=mat->ptr;p!=e;++p) { \
       if(p->k.p==pid || rid_equal(last_rid,p->k)) continue; \
       (out++)->rid=last_rid=p->k; \

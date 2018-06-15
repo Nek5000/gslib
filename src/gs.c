@@ -1,8 +1,8 @@
 #include <stdio.h>
-
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "c99.h"
 #include "name.h"
 #include "fail.h"
@@ -20,6 +20,9 @@
 #include "sarray_transfer.h"
 
 #define gs         PREFIXED_NAME(gs       )
+#define gs_irecv   PREFIXED_NAME(gs_irecv )
+#define gs_isend   PREFIXED_NAME(gs_isend )
+#define gs_wait    PREFIXED_NAME(gs_wait  )
 #define gs_vec     PREFIXED_NAME(gs_vec   )
 #define gs_many    PREFIXED_NAME(gs_many  )
 #define gs_setup   PREFIXED_NAME(gs_setup )
@@ -86,8 +89,8 @@ struct nonzero_id {
 static void nonzero_ids(struct array *nz,
                         const slong *id, const uint n, buffer *buf)
 {
-  ulong last_id = -(ulong)1;
-  uint i, primary = -(uint)1;
+  ulong last_id = ULONG_MAX;
+  uint i, primary = UINT_MAX;
   struct nonzero_id *row, *end;
   array_init(struct nonzero_id,nz,n), end=row=nz->ptr;
   for(i=0;i<n;++i) {
@@ -165,7 +168,7 @@ static void shared_ids_aux(struct array *sh, struct array *pr, uint pr_n,
   const struct shared_id_work *w, *we;
   struct shared_id *s;
   struct primary_shared_id *p;
-  ulong last_id = -(ulong)1;
+  ulong last_id = ULONG_MAX;
   /* translate work array to output arrays */
   sarray_sort(struct shared_id_work,wa->ptr,wa->n, id,1, buf);
   array_init(struct shared_id,sh,wa->n), sh->n=wa->n, s=sh->ptr;
@@ -190,7 +193,7 @@ static ulong shared_ids(struct array *sh, struct array *pr,
                         const struct array *nz, struct crystal *cr)
 {
   struct array un; struct unique_id *un_row, *un_end, *other;
-  ulong last_id = -(ulong)1;
+  ulong last_id = ULONG_MAX;
   ulong ordinal[2], n_shared=0, scan_buf[2];
   struct array wa; struct shared_id_work *w;
   uint n_unique;
@@ -214,7 +217,7 @@ static ulong shared_ids(struct array *sh, struct array *pr,
            and ordinal[0] of those are seen by work procs of lower rank;
      i.e., this work processor sees the range ordinal[0] + (0,n_shared-1) */
   /* construct list of shared ids */
-  last_id = -(ulong)1;
+  last_id = ULONG_MAX;
   array_init(struct shared_id_work,&wa,un.n), wa.n=0, w=wa.ptr;
   for(un_row=un.ptr,un_end=un_row+un.n;un_row!=un_end;++un_row) {
     ulong id = un_row->id;
@@ -274,7 +277,7 @@ static void make_topology_unique(struct gs_topology *top, slong *id,
 
   /* create sentinel with i = -1 */
   array_reserve(struct shared_id,sh,sh->n+1);
-  ((struct shared_id*)sh->ptr)[sh->n].i = -(uint)1;
+  ((struct shared_id*)sh->ptr)[sh->n].i = UINT_MAX;
   /* in the sorted list of procs sharing a given id,
      the owner is chosen to be the j^th unflagged proc,
      where j = id mod (length of list) */
@@ -307,7 +310,7 @@ static void make_topology_unique(struct gs_topology *top, slong *id,
   sh->n = out - ((struct shared_id*)sh->ptr);
 
   /* set primary_shared_id flags to match */
-  ((struct shared_id*)sh->ptr)[sh->n].i = -(uint)1;
+  ((struct shared_id*)sh->ptr)[sh->n].i = UINT_MAX;
   sarray_sort(struct shared_id,sh->ptr,sh->n, id,1, buf);
   sarray_sort(struct primary_shared_id,pr->ptr,pr->n, id,1, buf);
   q=pr->ptr;
@@ -346,12 +349,12 @@ static const uint *local_map(const struct array *nz, const int ignore_flagged,
       *p++ = row->i;                                               \
       for(other=row+1;other!=end&&other->id==row_id&&cond;++other) \
         any=1, *p++ = other->i;                                    \
-      if(any) *p++ = -(uint)1; else --p;                           \
+      if(any) *p++ = UINT_MAX; else --p;                           \
       row=other;                                                   \
     } while(0)
   if(ignore_flagged) DO_SET(other->flag==0); else DO_SET(1);
 #undef DO_SET
-  *p = -(uint)1;
+  *p = UINT_MAX;
   return map;
 }
 
@@ -364,7 +367,7 @@ static const uint *flagged_primaries_map(const struct array *nz, uint *mem_size)
   p = map = tmalloc(uint,count); *mem_size += count*sizeof(uint);
   for(row=nz->ptr,end=row+nz->n;row!=end;++row)
     if(row->i==row->primary && row->flag==1) *p++ = row->i;
-  *p = -(uint)1;
+  *p = UINT_MAX;
   return map;
 }
 
@@ -381,6 +384,9 @@ struct gs_remote {
   uint buffer_size, mem_size;
   void *data;
   exec_fun *exec;
+  exec_fun *exec_irecv;
+  exec_fun *exec_isend;
+  exec_fun *exec_wait;
   fin_fun *fin;
 };
 
@@ -455,18 +461,73 @@ static void pw_exec(
 }
 
 /*------------------------------------------------------------------------------
+  Nonblocking Pairwise Execution
+------------------------------------------------------------------------------*/
+static void pw_exec_irecv(
+  void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
+  unsigned transpose, const void *execdata, const struct comm *comm, char *buf)
+{
+  const struct pw_data *pwd = execdata;
+  static gs_scatter_fun *const scatter_to_buf[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many_to_vec, &scatter_noop };
+  static gs_gather_fun *const gather_from_buf[] =
+    { &gs_gather, &gs_gather_vec, &gs_gather_vec_to_many, &gather_noop };
+  const unsigned recv = 0^transpose, send = 1^transpose;
+  unsigned unit_size = vn*gs_dom_size[dom];
+  /* post receives */
+  char *sendbuf = pw_exec_recvs(buf,unit_size,comm,&pwd->comm[recv],pwd->req);
+}
+
+static void pw_exec_isend(
+  void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
+  unsigned transpose, const void *execdata, const struct comm *comm, char *buf)
+{
+  const struct pw_data *pwd = execdata;
+  static gs_scatter_fun *const scatter_to_buf[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many_to_vec, &scatter_noop };
+  static gs_gather_fun *const gather_from_buf[] =
+    { &gs_gather, &gs_gather_vec, &gs_gather_vec_to_many, &gather_noop };
+  const unsigned recv = 0^transpose, send = 1^transpose;
+  unsigned unit_size = vn*gs_dom_size[dom];
+
+  /* fill send buffer */
+  char *sendbuf = buf+unit_size*pwd->comm[recv].total;
+  scatter_to_buf[mode](sendbuf,data,vn,pwd->map[send],dom);
+  /* post sends */
+  pw_exec_sends(sendbuf,unit_size,comm,&pwd->comm[send],
+                &pwd->req[pwd->comm[recv].n]);
+}
+
+static void pw_exec_wait(
+  void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
+  unsigned transpose, const void *execdata, const struct comm *comm, char *buf)
+{
+  const struct pw_data *pwd = execdata;
+  static gs_scatter_fun *const scatter_to_buf[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many_to_vec, &scatter_noop };
+  static gs_gather_fun *const gather_from_buf[] =
+    { &gs_gather, &gs_gather_vec, &gs_gather_vec_to_many, &gather_noop };
+  const unsigned recv = 0^transpose, send = 1^transpose;
+  unsigned unit_size = vn*gs_dom_size[dom];
+
+  comm_wait(pwd->req,pwd->comm[0].n+pwd->comm[1].n);
+  /* gather using recv buffer */
+  gather_from_buf[mode](data,buf,vn,pwd->map[recv],dom,op);
+}
+
+/*------------------------------------------------------------------------------
   Pairwise setup
 ------------------------------------------------------------------------------*/
 static uint pw_comm_setup(struct pw_comm_data *data, struct array *sh,
                           const unsigned flags_mask, buffer *buf)
 {
-  uint n=0,count=0, lp=-(uint)1, mem_size=0;
+  uint n=0,count=0, lp=UINT_MAX, mem_size=0;
   struct shared_id *s, *se;
   /* sort by remote processor and id (a globally consistent ordering) */
   sarray_sort_2(struct shared_id,sh->ptr,sh->n, p,0, id,1, buf);
   /* assign index into buffer */
   for(s=sh->ptr,se=s+sh->n;s!=se;++s) {
-    if(s->flags&flags_mask) { s->bi = -(uint)1; continue; }
+    if(s->flags&flags_mask) { s->bi = UINT_MAX; continue; }
     s->bi = count++;
     if(s->p!=lp) lp=s->p, ++n;
   }
@@ -474,7 +535,7 @@ static uint pw_comm_setup(struct pw_comm_data *data, struct array *sh,
   data->p = tmalloc(uint,2*n); mem_size+=2*n*sizeof(uint);
   data->size = data->p + n;
   data->total = count;
-  n = 0, lp=-(uint)1;
+  n = 0, lp=UINT_MAX;
   for(s=sh->ptr,se=s+sh->n;s!=se;++s) {
     if(s->flags&flags_mask) continue;
     if(s->p!=lp) {
@@ -500,20 +561,20 @@ static const uint *pw_map_setup(struct array *sh, buffer *buf, uint *mem_size)
   count=1;
   for(s=sh->ptr,se=s+sh->n;s!=se;) {
     uint i=s->i;
-    if(s->bi==-(uint)1) { ++s; continue; }
+    if(s->bi==UINT_MAX) { ++s; continue; }
     count+=3;
-    for(++s;s!=se&&s->i==i;++s) if(s->bi!=-(uint)1) ++count;
+    for(++s;s!=se&&s->i==i;++s) if(s->bi!=UINT_MAX) ++count;
   }
   /* write map */
   p = map = tmalloc(uint,count); *mem_size += count*sizeof(uint);
   for(s=sh->ptr,se=s+sh->n;s!=se;) {
     uint i=s->i;
-    if(s->bi==-(uint)1) { ++s; continue; }
+    if(s->bi==UINT_MAX) { ++s; continue; }
     *p++ = i, *p++ = s->bi;
-    for(++s;s!=se&&s->i==i;++s) if(s->bi!=-(uint)1) *p++ = s->bi;
-    *p++ = -(uint)1;
+    for(++s;s!=se&&s->i==i;++s) if(s->bi!=UINT_MAX) *p++ = s->bi;
+    *p++ = UINT_MAX;
   }
-  *p = -(uint)1;
+  *p = UINT_MAX;
   return map;
 }
 
@@ -554,6 +615,9 @@ static void pw_setup(struct gs_remote *r, struct gs_topology *top,
   r->buffer_size = pwd->buffer_size;
   r->data = pwd;
   r->exec = (exec_fun*)&pw_exec;
+  r->exec_irecv = (exec_fun*)&pw_exec_irecv;
+  r->exec_isend = (exec_fun*)&pw_exec_isend;
+  r->exec_wait = (exec_fun*)&pw_exec_wait;
   r->fin = (fin_fun*)&pw_free;
 }
 
@@ -663,7 +727,7 @@ static void crl_work_init(struct array *cw, struct array *sh,
                           const unsigned send_mask, uint this_p)
 {
   const unsigned recv_mask = send_mask^(FLAGS_REMOTE|FLAGS_LOCAL);
-  uint last_i=-(uint)1; int added_myself;
+  uint last_i=UINT_MAX; int added_myself;
   uint cw_n = 0, cw_max = cw->max;
   struct crl_id *w = cw->ptr;
   struct shared_id *s, *se;
@@ -712,10 +776,10 @@ static uint crl_maps(struct cr_stage *stage, struct array *cw, buffer *buf)
     *gp++ = bi;
     for(other=w+1;other!=we&&other->bi==bi;++other)
       if(other->si!=si) si=other->si, any=1, *gp++ = si;
-    if(any) *gp++ = -(uint)1; else --gp;
-    *sp++ = -(uint)1;
+    if(any) *gp++ = UINT_MAX; else --gp;
+    *sp++ = UINT_MAX;
   }
-  *sp=-(uint)1, *gp=-(uint)1;
+  *sp=UINT_MAX, *gp=UINT_MAX;
   return mem_size;
 }
 
@@ -878,6 +942,7 @@ static void cr_setup(struct gs_remote *r, struct gs_topology *top,
 struct allreduce_data {
   const uint *map_to_buf[2], *map_from_buf[2];
   uint buffer_size;
+  comm_req *req;
 };
 
 static void allreduce_exec(
@@ -903,6 +968,52 @@ static void allreduce_exec(
 }
 
 /*------------------------------------------------------------------------------
+  Nonblocking All-reduce Execution
+------------------------------------------------------------------------------*/
+static void allreduce_exec_i(
+  void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
+  unsigned transpose, const void *execdata, const struct comm *comm, char *buf)
+{
+  const struct allreduce_data *ard = execdata;
+  static gs_scatter_fun *const scatter_to_buf[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many_to_vec, &scatter_noop };
+  static gs_scatter_fun *const scatter_from_buf[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_vec_to_many, &scatter_noop };
+  uint gvn = vn*(ard->buffer_size/2);
+  unsigned unit_size = gs_dom_size[dom];
+  char *ardbuf = buf+unit_size*gvn;
+
+  /* user array -> buffer */
+  gs_init_array(buf,gvn,dom,op);
+  scatter_to_buf[mode](buf,data,vn,ard->map_to_buf[transpose],dom);
+  /* all reduce */
+  comm_iallreduce(ard->req,comm,dom,op,buf,gvn,ardbuf);
+}
+
+static void allreduce_exec_wait(
+  void *data, gs_mode mode, unsigned vn, gs_dom dom, gs_op op,
+  unsigned transpose, const void *execdata, const struct comm *comm, char *buf)
+{
+  const struct allreduce_data *ard = execdata;
+  static gs_scatter_fun *const scatter_to_buf[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many_to_vec, &scatter_noop };
+  static gs_scatter_fun *const scatter_from_buf[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_vec_to_many, &scatter_noop };
+  uint gvn = vn*(ard->buffer_size/2);
+  unsigned unit_size = gs_dom_size[dom];
+  char *ardbuf = buf+unit_size*gvn;
+
+  // Why do I need this? Ugly !!!
+  if (comm->np > 1)
+    comm_wait(ard->req, 1);
+#ifdef MPI
+  memcpy(buf,ardbuf,gvn*gs_dom_size[dom]);
+#endif
+  /* buffer -> user array */
+  scatter_from_buf[mode](data,buf,vn,ard->map_from_buf[transpose],dom);
+}
+
+/*------------------------------------------------------------------------------
   All-reduce setup
 ------------------------------------------------------------------------------*/
 static const uint *allreduce_map_setup(
@@ -916,13 +1027,13 @@ static const uint *allreduce_map_setup(
   if(to_buf) {
     for(p=pr->ptr,pe=p+pr->n;p!=pe;++p)
       if((p->flag&flags_mask)==0)
-        *m++ = p->i, *m++ = p->ord, *m++ = -(uint)1;
+        *m++ = p->i, *m++ = p->ord, *m++ = UINT_MAX;
   } else {
     for(p=pr->ptr,pe=p+pr->n;p!=pe;++p)
       if((p->flag&flags_mask)==0)
-        *m++ = p->ord, *m++ = p->i, *m++ = -(uint)1;
+        *m++ = p->ord, *m++ = p->i, *m++ = UINT_MAX;
   }
-  *m=-(uint)1;
+  *m=UINT_MAX;
   return map;
 }
 
@@ -939,6 +1050,8 @@ static struct allreduce_data *allreduce_setup_aux(
   /* transpose behavior: reduce all data, copy to unflagged */
   ard->map_to_buf  [1] = allreduce_map_setup(pr,0,1, mem_size);
   ard->map_from_buf[1] = allreduce_map_setup(pr,1,0, mem_size);
+
+  ard->req = tmalloc(comm_req, 1);
 
   ard->buffer_size = total_shared*2;
   return ard;
@@ -961,6 +1074,9 @@ static void allreduce_setup(struct gs_remote *r, struct gs_topology *top,
   r->buffer_size = ard->buffer_size;
   r->data = ard;
   r->exec = (exec_fun*)&allreduce_exec;
+  r->exec_irecv = (exec_fun*)&allreduce_exec_i;
+  r->exec_isend = NULL;
+  r->exec_wait = (exec_fun*)&allreduce_exec_wait;
   r->fin = (fin_fun*)&allreduce_free;
 }
 
@@ -1040,6 +1156,9 @@ struct gs_data {
   uint handle_size;
 };
 
+/*------------------------------------------------------------------------------
+  GS_AUX - blocking and non-blocking
+------------------------------------------------------------------------------*/
 static void gs_aux(
   void *u, gs_mode mode, unsigned vn, gs_dom dom, gs_op op, unsigned transpose,
   struct gs_data *gsh, buffer *buf)
@@ -1058,22 +1177,198 @@ static void gs_aux(
   local_scatter[mode](u,u,vn,gsh->map_local[1^transpose],dom);
 }
 
+static void gs_aux_irecv(
+  void *u, gs_mode mode, unsigned vn, gs_dom dom, gs_op op, unsigned transpose,
+  struct gs_data *gsh, buffer *buf)
+{
+  static gs_scatter_fun *const local_scatter[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many, &scatter_noop };
+  static gs_gather_fun  *const local_gather [] =
+    { &gs_gather,  &gs_gather_vec,  &gs_gather_many, &gather_noop  };
+  static gs_init_fun *const init[] =
+    { &gs_init, &gs_init_vec, &gs_init_many, &init_noop };
+  if(!buf) buf = &static_buffer;
+  buffer_reserve(buf,vn*gs_dom_size[dom]*gsh->r.buffer_size);
+  local_gather [mode](u,u,vn,gsh->map_local[0^transpose],dom,op);
+  if(transpose==0) init[mode](u,vn,gsh->flagged_primaries,dom,op);
+
+  if (gsh->r.exec_irecv)
+    gsh->r.exec_irecv(u,mode,vn,dom,op,transpose,gsh->r.data,&gsh->comm,buf->ptr);
+}
+
+static void gs_aux_isend(
+  void *u, gs_mode mode, unsigned vn, gs_dom dom, gs_op op, unsigned transpose,
+  struct gs_data *gsh, buffer *buf)
+{
+  static gs_scatter_fun *const local_scatter[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many, &scatter_noop };
+  static gs_gather_fun  *const local_gather [] =
+    { &gs_gather,  &gs_gather_vec,  &gs_gather_many, &gather_noop  };
+  static gs_init_fun *const init[] =
+    { &gs_init, &gs_init_vec, &gs_init_many, &init_noop };
+
+  if(!buf) buf = &static_buffer;
+
+  if (gsh->r.exec_isend)
+    gsh->r.exec_isend(u,mode,vn,dom,op,transpose,gsh->r.data,&gsh->comm,buf->ptr);
+}
+
+static void gs_aux_wait(
+  void *u, gs_mode mode, unsigned vn, gs_dom dom, gs_op op, unsigned transpose,
+  struct gs_data *gsh, buffer *buf)
+{
+  static gs_scatter_fun *const local_scatter[] =
+    { &gs_scatter, &gs_scatter_vec, &gs_scatter_many, &scatter_noop };
+  static gs_gather_fun  *const local_gather [] =
+    { &gs_gather,  &gs_gather_vec,  &gs_gather_many, &gather_noop  };
+  static gs_init_fun *const init[] =
+    { &gs_init, &gs_init_vec, &gs_init_many, &init_noop };
+
+  if(!buf) buf = &static_buffer;
+
+  if (gsh->r.exec_wait)
+    gsh->r.exec_wait(u,mode,vn,dom,op,transpose,gsh->r.data,&gsh->comm,buf->ptr);
+
+  local_scatter[mode](u,u,vn,gsh->map_local[1^transpose],dom);
+}
+
+/*------------------------------------------------------------------------------
+  GS interface - blocking and non-blocking
+------------------------------------------------------------------------------*/
+struct nonblocking_private {
+  void *u;
+  gs_mode mode;
+  gs_dom dom;
+  gs_op op;
+  unsigned transpose;
+  struct gs_data *gsh;
+  buffer *buf;
+  unsigned vn;
+};
+
+typedef struct nonblocking_private* nblkng;
+
+static nblkng *nblkng_dict;
+static int nblkng_max = 0;
+static int nblkng_n = 0;
+static int nblkng_count = 0;
+
 void gs(void *u, gs_dom dom, gs_op op, unsigned transpose,
         struct gs_data *gsh, buffer *buf)
 {
   gs_aux(u,mode_plain,1,dom,op,transpose,gsh,buf);
 }
 
+void igs(void *u, gs_dom dom, gs_op op, unsigned transpose,
+        struct gs_data *gsh, buffer *buf, int *handle)
+{
+  if(nblkng_n==nblkng_max) nblkng_max+=nblkng_max/2+1,
+                     nblkng_dict=trealloc(nblkng,nblkng_dict,nblkng_max);
+
+  nblkng_dict[nblkng_n] = tmalloc(struct nonblocking_private, 1);
+
+  nblkng_dict[nblkng_n]->u = u;
+  nblkng_dict[nblkng_n]->dom = dom;
+  nblkng_dict[nblkng_n]->op = op;
+  nblkng_dict[nblkng_n]->transpose = transpose;
+  nblkng_dict[nblkng_n]->gsh = gsh;
+  nblkng_dict[nblkng_n]->buf = buf;
+  nblkng_dict[nblkng_n]->mode = mode_plain;
+  nblkng_dict[nblkng_n]->vn = 1;
+
+  *handle = nblkng_n++;
+  nblkng_count++;
+
+  gs_aux_irecv(u,mode_plain,1,dom,op,transpose,gsh,buf);
+  gs_aux_isend(u,mode_plain,1,dom,op,transpose,gsh,buf);
+}
+
+void gs_wait(int handle)
+{
+  if(handle < nblkng_n) {
+    gs_aux_wait(nblkng_dict[handle]->u,
+	        nblkng_dict[handle]->mode,
+	        nblkng_dict[handle]->vn,
+	        nblkng_dict[handle]->dom,
+	        nblkng_dict[handle]->op,
+	        nblkng_dict[handle]->transpose,
+	        nblkng_dict[handle]->gsh,
+	        nblkng_dict[handle]->buf);
+    free(nblkng_dict[handle]);
+    nblkng_dict[handle] = 0;
+    nblkng_count--;
+  }
+
+  if(nblkng_count == 0) {
+    free(nblkng_dict);
+    nblkng_dict = 0;
+    nblkng_max = 0;
+    nblkng_n = 0;
+  }
+}
+/*------------------------------------------------------------------------------
+  GS_VEC interface - blocking and non-blocking
+------------------------------------------------------------------------------*/
 void gs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
             unsigned transpose, struct gs_data *gsh, buffer *buf)
 {
   gs_aux(u,mode_vec,vn,dom,op,transpose,gsh,buf);
 }
 
+void igs_vec(void *u, unsigned vn, gs_dom dom, gs_op op,
+            unsigned transpose, struct gs_data *gsh, buffer *buf, int *handle)
+{
+  if(nblkng_n==nblkng_max) nblkng_max+=nblkng_max/2+1,
+                     nblkng_dict=trealloc(nblkng,nblkng_dict,nblkng_max);
+
+  nblkng_dict[nblkng_n] = tmalloc(struct nonblocking_private, 1);
+
+  nblkng_dict[nblkng_n]->u = u;
+  nblkng_dict[nblkng_n]->dom = dom;
+  nblkng_dict[nblkng_n]->op = op;
+  nblkng_dict[nblkng_n]->transpose = transpose;
+  nblkng_dict[nblkng_n]->gsh = gsh;
+  nblkng_dict[nblkng_n]->buf = buf;
+  nblkng_dict[nblkng_n]->vn = vn;
+  nblkng_dict[nblkng_n]->mode = mode_vec;
+
+  *handle = nblkng_n++;
+  nblkng_count++;
+
+  gs_aux_irecv(u,mode_vec,vn,dom,op,transpose,gsh,buf);
+  gs_aux_isend(u,mode_vec,vn,dom,op,transpose,gsh,buf);
+}
+/*------------------------------------------------------------------------------
+  GS_MANY interface - blocking and non-blocking
+------------------------------------------------------------------------------*/
 void gs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
              unsigned transpose, struct gs_data *gsh, buffer *buf)
 {
   gs_aux((void*)u,mode_many,vn,dom,op,transpose,gsh,buf);
+}
+
+void igs_many(void *const*u, unsigned vn, gs_dom dom, gs_op op,
+             unsigned transpose, struct gs_data *gsh, buffer *buf, int *handle)
+{
+  if(nblkng_n==nblkng_max) nblkng_max+=nblkng_max/2+1,
+                     nblkng_dict=trealloc(nblkng,nblkng_dict,nblkng_max);
+
+  nblkng_dict[nblkng_n] = tmalloc(struct nonblocking_private, 1);
+
+  nblkng_dict[nblkng_n]->u = (void *)u;
+  nblkng_dict[nblkng_n]->dom = dom;
+  nblkng_dict[nblkng_n]->op = op;
+  nblkng_dict[nblkng_n]->transpose = transpose;
+  nblkng_dict[nblkng_n]->gsh = gsh;
+  nblkng_dict[nblkng_n]->buf = buf;
+  nblkng_dict[nblkng_n]->vn = vn;
+  nblkng_dict[nblkng_n]->mode = mode_many;
+
+  *handle = nblkng_n++;
+  nblkng_count++;
+
+  gs_aux_irecv((void *)u,mode_many,vn,dom,op,transpose,gsh,buf);
+  gs_aux_isend((void *)u,mode_many,vn,dom,op,transpose,gsh,buf);
 }
 
 /*------------------------------------------------------------------------------
@@ -1168,6 +1463,7 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 
 #undef gs_op
 
+#undef gs_unique
 #undef gs_free
 #undef gs_setup
 #undef gs_many
@@ -1178,14 +1474,24 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 #define cgs_many  PREFIXED_NAME(gs_many )
 #define cgs_setup PREFIXED_NAME(gs_setup)
 #define cgs_free  PREFIXED_NAME(gs_free )
+#define cgs_unique  PREFIXED_NAME(gs_unique)
+#define cigs      PREFIXED_NAME(igs     )
+#define cigs_vec  PREFIXED_NAME(igs_vec )
+#define cigs_many PREFIXED_NAME(igs_many)
+#define cgs_wait  PREFIXED_NAME(gs_wait )
 
 #define fgs_setup_pick FORTRAN_NAME(gs_setup_pick,GS_SETUP_PICK)
 #define fgs_setup      FORTRAN_NAME(gs_setup     ,GS_SETUP     )
 #define fgs            FORTRAN_NAME(gs_op        ,GS_OP        )
 #define fgs_vec        FORTRAN_NAME(gs_op_vec    ,GS_OP_VEC    )
 #define fgs_many       FORTRAN_NAME(gs_op_many   ,GS_OP_MANY   )
+#define figs           FORTRAN_NAME(igs_op       ,IGS_OP       )
+#define figs_vec       FORTRAN_NAME(igs_op_vec   ,IGS_OP_VEC   )
+#define figs_many      FORTRAN_NAME(igs_op_many  ,IGS_OP_MANY  )
+#define fgs_wait       FORTRAN_NAME(gs_op_wait   ,GS_OP_WAIT   )
 #define fgs_fields     FORTRAN_NAME(gs_op_fields ,GS_OP_FIELDS )
 #define fgs_free       FORTRAN_NAME(gs_free      ,GS_FREE      )
+#define fgs_unique     FORTRAN_NAME(gs_unique    ,GS_UNIQUE    )
 
 static struct gs_data **fgs_info = 0;
 static int fgs_max = 0;
@@ -1235,12 +1541,27 @@ void fgs(const sint *handle, void *u, const sint *dom, const sint *op,
   cgs(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0);
 }
 
+void figs(const sint *handle, void *u, const sint *dom, const sint *op,
+         const sint *transpose, int *wait)
+{
+  fgs_check_parms(*handle,*dom,*op,"gs_op",__LINE__);
+  cigs(u,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,fgs_info[*handle],0,wait);
+}
+
 void fgs_vec(const sint *handle, void *u, const sint *n,
              const sint *dom, const sint *op, const sint *transpose)
 {
   fgs_check_parms(*handle,*dom,*op,"gs_op_vec",__LINE__);
   cgs_vec(u,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
           fgs_info[*handle],0);
+}
+
+void figs_vec(const sint *handle, void *u, const sint *n,
+             const sint *dom, const sint *op, const sint *transpose, int *wait)
+{
+  fgs_check_parms(*handle,*dom,*op,"gs_op_vec",__LINE__);
+  cigs_vec(u,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+          fgs_info[*handle],0,wait);
 }
 
 void fgs_many(const sint *handle, void *u1, void *u2, void *u3,
@@ -1252,6 +1573,23 @@ void fgs_many(const sint *handle, void *u1, void *u2, void *u3,
   fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
   cgs_many((void *const*)uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
            fgs_info[*handle],0);
+}
+
+void figs_many(const sint *handle, void *u1, void *u2, void *u3,
+              void *u4, void *u5, void *u6, const sint *n,
+              const sint *dom, const sint *op, const sint *transpose,
+	      int *wait)
+{
+  void *uu[6];
+  uu[0]=u1,uu[1]=u2,uu[2]=u3,uu[3]=u4,uu[4]=u5,uu[5]=u6;
+  fgs_check_parms(*handle,*dom,*op,"gs_op_many",__LINE__);
+  cigs_many((void *const*)uu,*n,fgs_dom[*dom],(gs_op_t)(*op-1),*transpose!=0,
+           fgs_info[*handle],0,wait);
+}
+
+void fgs_wait(int *handle)
+{
+  cgs_wait(*handle);
 }
 
 static struct array fgs_fields_array = null_array;
@@ -1284,3 +1622,12 @@ void fgs_free(const sint *handle)
   fgs_info[*handle] = 0;
 }
 
+void fgs_unique(slong id[], const sint *n, const MPI_Fint *c, const sint *np)
+{
+  struct comm *comm;
+  uint un = *n;
+  comm = tmalloc(struct comm, 1);
+  comm_init_check(comm, *c, *np);
+  cgs_unique(id, un, comm);
+  free(comm);
+}

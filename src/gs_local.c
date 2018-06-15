@@ -63,9 +63,9 @@ static void gather_##T##_##OP( \
   const uint *restrict map)                                                  \
 {                                                                            \
   uint i,j;                                                                  \
-  while((i=*map++)!=-(uint)1) {                                              \
+  while((i=*map++)!=UINT_MAX) {                                              \
     T t=out[i];                                                              \
-    j=*map++; do GS_DO_##OP(t,in[j*in_stride]); while((j=*map++)!=-(uint)1); \
+    j=*map++; do GS_DO_##OP(t,in[j*in_stride]); while((j=*map++)!=UINT_MAX); \
     out[i]=t;                                                                \
   }                                                                          \
 }
@@ -80,9 +80,9 @@ static void scatter_##T( \
   const uint *restrict map)                                        \
 {                                                                  \
   uint i,j;                                                        \
-  while((i=*map++)!=-(uint)1) {                                    \
+  while((i=*map++)!=UINT_MAX) {                                    \
     T t=in[i*in_stride];                                           \
-    j=*map++; do out[j*out_stride]=t; while((j=*map++)!=-(uint)1); \
+    j=*map++; do out[j*out_stride]=t; while((j=*map++)!=UINT_MAX); \
   }                                                                \
 }
 
@@ -93,7 +93,7 @@ static void scatter_##T( \
 static void init_##T(T *restrict out, const uint *restrict map, gs_op op) \
 {                                                       \
   uint i; const T e = gs_identity_##T[op];              \
-  while((i=*map++)!=-(uint)1) out[i]=e;                 \
+  while((i=*map++)!=UINT_MAX) out[i]=e;                 \
 }
 
 #define DEFINE_PROCS(T) \
@@ -117,12 +117,12 @@ static void gather_vec_##T##_##OP( \
   const uint *restrict map)                                                  \
 {                                                                            \
   uint i,j;                                                                  \
-  while((i=*map++)!=-(uint)1) {                                              \
+  while((i=*map++)!=UINT_MAX) {                                              \
     T *restrict p = &out[i*vn], *pe = p+vn;                                  \
     j=*map++; do {                                                           \
       const T *restrict q = &in[j*vn];                                       \
       T *restrict pk=p; do { GS_DO_##OP(*pk,*q); ++pk, ++q; } while(pk!=pe); \
-    } while((j=*map++)!=-(uint)1);                                           \
+    } while((j=*map++)!=UINT_MAX);                                           \
   }                                                                          \
 }
 
@@ -135,11 +135,11 @@ void gs_scatter_vec(
 {
   unsigned unit_size = vn*gs_dom_size[dom];
   uint i,j;
-  while((i=*map++)!=-(uint)1) {
+  while((i=*map++)!=UINT_MAX) {
     const char *t = (const char *)in + i*unit_size;
     j=*map++; do
       memcpy((char *)out+j*unit_size,t,unit_size);
-    while((j=*map++)!=-(uint)1);
+    while((j=*map++)!=UINT_MAX);
   }
 }
 
@@ -151,7 +151,7 @@ static void init_vec_##T(T *restrict out, const unsigned vn, \
                          const uint *restrict map, gs_op op) \
 {                                                            \
   uint i; const T e = gs_identity_##T[op];                   \
-  while((i=*map++)!=-(uint)1) {                              \
+  while((i=*map++)!=UINT_MAX) {                              \
     T *restrict u = (T*)out + vn*i, *ue = u+vn;              \
     do *u++ = e; while(u!=ue);                               \
   }                                                          \

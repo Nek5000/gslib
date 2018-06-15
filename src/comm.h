@@ -71,9 +71,10 @@ typedef int comm_req;
 typedef int MPI_Fint;
 #endif
 
-#define comm_allreduce PREFIXED_NAME(comm_allreduce)
-#define comm_scan      PREFIXED_NAME(comm_scan     )
-#define comm_dot       PREFIXED_NAME(comm_dot      )
+#define comm_allreduce  PREFIXED_NAME(comm_allreduce )
+#define comm_iallreduce PREFIXED_NAME(comm_iallreduce)
+#define comm_scan       PREFIXED_NAME(comm_scan      )
+#define comm_dot        PREFIXED_NAME(comm_dot       )
 
 /* global id, np vars strictly for diagnostic messages (fail.c) */
 #ifndef comm_gbl_id
@@ -107,6 +108,8 @@ double comm_dot(const struct comm *comm, double *v, double *w, uint n);
 
 #ifdef GS_DEFS_H
 void comm_allreduce(const struct comm *com, gs_dom dom, gs_op op,
+                          void *v, uint vn, void *buf);
+void comm_iallreduce(comm_req *req, const struct comm *com, gs_dom dom, gs_op op,
                           void *v, uint vn, void *buf);
 void comm_scan(void *scan, const struct comm *com, gs_dom dom, gs_op op,
                const void *v, uint vn, void *buffer);
