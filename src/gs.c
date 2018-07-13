@@ -28,6 +28,7 @@
 #define gs_setup   PREFIXED_NAME(gs_setup )
 #define gs_free    PREFIXED_NAME(gs_free  )
 #define gs_unique  PREFIXED_NAME(gs_unique)
+#define gs_hf2c    PREFIXED_NAME(gs_hf2c  )
 
 GS_DEFINE_DOM_SIZES()
 
@@ -1496,6 +1497,11 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 static struct gs_data **fgs_info = 0;
 static int fgs_max = 0;
 static int fgs_n = 0;
+
+struct gs_data* gs_hf2c(const sint gsh)
+{
+  return fgs_info[gsh];
+}
 
 void fgs_setup_pick(sint *handle, const slong id[], const sint *n,
                     const MPI_Fint *comm, const sint *np, const sint *method)
