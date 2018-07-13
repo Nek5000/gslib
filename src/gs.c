@@ -20,11 +20,12 @@
 #include "sarray_transfer.h"
 
 #define gs         PREFIXED_NAME(gs       )
-#define gs_irecv   PREFIXED_NAME(gs_irecv )
-#define gs_isend   PREFIXED_NAME(gs_isend )
-#define gs_wait    PREFIXED_NAME(gs_wait  )
 #define gs_vec     PREFIXED_NAME(gs_vec   )
 #define gs_many    PREFIXED_NAME(gs_many  )
+#define igs        PREFIXED_NAME(igs      )
+#define igs_vec    PREFIXED_NAME(igs_vec  )
+#define igs_many   PREFIXED_NAME(igs_many )
+#define gs_wait    PREFIXED_NAME(gs_wait  )
 #define gs_setup   PREFIXED_NAME(gs_setup )
 #define gs_free    PREFIXED_NAME(gs_free  )
 #define gs_unique  PREFIXED_NAME(gs_unique)
@@ -1470,16 +1471,21 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
 #undef gs_many
 #undef gs_vec
 #undef gs
-#define cgs       PREFIXED_NAME(gs      )
-#define cgs_vec   PREFIXED_NAME(gs_vec  )
-#define cgs_many  PREFIXED_NAME(gs_many )
-#define cgs_setup PREFIXED_NAME(gs_setup)
-#define cgs_free  PREFIXED_NAME(gs_free )
+#undef igs
+#undef igs_vec
+#undef igs_many
+#undef gs_wait
+
+#define cgs         PREFIXED_NAME(gs      )
+#define cgs_vec     PREFIXED_NAME(gs_vec  )
+#define cgs_many    PREFIXED_NAME(gs_many )
+#define cgs_setup   PREFIXED_NAME(gs_setup)
+#define cgs_free    PREFIXED_NAME(gs_free )
 #define cgs_unique  PREFIXED_NAME(gs_unique)
-#define cigs      PREFIXED_NAME(igs     )
-#define cigs_vec  PREFIXED_NAME(igs_vec )
-#define cigs_many PREFIXED_NAME(igs_many)
-#define cgs_wait  PREFIXED_NAME(gs_wait )
+#define cigs        PREFIXED_NAME(igs     )
+#define cigs_vec    PREFIXED_NAME(igs_vec )
+#define cigs_many   PREFIXED_NAME(igs_many)
+#define cgs_wait    PREFIXED_NAME(gs_wait )
 
 #define fgs_setup_pick FORTRAN_NAME(gs_setup_pick,GS_SETUP_PICK)
 #define fgs_setup      FORTRAN_NAME(gs_setup     ,GS_SETUP     )

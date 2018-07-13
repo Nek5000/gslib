@@ -29,9 +29,6 @@ env:
     - TEST=sarray_transfer_test    NP=2
     - TEST=sort_test               NP=2
     - TEST=sort_test2              NP=2
-    - TEST=spchol_test             NP=2
-    - TEST=xxt_test                NP=3
-    - TEST=xxt_test2               NP=2
 
 install: true
 
