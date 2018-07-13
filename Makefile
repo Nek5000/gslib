@@ -65,9 +65,11 @@ LINKCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G) $^ -o $@ -L$(SRCDIR) \
         -l$(LIBNAME) -lm $(LDFLAGS)
 
 TESTS=$(TESTDIR)/sort_test $(TESTDIR)/sort_test2 $(TESTDIR)/sarray_sort_test \
+      $(TESTDIR)/comm_test $(TESTDIR)/crystal_test \
       $(TESTDIR)/sarray_transfer_test $(TESTDIR)/gs_test \
       $(TESTDIR)/gs_test_gop_blocking $(TESTDIR)/gs_test_gop_nonblocking \
       $(TESTDIR)/gs_unique_test $(TESTDIR)/gs_test_old \
+      $(TESTDIR)/findpts_el_2_test \
       $(TESTDIR)/findpts_el_2_test2 $(TESTDIR)/findpts_el_3_test \
       $(TESTDIR)/findpts_el_3_test2 $(TESTDIR)/findpts_local_test \
       $(TESTDIR)/findpts_test $(TESTDIR)/poly_test \

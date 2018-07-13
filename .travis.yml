@@ -7,8 +7,6 @@ before_install:
 
 env:
   matrix:
-    - TEST=comm_test               NP=2
-    - TEST=crs_test                NP=2
     - TEST=crystal_test            NP=2
     - TEST=findpts_el_2_test       NP=2
     - TEST=findpts_el_2_test2      NP=2
