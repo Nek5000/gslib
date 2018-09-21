@@ -32,5 +32,5 @@ install: true
 
 script:
   - cd $ROOT_DIR
-  - make NBC=1 tests/$TEST
+  - make NBC=1 CC=mpicc tests/$TEST
   - mpiexec -np $NP ./tests/$TEST
