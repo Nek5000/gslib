@@ -2,6 +2,7 @@ MPI ?= 1
 MPIIO ?= 1
 ADDUS ?= 1
 USREXIT ?= 0
+NBC ?= 0
 LIBNAME ?= gs
 BLAS ?= 0
 CFLAGS ?= -O2
@@ -22,6 +23,12 @@ endif
 
 ifneq (0,$(MPI))
   G+=-DMPI
+  ifeq ($(origin CC),default)
+    CC = mpicc
+  endif
+  ifeq ($(origin FC),default)
+    FC = mpif77
+  endif
 endif
 
 ifneq (0,$(MPIIO))
@@ -36,6 +43,10 @@ endif
 
 ifneq (0,$(USREXIT))
   G+=-DUSE_USR_EXIT
+endif
+
+ifneq (0,$(NBC))
+  G+=-DUSE_NBC
 endif
 
 ifeq (0,$(BLAS))
@@ -99,7 +110,7 @@ install: lib
 
 tests: $(TESTS) $(FTESTS)
 
-clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTS) $(TESTS)/*.o $(FTESTS) $(FTESTS)/*.o
+clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 
