@@ -2,6 +2,7 @@ MPI ?= 1
 MPIIO ?= 1
 ADDUS ?= 1
 USREXIT ?= 0
+NBC ?= 0
 LIBNAME ?= gs
 BLAS ?= 0
 CFLAGS ?= -O2
@@ -22,6 +23,12 @@ endif
 
 ifneq (0,$(MPI))
   G+=-DMPI
+  ifeq ($(origin CC),default)
+    CC = mpicc
+  endif
+  ifeq ($(origin FC),default)
+    FC = mpif77
+  endif
 endif
 
 ifneq (0,$(MPIIO))
@@ -36,6 +43,10 @@ endif
 
 ifneq (0,$(USREXIT))
   G+=-DUSE_USR_EXIT
+endif
+
+ifneq (0,$(NBC))
+  G+=-DUSE_NBC
 endif
 
 ifeq (0,$(BLAS))
@@ -65,12 +76,11 @@ LINKCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G) $^ -o $@ -L$(SRCDIR) \
         -l$(LIBNAME) -lm $(LDFLAGS)
 
 TESTS=$(TESTDIR)/sort_test $(TESTDIR)/sort_test2 $(TESTDIR)/sarray_sort_test \
-      $(TESTDIR)/spchol_test $(TESTDIR)/comm_test $(TESTDIR)/crystal_test \
+      $(TESTDIR)/comm_test $(TESTDIR)/crystal_test \
       $(TESTDIR)/sarray_transfer_test $(TESTDIR)/gs_test \
       $(TESTDIR)/gs_test_gop_blocking $(TESTDIR)/gs_test_gop_nonblocking \
-      $(TESTDIR)/gs_unique_test \
-      $(TESTDIR)/xxt_test $(TESTDIR)/xxt_test2 \
-      $(TESTDIR)/crs_test $(TESTDIR)/findpts_el_2_test \
+      $(TESTDIR)/gs_unique_test $(TESTDIR)/gs_test_old \
+      $(TESTDIR)/findpts_el_2_test \
       $(TESTDIR)/findpts_el_2_test2 $(TESTDIR)/findpts_el_3_test \
       $(TESTDIR)/findpts_el_3_test2 $(TESTDIR)/findpts_local_test \
       $(TESTDIR)/findpts_test $(TESTDIR)/poly_test \
@@ -82,9 +92,7 @@ GS=$(SRCDIR)/gs.o $(SRCDIR)/sort.o $(SRCDIR)/sarray_transfer.o \
    $(SRCDIR)/sarray_sort.o $(SRCDIR)/gs_local.o $(SRCDIR)/fail.o \
    $(SRCDIR)/crystal.o $(SRCDIR)/comm.o $(SRCDIR)/tensor.o
 
-XXT=$(SRCDIR)/sparse_cholesky.o $(SRCDIR)/xxt.o
-AMG=$(SRCDIR)/amg.o
-FWRAPPER=$(SRCDIR)/fcrystal.o $(SRCDIR)/fcrs.o $(SRCDIR)/findpts.o
+FWRAPPER=$(SRCDIR)/fcrystal.o $(SRCDIR)/findpts.o
 INTP=$(SRCDIR)/findpts_local.o $(SRCDIR)/obbox.o $(SRCDIR)/poly.o \
      $(SRCDIR)/lob_bnd.o $(SRCDIR)/findpts_el_3.o $(SRCDIR)/findpts_el_2.o
 
@@ -92,7 +100,7 @@ INTP=$(SRCDIR)/findpts_local.o $(SRCDIR)/obbox.o $(SRCDIR)/poly.o \
 
 all : lib tests
 
-lib: $(GS) $(XXT) $(AMG) $(FWRAPPER) $(INTP) $(SRCDIR)/rand_elt_test.o
+lib: $(GS) $(FWRAPPER) $(INTP) $(SRCDIR)/rand_elt_test.o
 	@$(AR) cr $(SRCDIR)/lib$(LIBNAME).a $?
 	@ranlib $(SRCDIR)/lib$(LIBNAME).a
 
@@ -102,7 +110,7 @@ install: lib
 
 tests: $(TESTS) $(FTESTS)
 
-clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTS) $(FTESTS)
+clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 
