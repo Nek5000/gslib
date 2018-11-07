@@ -103,8 +103,12 @@ static void comm_irecv(comm_req *req, const struct comm *c,
 static void comm_isend(comm_req *req, const struct comm *c,
                        void *p, size_t n, uint dst, int tag);
 static void comm_wait(comm_req *req, int n);
-
-double comm_dot(const struct comm *comm, double *v, double *w, uint n);
+static void comm_bcast(const struct comm *c, void *p, size_t n,
+		       uint root);
+double comm_dot(const struct comm *comm, double *v, double *w,
+		uint n);
+static void comm_gather(const struct comm *c, void *out, size_t out_n,
+		        void *in, size_t in_n, uint root);
 
 #ifdef GS_DEFS_H
 void comm_allreduce(const struct comm *com, gs_dom dom, gs_op op,
@@ -256,4 +260,11 @@ static void comm_bcast(const struct comm *c, void *p, size_t n, uint root)
 #endif
 }
 
+static void comm_gather(const struct comm *c, void *out, size_t out_n,
+		void *in, size_t in_n, uint root)
+{
+#ifdef MPI
+  MPI_Gather(out,out_n,MPI_UNSIGNED_CHAR,in,in_n,MPI_UNSIGNED_CHAR,root,c->c);
+#endif
+}
 #endif
