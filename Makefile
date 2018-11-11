@@ -5,6 +5,7 @@ USREXIT ?= 0
 NBC ?= 0
 LIBNAME ?= gs
 BLAS ?= 0
+DEBUG ?= 0
 CFLAGS ?= -O2
 FFLAGS ?= -O2
 
@@ -55,6 +56,11 @@ endif
 
 ifeq (1,$(BLAS))
   G+=-DUSE_CBLAS
+endif
+
+ifneq (0,$(DEBUG))
+  G+=-DGSLIB_DEBUG
+  CFLAGS+=-g
 endif
 
 ifneq ($(PREFIX),)

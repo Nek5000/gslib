@@ -8,6 +8,8 @@
      "gs_defs.h"           for comm_allreduce, comm_scan, comm_reduce_T
 */
 
+#include <assert.h>
+#include <string.h>
 #if !defined(FAIL_H) || !defined(TYPES_H)
 #warning "comm.h" requires "fail.h" and "types.h"
 #endif
@@ -265,6 +267,9 @@ static void comm_gather(const struct comm *c, void *out, size_t out_n,
 {
 #ifdef MPI
   MPI_Gather(out,out_n,MPI_UNSIGNED_CHAR,in,in_n,MPI_UNSIGNED_CHAR,root,c->c);
+#else
+  assert(out_n == in_n);
+  memcpy(in,out,out_n);
 #endif
 }
 #endif
