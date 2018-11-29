@@ -12,6 +12,7 @@
 #include "poly.h"
 #include "gs_defs.h"
 #include "comm.h"
+#include "lob_bnd.h"
 #include "rand_elt_test.h"
 #include "findpts.h"
 #include "crystal.h"

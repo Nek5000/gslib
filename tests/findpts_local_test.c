@@ -13,6 +13,7 @@
 #include "obbox.h"
 #include "findpts_el.h"
 #include "findpts_local.h"
+#include "lob_bnd.h"
 #include "rand_elt_test.h"
 
 #define D 3

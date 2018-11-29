@@ -63,6 +63,3 @@ All of the preprocessor macros that affect compilation are:
                 otherwise, use a dummy single-proc implementation)
   tensor.h: USE_CBLAS, USE_NAIVE_BLAS
             (select BLAS implementation; default is Nek's mxm)
-  amg.c: AMG_BLOCK_ROWS   number of rows to read at a time (default=1200)
-         GS_TIMING        record timings for the matrix multiplies
-         GS_BARRIER       use a barrier to improve the quality of the timings

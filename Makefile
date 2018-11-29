@@ -102,11 +102,12 @@ FWRAPPER=$(SRCDIR)/fcrystal.o $(SRCDIR)/findpts.o
 INTP=$(SRCDIR)/findpts_local.o $(SRCDIR)/obbox.o $(SRCDIR)/poly.o \
      $(SRCDIR)/lob_bnd.o $(SRCDIR)/findpts_el_3.o $(SRCDIR)/findpts_el_2.o
 
-.PHONY: all lib install deps tests clean objects odepinfo
+.PHONY: all lib install tests clean objects
 
 all : lib tests
 
-lib: $(GS) $(FWRAPPER) $(INTP) $(SRCDIR)/rand_elt_test.o
+#lib: $(GS) $(FWRAPPER) $(INTP) $(SRCDIR)/rand_elt_test.o
+lib: $(GS) $(FWRAPPER) $(INTP)
 	@$(AR) cr $(SRCDIR)/lib$(LIBNAME).a $?
 	@ranlib $(SRCDIR)/lib$(LIBNAME).a
 
@@ -114,15 +115,11 @@ install: lib
 	@mkdir -p $(INSTALL_ROOT) 2>/dev/null
 	@cp -v $(SRCDIR)/lib$(LIBNAME).a $(INSTALL_ROOT) 2>/dev/null
 
-tests: $(TESTS) $(FTESTS)
+tests: $(TESTS)
 
 clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
-
-deps: ; ./cdep.py *.c > makefile.cdep;
-
-odepinfo: deps objects; @./odep_info.py *.o
 
 $(TESTS): % : %.o | lib
 	$(LINKCMD)
@@ -130,15 +127,7 @@ $(TESTS): % : %.o | lib
 $(FTESTS): % : %.o | lib
 	$(FCCMD) $^ -o $@ -L$(SRCDIR) -l$(LIBNAME)
 
--include makefile.cdep
-
 %.o: %.c ; $(CCCMD) -c $< -o $@
 %.o: %.f ; $(FCCMD) -c $< -o $@
 %.s: %.c ; $(CCCMD) -S $< -o $@
 objects: $(OBJECTS) ;
-
-#poly_imp.h: gen_poly_imp.c
-#	$(RM) poly_imp.h;
-#	$(CC) -lgmp -lm gen_poly_imp.c -o gen_poly_imp;
-#	./gen_poly_imp > poly_imp.h;
-#	$(RM) gen_poly_imp
