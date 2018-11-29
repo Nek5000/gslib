@@ -21,6 +21,7 @@
 #  include <mpi.h>
 #else
    typedef void MPI_Comm;
+   typedef int MPI_Fint;
 #endif
 #include "name.h"
 #include "types.h"
@@ -62,6 +63,7 @@ int main(int narg, char* arg[])
   slong *glindex;
 #ifndef MPI
   int comm;
+  int fcomm;
 #else
   MPI_Init(&narg,&arg);
   MPI_Comm comm;

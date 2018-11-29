@@ -5,6 +5,7 @@ USREXIT ?= 0
 NBC ?= 0
 LIBNAME ?= gs
 BLAS ?= 0
+DEBUG ?= 0
 CFLAGS ?= -O2
 FFLAGS ?= -O2
 
@@ -57,6 +58,11 @@ ifeq (1,$(BLAS))
   G+=-DUSE_CBLAS
 endif
 
+ifneq (0,$(DEBUG))
+  G+=-DGSLIB_DEBUG
+  CFLAGS+=-g
+endif
+
 ifneq ($(PREFIX),)
   G+=-DPREFIX=$(PREFIX)
 endif
@@ -70,7 +76,7 @@ G+=-DGLOBAL_LONG_LONG
 #G+=-DGS_TIMING -DGS_BARRIER
 
 CCCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G)
-FCCMD=$(FC) $(FFLAGS)
+FCCMD=$(FC) $(FFLAGS) -I$(INCDIR) $(G)
 
 LINKCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G) $^ -o $@ -L$(SRCDIR) \
         -l$(LIBNAME) -lm $(LDFLAGS)
