@@ -11,8 +11,9 @@ The build system relies on GNU Make with the `make` command. To compile gslib ju
 
 ```
 make
-make PREFIX=<install path> install
 ```
+
+Different make options are available (see Makefile).
 
 # Applications
 

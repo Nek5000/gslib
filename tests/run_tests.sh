@@ -6,7 +6,7 @@ np="1 2 3 4"
 
 # Build the tests if they have not been built
 # before.
-make -C .. CC=mpicc CFLAGS="-O2 -g" tests
+make -j -C .. CC=mpicc CFLAGS="-g" NBC=1 tests
 
 for i in *.o fortran/*.o; do
   j=${i%.*}

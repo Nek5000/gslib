@@ -15,9 +15,6 @@ The following headers are fundamental to most of the code.
 The Gather/Scatter library top-level interface is defined in "gs.h".
 The file "gs_defs.h" defines the datatypes and operations that it supports.
 
-There are two coarse solvers (XXT and AMG), which are not currently very well
-documented. The interface is given in "crs.h". 
- 
 "findpts" is documented in "findpts.c". The idea is that during a run of an
 SEM code, we have a geometry map
   (processor, element, r, s, t) -> (x, y, z)

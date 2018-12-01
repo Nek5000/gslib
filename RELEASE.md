@@ -7,6 +7,7 @@
 * Added gs_hf2c to convert Fortran into C handle
 
 ## Backwards-Incompatible Changes
+* Prefixed all functions by default (see make variables PREFIX and FPREFIX)
 * Removed XXT and AMG solver from distribution
 * Non-blocking MPI collectives (NBC) require MPI > v3.x 
 

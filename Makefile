@@ -8,6 +8,8 @@ BLAS ?= 0
 DEBUG ?= 0
 CFLAGS ?= -O2
 FFLAGS ?= -O2
+PREFIX ?= gslib_
+FPREFIX ?= fgslib_
 
 SRCROOT=.
 TESTDIR=$(SRCROOT)/tests
@@ -16,10 +18,10 @@ SRCDIR=$(SRCROOT)/src
 INCDIR=$(SRCROOT)/src
 LIBDIR=$(SRCROOT)/lib
 
-ifneq (,$(strip $(PREFIX)))
-INSTALL_ROOT = $(PREFIX)
+ifneq (,$(strip $(DESTDIR)))
+INSTALL_ROOT = $(DESTDIR)
 else
-INSTALL_ROOT = $(LIBDIR)
+INSTALL_ROOT = $(SRCROOT)/build
 endif
 
 ifneq (0,$(MPI))
@@ -63,13 +65,8 @@ ifneq (0,$(DEBUG))
   CFLAGS+=-g
 endif
 
-ifneq ($(PREFIX),)
-  G+=-DPREFIX=$(PREFIX)
-endif
-
-ifneq ($(FPREFIX),)
-  G+=-DFPREFIX=$(FPREFIX)
-endif
+G+=-DPREFIX=$(PREFIX)
+G+=-DFPREFIX=$(FPREFIX)
 
 G+=-DGLOBAL_LONG_LONG
 #G+=-DPRINT_MALLOCS=1
@@ -104,20 +101,21 @@ INTP=$(SRCDIR)/findpts_local.o $(SRCDIR)/obbox.o $(SRCDIR)/poly.o \
 
 .PHONY: all lib install tests clean objects
 
-all : lib tests
+all : lib install
 
-#lib: $(GS) $(FWRAPPER) $(INTP) $(SRCDIR)/rand_elt_test.o
 lib: $(GS) $(FWRAPPER) $(INTP)
 	@$(AR) cr $(SRCDIR)/lib$(LIBNAME).a $?
 	@ranlib $(SRCDIR)/lib$(LIBNAME).a
 
 install: lib
-	@mkdir -p $(INSTALL_ROOT) 2>/dev/null
-	@cp -v $(SRCDIR)/lib$(LIBNAME).a $(INSTALL_ROOT) 2>/dev/null
+	@mkdir -p $(INSTALL_ROOT)/lib 2>/dev/null
+	@cp -v $(SRCDIR)/lib$(LIBNAME).a $(INSTALL_ROOT)/lib 2>/dev/null
+	@mkdir -p $(INSTALL_ROOT)/include 2>/dev/null
+	@cp $(SRCDIR)/*.h $(INSTALL_ROOT)/include 2>/dev/null
 
 tests: $(TESTS)
 
-clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o
+clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o $(TESTS)
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 
