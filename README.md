@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/gslib/gslib.svg?branch=master)](https://travis-ci.org/gslib/gslib)
 
-* Scalable Many-to-Many (sparse) collectives
+* Scalable Many-to-Many (sparse) gather-scatter collectives
 * Robust interpolation for hexahedral spectral element meshes
 
 # Build Instructions
