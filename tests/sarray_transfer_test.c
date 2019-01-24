@@ -1,17 +1,4 @@
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "c99.h"
-#include "name.h"
-#include "fail.h"
-#include "types.h"
-#include "comm.h"
-#include "mem.h"
-#include "sort.h"
-#include "sarray_sort.h"
-#include "crystal.h"
-#include "sarray_transfer.h"
+#include "gslib.h"
 
 typedef struct {
   double d;
