@@ -1428,6 +1428,7 @@ static void gs_setup_aux(struct gs_data *gsh, const slong *id, uint n,
 
   gs_topology_free(&top);
   crystal_free(&cr);
+  fflush(stdout);
 }
 
 struct gs_data *gs_setup(const slong *id, uint n, const struct comm *comm,
