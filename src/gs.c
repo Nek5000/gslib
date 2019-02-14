@@ -30,6 +30,8 @@
 #define gs_free    PREFIXED_NAME(gs_free  )
 #define gs_unique  PREFIXED_NAME(gs_unique)
 #define gs_hf2c    PREFIXED_NAME(gs_hf2c  )
+#define pw_data_nmsg PREFIXED_NAME(pw_data_nmsg )
+#define pw_data_size PREFIXED_NAME(pw_data_size )
 
 GS_DEFINE_DOM_SIZES()
 
@@ -398,6 +400,7 @@ typedef void setup_fun(struct gs_remote *r, struct gs_topology *top,
 /*------------------------------------------------------------------------------
   Pairwise Execution
 ------------------------------------------------------------------------------*/
+
 struct pw_comm_data {
   uint n;      /* number of messages */
   uint *p;     /* message source/dest proc */
@@ -1411,6 +1414,7 @@ static void gs_setup_aux(struct gs_data *gsh, const slong *id, uint n,
   gsh->handle_size += gsh->r.mem_size;
 
   if(verbose) { /* report memory usage */
+
     double avg[2],td[2]; uint min[2],max[2],ti[2];
     avg[0] = min[0] = max[0] = gsh->handle_size;
     avg[1] = min[1] = max[1] = sizeof(double)*gsh->r.buffer_size;
@@ -1458,6 +1462,22 @@ void gs_unique(slong *id, uint n, const struct comm *comm)
   make_topology_unique(&top,id,comm->id,&cr.data);
   gs_topology_free(&top);
   crystal_free(&cr);
+}
+
+void pw_data_nmsg(struct gs_data *gsh, int *n)
+{
+  struct gs_remote *r = &gsh->r;
+  const struct pw_data *pwd = r->data;
+  *n = pwd->comm[0].n;
+}
+
+void pw_data_size(struct gs_data *gsh, int *n)
+{
+  int i;
+  struct gs_remote *r = &gsh->r;
+  const struct pw_data *pwd = r->data;
+  int ns = pwd->comm[0].n;
+  for(i=0; i< ns; ++i) n[i] = pwd->comm[0].size[i];
 }
 
 /*------------------------------------------------------------------------------
