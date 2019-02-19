@@ -4,19 +4,8 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
-#include "c99.h"
-#include "name.h"
-#include "fail.h"
-#include "types.h"
-#include "mem.h"
-#include "poly.h"
-#include "gs_defs.h"
-#include "comm.h"
-#include "lob_bnd.h"
+#include "gslib.h"
 #include "rand_elt_test.h"
-#include "findpts.h"
-#include "crystal.h"
-#include "sarray_transfer.h"
 
 #define D 3
 

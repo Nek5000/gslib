@@ -1,3 +1,6 @@
+#ifndef GSLIB_H
+#define GSLIB_H
+
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -19,6 +22,15 @@ extern "C" {
 #include "sort.h"
 #include "sarray_sort.h"
 #include "sarray_transfer.h"
+#include "tensor.h"
+#include "poly.h"
+#include "lob_bnd.h"
+#include "obbox.h"
+#include "findpts.h"
+#include "findpts_el.h"
+#include "findpts_local.h"
 #ifdef __cplusplus
 }
+#endif
+
 #endif

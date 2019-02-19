@@ -1,11 +1,4 @@
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "name.h"
-#include "fail.h"
-#include "types.h"
-#include "gs_defs.h"
-#include "comm.h"
+#include "gslib.h"
 
 int main(int narg, char *arg[])
 {

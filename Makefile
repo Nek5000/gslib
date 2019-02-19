@@ -63,7 +63,9 @@ ifneq (0,$(NBC))
 endif
 
 ifeq (0,$(BLAS))
-  G+=-DUSE_NAIVE_BLAS
+  SN=USE_NAIVE_BLAS
+  G:=$(G) -D$(SN)
+  $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
 endif
 
 ifeq (1,$(BLAS))
@@ -78,14 +80,11 @@ endif
 CCCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G)
 FCCMD=$(FC) $(FFLAGS) -I$(INCDIR) $(G)
 
-LINKCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G) $^ -o $@ -L$(SRCDIR) \
-        -l$(LIBNAME) -lm $(LDFLAGS)
-
 TESTS=$(TESTDIR)/sort_test $(TESTDIR)/sort_test2 $(TESTDIR)/sarray_sort_test \
       $(TESTDIR)/comm_test $(TESTDIR)/crystal_test \
       $(TESTDIR)/sarray_transfer_test $(TESTDIR)/gs_test \
       $(TESTDIR)/gs_test_gop_blocking $(TESTDIR)/gs_test_gop_nonblocking \
-      $(TESTDIR)/gs_unique_test $(TESTDIR)/gs_test_old \
+      $(TESTDIR)/gs_unique_test \
       $(TESTDIR)/findpts_el_2_test \
       $(TESTDIR)/findpts_el_2_test2 $(TESTDIR)/findpts_el_3_test \
       $(TESTDIR)/findpts_el_3_test2 $(TESTDIR)/findpts_local_test \
@@ -122,12 +121,10 @@ tests: $(TESTS)
 
 clean: ; @$(RM) config.h $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o $(TESTS)
 
-cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
+$(TESTS): % : %.c | lib install
+	$(CC) $(CFLAGS) -I$(INSTALL_ROOT)/include $< -o $@ -L$(INSTALL_ROOT)/lib -l$(LIBNAME) -lm $(LDFLAGS) 
 
-$(TESTS): % : %.o | lib
-	$(LINKCMD)
-
-$(FTESTS): % : %.o | lib
+$(FTESTS): % : %.o | lib install
 	$(FCCMD) $^ -o $@ -L$(SRCDIR) -l$(LIBNAME)
 
 %.o: %.c ; $(CCCMD) -c $< -o $@

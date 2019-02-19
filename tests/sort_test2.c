@@ -3,16 +3,9 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-#include "c99.h"
-#include "name.h"
-#include "fail.h"
-#include "types.h"
-#include "mem.h"
-#include "sort.h"
-#include "sarray_sort.h"
-
 #include <math.h>
 #include <assert.h>
+#include "gslib.h"
 
 #if 1
 
