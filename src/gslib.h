@@ -2,6 +2,11 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "config.h"
 #include "c99.h"
 #include "name.h"
 #include "fail.h"
@@ -14,3 +19,6 @@
 #include "sort.h"
 #include "sarray_sort.h"
 #include "sarray_transfer.h"
+#ifdef __cplusplus
+}
+#endif

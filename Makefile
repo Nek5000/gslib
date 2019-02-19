@@ -1,5 +1,4 @@
 MPI ?= 1
-MPIIO ?= 1
 ADDUS ?= 1
 USREXIT ?= 0
 NBC ?= 0
@@ -8,7 +7,7 @@ BLAS ?= 0
 DEBUG ?= 0
 CFLAGS ?= -O2
 FFLAGS ?= -O2
-PREFIX ?= gslib_
+CPREFIX ?= gslib_
 FPREFIX ?= fgslib_
 
 SRCROOT=.
@@ -24,25 +23,36 @@ else
 INSTALL_ROOT = $(SRCROOT)/build
 endif
 
+$(shell >config.h)
 ifneq (0,$(MPI))
-  G+=-DMPI
+  SN=MPI
+  G:=$(G) -D$(SN)
   ifeq ($(origin CC),default)
     CC = mpicc
   endif
   ifeq ($(origin FC),default)
     FC = mpif77
   endif
-endif
-
-ifneq (0,$(MPIIO))
-  ifneq (0,$(MPI))
-    G+=-DUSEMPIIO
-  endif
+  $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
 endif
 
 ifneq (0,$(ADDUS))
-  G+=-DUNDERSCORE
+  SN=UNDERSCORE
+  G:=$(G) -D$(SN)
+  $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
 endif
+
+SN=GLOBAL_LONG_LONG
+G:=$(G) -D$(SN)
+$(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
+
+SN=PREFIX
+G:=$(G) -D$(SN)=$(CPREFIX)
+$(shell printf "#ifndef ${SN}\n#define ${SN} ${CPREFIX}\n#endif\n" >>config.h)
+
+SN=FPREFIX
+G:=$(G) -D$(SN)=$(FPREFIX)
+$(shell printf "#ifndef ${SN}\n#define ${SN} ${FPREFIX}\n#endif\n" >>config.h)
 
 ifneq (0,$(USREXIT))
   G+=-DUSE_USR_EXIT
@@ -64,13 +74,6 @@ ifneq (0,$(DEBUG))
   G+=-DGSLIB_DEBUG
   CFLAGS+=-g
 endif
-
-G+=-DPREFIX=$(PREFIX)
-G+=-DFPREFIX=$(FPREFIX)
-
-G+=-DGLOBAL_LONG_LONG
-#G+=-DPRINT_MALLOCS=1
-#G+=-DGS_TIMING -DGS_BARRIER
 
 CCCMD=$(CC) $(CFLAGS) -I$(INCDIR) $(G)
 FCCMD=$(FC) $(FFLAGS) -I$(INCDIR) $(G)
@@ -112,10 +115,12 @@ install: lib
 	@cp -v $(SRCDIR)/lib$(LIBNAME).a $(INSTALL_ROOT)/lib 2>/dev/null
 	@mkdir -p $(INSTALL_ROOT)/include 2>/dev/null
 	@cp $(SRCDIR)/*.h $(INSTALL_ROOT)/include 2>/dev/null
+	@cp $(SRCDIR)/*.h $(INSTALL_ROOT)/include 2>/dev/null
+	@mv config.h $(INSTALL_ROOT)/include 2>/dev/null
 
 tests: $(TESTS)
 
-clean: ; @$(RM) $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o $(TESTS)
+clean: ; @$(RM) config.h $(SRCDIR)/*.o $(SRCDIR)/*.s $(SRCDIR)/*.a $(TESTDIR)/*.o $(FTESTDIR)/*.o $(TESTS)
 
 cmds: ; @echo CC = $(CCCMD); echo LINK = $(LINKCMD);
 

@@ -2,15 +2,15 @@
 
 [![Build Status](https://travis-ci.org/gslib/gslib.svg?branch=master)](https://travis-ci.org/gslib/gslib)
 
-* Scalable Many-to-Many (sparse) gather-scatter collectives
-* Robust interpolation for hexahedral spectral element meshes
+* Scalable Many-to-Many (neighborhood) gather-scatter collectives
+* Robust GLL interpolation on hexahedral spectral element meshes
 
 # Build Instructions
 
 The build system relies on GNU Make with the `make` command. To compile gslib just run:
 
 ```
-make
+make CC=mpicc
 ```
 
 Different make options are available (see Makefile).
