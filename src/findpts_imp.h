@@ -1,7 +1,7 @@
-
+#include <stdio.h>
 #define obbox           TOKEN_PASTE(obbox_,D)
-#define local_hash_data TOKEN_PASTE(findpts_local_hash_data_,D)
-#define hash_data       TOKEN_PASTE(findpts_hash_data_,D)
+#define local_hash_data TOKEN_PASTE(findptsms_local_hash_data_,D)
+#define hash_data       TOKEN_PASTE(findptsms_hash_data_,D)
 #define hash_index      TOKEN_PASTE(hash_index_       ,D)
 #define hash_setfac     TOKEN_PASTE(hash_setfac_      ,D)
 #define hash_range      TOKEN_PASTE(hash_range_       ,D)
@@ -12,21 +12,21 @@
 #define hash_build      TOKEN_PASTE(hash_build_       ,D)
 #define hash_free       TOKEN_PASTE(hash_free_        ,D)
 
-#define findpts_local_data  TOKEN_PASTE(findpts_local_data_,D)
-#define findpts_local_setup TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
-#define findpts_local_free  TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
-#define findpts_local       TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
-#define findpts_local_eval  TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
-#define findpts_data        TOKEN_PASTE(findpts_data_,D)
+#define findptsms_local_data  TOKEN_PASTE(findptsms_local_data_,D)
+#define findptsms_local_setup TOKEN_PASTE(PREFIXED_NAME(findptsms_local_setup_),D)
+#define findptsms_local_free  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_free_ ),D)
+#define findptsms_local       TOKEN_PASTE(PREFIXED_NAME(findptsms_local_      ),D)
+#define findptsms_local_eval  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_eval_ ),D)
+#define findptsms_data        TOKEN_PASTE(findptsms_data_,D)
 #define src_pt              TOKEN_PASTE(src_pt_      ,D)
 #define out_pt              TOKEN_PASTE(out_pt_      ,D)
 #define eval_src_pt         TOKEN_PASTE(eval_src_pt_ ,D)
 #define eval_out_pt         TOKEN_PASTE(eval_out_pt_ ,D)
-#define setup_aux           TOKEN_PASTE(setup_aux_,D)
-#define findpts_setup       TOKEN_PASTE(PREFIXED_NAME(findpts_setup_),D)
-#define findpts_free        TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
-#define findpts             TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
-#define findpts_eval        TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
+#define setupms_aux           TOKEN_PASTE(setupms_aux_,D)
+#define findptsms_setup       TOKEN_PASTE(PREFIXED_NAME(findptsms_setup_),D)
+#define findptsms_free        TOKEN_PASTE(PREFIXED_NAME(findptsms_free_ ),D)
+#define findptsms             TOKEN_PASTE(PREFIXED_NAME(findptsms_      ),D)
+#define findptsms_eval        TOKEN_PASTE(PREFIXED_NAME(findptsms_eval_ ),D)
 
 struct hash_data {
   ulong hash_n;
@@ -184,7 +184,7 @@ static void hash_build(struct hash_data *const p,
   set_local_mask(local_mask,local_base,local_n,p,obb,nel);
   nc=count_bits(local_mask,(local_ntot+CHAR_BIT-1)/CHAR_BIT);
   #ifdef DIAGNOSTICS
-  printf("findpts_hash(%u): local cells : %u / %u\n",cr->comm.id,nc,local_ntot);
+  printf("findptsms_hash(%u): local cells : %u / %u\n",cr->comm.id,nc,local_ntot);
   #endif
   array_init(struct proc_index,&hash,nc), hash.n=nc;
   fill_hash(&hash,local_mask,local_base,local_n,p->hash_n,cr->comm.np);
@@ -196,92 +196,107 @@ static void hash_build(struct hash_data *const p,
 
 static void hash_free(struct hash_data *p) { free(p->offset); }
 
-struct findpts_data {
+struct findptsms_data {
   struct crystal cr;
-  struct findpts_local_data local;
+  struct findptsms_local_data local;
   struct hash_data hash;
 };
 
-static void setup_aux(
-  struct findpts_data *const fd,
+static void setupms_aux(
+  struct findptsms_data *const fd,
   const double *const elx[D],
   const unsigned n[D], const uint nel,
   const unsigned m[D], const double bbox_tol,
   const uint local_hash_size, const uint global_hash_size,
-  const unsigned npt_max, const double newt_tol)
+  const unsigned npt_max, const double newt_tol,
+  const uint *const nsid, const double *const distfint, const bool ifms
+  )
 {
-  findpts_local_setup(&fd->local,elx,n,nel,m,bbox_tol,local_hash_size,
-                      npt_max, newt_tol);
+  findptsms_local_setup(&fd->local,elx,nsid,distfint,n,nel,m,bbox_tol,local_hash_size,
+                      npt_max, newt_tol,ifms);
   hash_build(&fd->hash,&fd->local.hd,fd->local.obb,nel,
              global_hash_size,&fd->cr);
 }
 
-struct findpts_data *findpts_setup(
+struct findptsms_data *findptsms_setup(
   const struct comm *const comm,
   const double *const elx[D],
   const unsigned n[D], const uint nel,
   const unsigned m[D], const double bbox_tol,
   const uint local_hash_size, const uint global_hash_size,
-  const unsigned npt_max, const double newt_tol)
+  const unsigned npt_max, const double newt_tol, 
+  const uint *const nsid, const double *const distfint,const bool ifms)
 {
-  struct findpts_data *const fd = tmalloc(struct findpts_data, 1);
+  struct findptsms_data *const fd = tmalloc(struct findptsms_data, 1);
   crystal_init(&fd->cr,comm);
-  setup_aux(fd,elx,n,nel,m,bbox_tol,
-            local_hash_size,global_hash_size,npt_max,newt_tol);
+  setupms_aux(fd,elx,n,nel,m,bbox_tol,
+            local_hash_size,global_hash_size,npt_max,newt_tol,nsid, distfint,ifms);
   return fd;
 }
 
-void findpts_free(struct findpts_data *fd)
+void findptsms_free(struct findptsms_data *fd)
 {
   hash_free(&fd->hash);
-  findpts_local_free(&fd->local);
+  findptsms_local_free(&fd->local);
   crystal_free(&fd->cr);
   free(fd);
 }
 
-struct src_pt { double x[D]; uint index, proc; };
-struct out_pt { double r[D], dist2; uint index, code, el, proc; };
+struct src_pt { double x[D]; uint index, proc, session_id; };
+struct out_pt { double r[D], dist2, disti; uint index, code, el, proc, elsid; };
 
-void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
+void findptsms(      uint   *const  code_base   , const unsigned  code_stride   ,
                    uint   *const  proc_base   , const unsigned  proc_stride   ,
                    uint   *const    el_base   , const unsigned    el_stride   ,
                    double *const     r_base   , const unsigned     r_stride   ,
                    double *const dist2_base   , const unsigned dist2_stride   ,
              const double *const     x_base[D], const unsigned     x_stride[D],
-             const uint npt, struct findpts_data *const fd)
+             const uint   *const  session_id_base, const unsigned session_id_stride,
+                   double *const disti_base   , const unsigned disti_stride   ,
+                   uint   *const elsid_base   , const unsigned elsid_stride   ,
+             const uint npt, struct findptsms_data *const fd)
 {
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
   struct array hash_pt, src_pt, out_pt;
   /* look locally first */
-  if(npt) findpts_local( code_base, code_stride,
+  if(npt) findptsms_local( code_base, code_stride,
                            el_base,   el_stride,
                             r_base,    r_stride,
                         dist2_base,dist2_stride,
                             x_base,    x_stride,
+                            session_id_base,session_id_stride,
+                        disti_base,disti_stride,
+                        elsid_base,elsid_stride,
                         npt,&fd->local,&fd->cr.data);
   /* send unfound and border points to global hash cells */
   {
     uint index;
     uint *code=code_base, *proc=proc_base;
+    const uint *sess_id;
+    sess_id=session_id_base;
     const double *xp[D];
     struct src_pt *pt;
     unsigned d; for(d=0;d<D;++d) xp[d]=x_base[d];
     array_init(struct src_pt, &hash_pt, npt), pt=hash_pt.ptr;
     for(index=0;index<npt;++index) {
       double x[D]; for(d=0;d<D;++d) x[d]=*xp[d];
+      uint session_id; session_id = *sess_id;
       *proc = id;
-      if(*code!=CODE_INTERNAL) {
+        if ((*code!=CODE_INTERNAL && fd->local.ifms==false) ||
+             fd->local.ifms==true) {
         const uint hi = hash_index(&fd->hash,x);
         unsigned d;
         for(d=0;d<D;++d) pt->x[d]=x[d];
         pt->index=index;
         pt->proc=hi%np;
+        pt->session_id = session_id;
         ++pt;
-      }
+           }
       for(d=0;d<D;++d)
       xp[d] = (const double*)((const char*)xp[d]+   x_stride[d]);
       code  =         (uint*)(      (char*)code +code_stride   );
       proc  =         (uint*)(      (char*)proc +proc_stride   );
+      sess_id = (const uint*)((const char*)sess_id +session_id_stride);
     }
     hash_pt.n = pt - (struct src_pt*)hash_pt.ptr;
     sarray_transfer(struct src_pt,&hash_pt,proc,1,&fd->cr);
@@ -330,11 +345,17 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
       const double *spt_x_base[D]; unsigned spt_x_stride[D];
       unsigned d; for(d=0;d<D;++d) spt_x_base[d] = spt[0].x+d,
                                    spt_x_stride[d] = sizeof(struct src_pt);
-      findpts_local(&opt[0].code ,sizeof(struct out_pt),
+      const uint *spt_sid_base; unsigned spt_sid_stride;
+      spt_sid_base = &spt->session_id, spt_sid_stride = sizeof(struct src_pt);
+
+      findptsms_local(&opt[0].code ,sizeof(struct out_pt),
                     &opt[0].el   ,sizeof(struct out_pt),
                      opt[0].r    ,sizeof(struct out_pt),
                     &opt[0].dist2,sizeof(struct out_pt),
                      spt_x_base  ,spt_x_stride,
+                     spt_sid_base  ,spt_sid_stride,
+                    &opt[0].disti,sizeof(struct out_pt),
+                    &opt[0].elsid ,sizeof(struct out_pt),
                     src_pt.n,&fd->local,&fd->cr.data);
     }
     array_free(&src_pt);
@@ -352,7 +373,35 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
     #define  AT(T,var,i) (T*)((char*)var##_base+(i)*var##_stride)
     uint n=out_pt.n;
     struct out_pt *opt;
-    for(opt=out_pt.ptr;n;--n,++opt) {
+    if (fd->local.ifms==true) {
+     for(opt=out_pt.ptr;n;--n,++opt) {
+      const uint index = opt->index;
+      uint *code = AT(uint,code,index);
+      double *dist2 = AT(double,dist2,index);
+      double *disti = AT(double,disti,index);
+      uint *elsid = AT(uint,elsid,index);
+      if (*code==CODE_INTERNAL && *elsid==opt->elsid) continue;
+      if (*code==CODE_NOT_FOUND || 
+         (*elsid == opt->elsid && (opt->code==CODE_INTERNAL || opt->dist2<=*dist2)) || 
+         (*elsid != opt->elsid && *code==CODE_BORDER && (opt->code==CODE_INTERNAL || opt->dist2<=*dist2)) ||
+         (*elsid != opt->elsid && *code==CODE_INTERNAL && opt->code==CODE_INTERNAL && opt->disti>=*disti)
+                               )
+        {
+        double *r = AT(double,r,index);
+        uint  *el = AT(uint,el,index), *proc = AT(uint,proc,index);
+        unsigned d; for(d=0;d<D;++d) r[d]=opt->r[d];
+        *dist2 = opt->dist2;
+        *disti = opt->disti;
+        *proc = opt->proc;
+        *el = opt->el;
+        *code = opt->code;
+        *elsid = opt->elsid; 
+      }
+     }
+    }
+    else
+    {
+     for(opt=out_pt.ptr;n;--n,++opt) {
       const uint index = opt->index;
       uint *code = AT(uint,code,index);
       double *dist2 = AT(double,dist2,index);
@@ -368,6 +417,7 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
         *el = opt->el;
         *code = opt->code;
       }
+     }
     }
     array_free(&out_pt);
     #undef AT
@@ -377,14 +427,14 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
 struct eval_src_pt { double r[D]; uint index, proc, el; };
 struct eval_out_pt { double out; uint index, proc; };
 
-void findpts_eval(
+void findptsms_eval(
         double *const  out_base, const unsigned  out_stride,
   const uint   *const code_base, const unsigned code_stride,
   const uint   *const proc_base, const unsigned proc_stride,
   const uint   *const   el_base, const unsigned   el_stride,
   const double *const    r_base, const unsigned    r_stride,
   const uint npt,
-  const double *const in, struct findpts_data *const fd)
+  const double *const in, struct findptsms_data *const fd)
 {
   struct array src, outpt;
   /* copy user data, weed out unfound points, send out */
@@ -422,7 +472,7 @@ void findpts_eval(
     spt=src.ptr, opt=outpt.ptr;
     for(;n;--n,++spt,++opt) opt->index=spt->index,opt->proc=spt->proc;
     spt=src.ptr, opt=outpt.ptr;
-    findpts_local_eval(&opt->out ,sizeof(struct eval_out_pt),
+    findptsms_local_eval(&opt->out ,sizeof(struct eval_out_pt),
                        &spt->el  ,sizeof(struct eval_src_pt),
                         spt->r   ,sizeof(struct eval_src_pt),
                        src.n, in,&fd->local);
@@ -440,21 +490,21 @@ void findpts_eval(
   }
 }
 
-#undef findpts_eval
-#undef findpts
-#undef findpts_free
-#undef findpts_setup
-#undef setup_aux
+#undef findptsms_eval
+#undef findptsms
+#undef findptsms_free
+#undef findptsms_setup
+#undef setupms_aux
 #undef eval_out_pt
 #undef eval_src_pt
 #undef out_pt
 #undef src_pt
-#undef findpts_data
-#undef findpts_local_eval
-#undef findpts_local
-#undef findpts_local_free
-#undef findpts_local_setup
-#undef findpts_local_data
+#undef findptsms_data
+#undef findptsms_local_eval
+#undef findptsms_local
+#undef findptsms_local_free
+#undef findptsms_local_setup
+#undef findptsms_local_data
 
 #undef hash_free
 #undef hash_build
