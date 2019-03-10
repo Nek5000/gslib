@@ -27,6 +27,7 @@
 #define findptsms_local       TOKEN_PASTE(PREFIXED_NAME(findptsms_local_      ),D)
 #define findptsms_local_eval  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_eval_ ),D)
 
+#define findpts_local_eval  TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
 /*--------------------------------------------------------------------------
    Point to Possible Elements Hashing
 
@@ -394,6 +395,22 @@ void findptsms_local_eval(
   }
 }
 
+/* assumes points are already grouped by elements */
+void findpts_local_eval(
+        double *const out_base, const unsigned out_stride,
+  const uint   *const  el_base, const unsigned  el_stride,
+  const double *const   r_base, const unsigned   r_stride,
+  const uint npt,
+  const double *const in, struct findptsms_local_data *const fd)
+{
+  findpts_local_eval(
+  out_base,out_stride,
+  el_base,el_stride,
+  r_base,r_stride,
+  npt,
+  in,fd);
+}
+
 #undef CATD
 #undef CAT
 #undef AT
@@ -423,3 +440,5 @@ void findptsms_local_eval(
 #undef obbox_test
 #undef obbox_calc
 #undef obbox
+
+#undef findpts_local_eval

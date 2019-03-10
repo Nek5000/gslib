@@ -10,6 +10,8 @@
 #define findptsms_local_2         PREFIXED_NAME(findptsms_local_2      )
 #define findptsms_local_eval_2    PREFIXED_NAME(findptsms_local_eval_2 )
 
+#define findpts_local_eval_2    PREFIXED_NAME(findpts_local_eval_2 )
+
 struct findptsms_local_hash_data_2 {
   uint hash_n;
   struct dbl_range bnd[2];
@@ -58,11 +60,19 @@ void findptsms_local_eval_2(
   const uint npt,
   const double *const in, struct findptsms_local_data_2 *const fd);
 
+void findpts_local_eval_2(
+        double *const out_base, const unsigned out_stride,
+  const uint   *const  el_base, const unsigned  el_stride,
+  const double *const   r_base, const unsigned   r_stride,
+  const uint npt,
+  const double *const in, struct findptsms_local_data_2 *const fd);
+
 #define findptsms_local_setup_3   PREFIXED_NAME(findptsms_local_setup_3)
 #define findptsms_local_free_3    PREFIXED_NAME(findptsms_local_free_3 )
 #define findptsms_local_3         PREFIXED_NAME(findptsms_local_3      )
 #define findptsms_local_eval_3    PREFIXED_NAME(findptsms_local_eval_3 )
 
+#define findpts_local_eval_3    PREFIXED_NAME(findpts_local_eval_3 )
 struct findptsms_local_hash_data_3 {
   uint hash_n;
   struct dbl_range bnd[3];
@@ -105,6 +115,13 @@ void findptsms_local_3(
   const uint npt, struct findptsms_local_data_3 *const fd,
   buffer *buf);
 void findptsms_local_eval_3(
+        double *const out_base, const unsigned out_stride,
+  const uint   *const  el_base, const unsigned  el_stride,
+  const double *const   r_base, const unsigned   r_stride,
+  const uint npt,
+  const double *const in, struct findptsms_local_data_3 *const fd);
+
+void findpts_local_eval_3(
         double *const out_base, const unsigned out_stride,
   const uint   *const  el_base, const unsigned  el_stride,
   const double *const   r_base, const unsigned   r_stride,

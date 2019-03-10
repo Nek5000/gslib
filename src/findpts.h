@@ -14,6 +14,15 @@
 #define findptsms_3         PREFIXED_NAME(findptsms_3      )
 #define findptsms_eval_3    PREFIXED_NAME(findptsms_eval_3 )
 
+#define findpts_setup_2   PREFIXED_NAME(findpts_setup_2)
+#define findpts_free_2    PREFIXED_NAME(findpts_free_2 )
+#define findpts_2         PREFIXED_NAME(findpts_2      )
+#define findpts_eval_2    PREFIXED_NAME(findpts_eval_2 )
+#define findpts_setup_3   PREFIXED_NAME(findpts_setup_3)
+#define findpts_free_3    PREFIXED_NAME(findpts_free_3 )
+#define findpts_3         PREFIXED_NAME(findpts_3      )
+#define findpts_eval_3    PREFIXED_NAME(findpts_eval_3 )
+
 struct findptsms_data_2;
 struct findptsms_data_3;
 
@@ -131,5 +140,7 @@ void findpts_eval_3(
   const double *const    r_base, const unsigned    r_stride,
   const uint npt,
   const double *const in, struct findptsms_data_3 *const fd);
+
+
 
 #endif

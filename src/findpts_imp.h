@@ -28,6 +28,12 @@
 #define findptsms             TOKEN_PASTE(PREFIXED_NAME(findptsms_      ),D)
 #define findptsms_eval        TOKEN_PASTE(PREFIXED_NAME(findptsms_eval_ ),D)
 
+#define findpts_setup       TOKEN_PASTE(PREFIXED_NAME(findpts_setup_),D)
+#define findpts_free        TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
+#define findpts             TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
+#define findpts_eval        TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
+#define findpts_local_eval  TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
+
 struct hash_data {
   ulong hash_n;
   struct dbl_range bnd[D];
@@ -490,6 +496,83 @@ void findptsms_eval(
   }
 }
 
+//findpts_setup
+struct findptsms_data *findpts_setup(
+  const struct comm *const comm,
+  const double *const elx[D],
+  const unsigned n[D], const uint nel,
+  const unsigned m[D], const double bbox_tol,
+  const uint local_hash_size, const uint global_hash_size,
+  const unsigned npt_max, const double newt_tol)
+{ 
+  bool ifms;
+  ifms = false;
+  unsigned int *nsid = tmalloc(uint,1);
+  double *distfint = tmalloc(double,1);
+  *nsid = 0;
+  *distfint = 0;
+
+  struct findptsms_data *const fd = tmalloc(struct findptsms_data, 1);
+  crystal_init(&fd->cr,comm);
+  setupms_aux(fd,elx,n,nel,m,bbox_tol,
+  local_hash_size,global_hash_size,npt_max,newt_tol,nsid, distfint,ifms);
+  return fd;
+}
+
+void findpts_free(struct findptsms_data *fd)
+{
+  findpts_free(fd);
+}
+
+void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
+                   uint   *const  proc_base   , const unsigned  proc_stride   ,
+                   uint   *const    el_base   , const unsigned    el_stride   ,
+                   double *const     r_base   , const unsigned     r_stride   ,
+                   double *const dist2_base   , const unsigned dist2_stride   ,
+             const double *const     x_base[D], const unsigned     x_stride[D],
+             const uint npt, struct findptsms_data *const fd)
+{
+    unsigned int *sess_base = tmalloc(uint,1);
+    double *disti_base = tmalloc(double,1);
+    unsigned int *elsid_base = tmalloc(uint,1);
+    *sess_base = 0;
+    *disti_base = 0;
+    *elsid_base = 0;
+
+    unsigned sess_stride=0;
+    unsigned disti_stride=0;
+    unsigned elsid_stride=0;
+
+    findptsms(code_base,code_stride,
+              proc_base,proc_stride,
+              el_base,el_stride,
+              r_base,r_stride,
+              dist2_base,dist2_stride,
+              x_base,x_stride,
+              sess_base,sess_stride,
+              disti_base,disti_stride,
+              elsid_base,elsid_stride,
+              npt,fd);
+}
+
+void findpts_eval(
+        double *const  out_base, const unsigned  out_stride,
+  const uint   *const code_base, const unsigned code_stride,
+  const uint   *const proc_base, const unsigned proc_stride,
+  const uint   *const   el_base, const unsigned   el_stride,
+  const double *const    r_base, const unsigned    r_stride,
+  const uint npt,
+  const double *const in, struct findptsms_data *const fd)
+{
+  findptsms_eval(out_base,out_stride,
+  code_base,code_stride,
+  proc_base,proc_stride,
+  el_base,el_stride,
+  r_base,r_stride,
+  npt,
+  in,fd);
+}
+
 #undef findptsms_eval
 #undef findptsms
 #undef findptsms_free
@@ -518,3 +601,8 @@ void findptsms_eval(
 #undef hash_data
 #undef local_hash_data
 #undef obbox
+
+#undef findpts_eval
+#undef findpts
+#undef findpts_free
+#undef findpts_setup

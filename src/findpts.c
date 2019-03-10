@@ -347,11 +347,11 @@ void ffindptsms_free(const sint *const handle)
 
 void ffindpts_free(const sint *const handle)
 {
-  CHECK_HANDLE("findptsms_free");
+  CHECK_HANDLE("findpts_free");
   if(h->ndim==2)
-    PREFIXED_NAME(findptsms_free_2)(h->data);
+    PREFIXED_NAME(findpts_free_2)(h->data);
   else
-    PREFIXED_NAME(findptsms_free_3)(h->data);
+    PREFIXED_NAME(findpts_free_3)(h->data);
   h->data = 0;
 }
 
@@ -528,7 +528,7 @@ void ffindpts_eval(const sint *const handle,
 {
   CHECK_HANDLE("findpts_eval");
   if(h->ndim==2)
-    PREFIXED_NAME(findptsms_eval_2)(
+    PREFIXED_NAME(findpts_eval_2)(
               out_base,(* out_stride)*sizeof(double),
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
@@ -536,7 +536,7 @@ void ffindpts_eval(const sint *const handle,
                 r_base,(*   r_stride)*sizeof(double),
       *npt, in, h->data);
   else
-    PREFIXED_NAME(findptsms_eval_3)(
+    PREFIXED_NAME(findpts_eval_3)(
               out_base,(* out_stride)*sizeof(double),
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
@@ -573,13 +573,13 @@ void ffindpts_eval_local(const sint *const handle,
 {
   CHECK_HANDLE("findpts_eval_local");
   if(h->ndim==2)
-    findptsms_local_eval_2(
+    findpts_local_eval_2(
               out_base,(* out_stride)*sizeof(double),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
       *npt, in, &((struct findptsms_data_2 *)h->data)->local);
   else
-    findptsms_local_eval_3(
+    findpts_local_eval_3(
               out_base,(* out_stride)*sizeof(double),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
