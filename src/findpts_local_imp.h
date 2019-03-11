@@ -12,21 +12,24 @@
 #define hash_bb             TOKEN_PASTE(hash_bb_           ,D)
 #define hash_build          TOKEN_PASTE(hash_build_        ,D)
 #define hash_free           TOKEN_PASTE(hash_free_         ,D)
-#define findptsms_el_data     TOKEN_PASTE(findptsms_el_data_   ,D)
-#define findptsms_el_pt       TOKEN_PASTE(findptsms_el_pt_     ,D)
-#define findptsms_el_setup    TOKEN_PASTE(PREFIXED_NAME(findptsms_el_setup_),D)
-#define findptsms_el_free     TOKEN_PASTE(PREFIXED_NAME(findptsms_el_free_ ),D)
-#define findptsms_el          TOKEN_PASTE(PREFIXED_NAME(findptsms_el_      ),D)
-#define findptsms_el_eval     TOKEN_PASTE(PREFIXED_NAME(findptsms_el_eval_ ),D)
-#define findptsms_el_start    TOKEN_PASTE(findptsms_el_start_  ,D)
-#define findptsms_el_points   TOKEN_PASTE(findptsms_el_points_ ,D)
-#define findptsms_local_data  TOKEN_PASTE(findptsms_local_data_,D)
+#define findpts_el_data     TOKEN_PASTE(findpts_el_data_   ,D)
+#define findpts_el_pt       TOKEN_PASTE(findpts_el_pt_     ,D)
+#define findpts_el_setup    TOKEN_PASTE(PREFIXED_NAME(findpts_el_setup_),D)
+#define findpts_el_free     TOKEN_PASTE(PREFIXED_NAME(findpts_el_free_ ),D)
+#define findpts_el          TOKEN_PASTE(PREFIXED_NAME(findpts_el_      ),D)
+#define findpts_el_eval     TOKEN_PASTE(PREFIXED_NAME(findpts_el_eval_ ),D)
+#define findpts_el_start    TOKEN_PASTE(findpts_el_start_  ,D)
+#define findpts_el_points   TOKEN_PASTE(findpts_el_points_ ,D)
+#define findpts_local_data  TOKEN_PASTE(findpts_local_data_,D)
 #define map_points_to_els   TOKEN_PASTE(map_points_to_els_ ,D)
 #define findptsms_local_setup TOKEN_PASTE(PREFIXED_NAME(findptsms_local_setup_),D)
 #define findptsms_local_free  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_free_ ),D)
 #define findptsms_local       TOKEN_PASTE(PREFIXED_NAME(findptsms_local_      ),D)
 #define findptsms_local_eval  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_eval_ ),D)
 
+#define findpts_local_setup TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
+#define findpts_local_free  TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
+#define findpts_local       TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
 #define findpts_local_eval  TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
 /*--------------------------------------------------------------------------
    Point to Possible Elements Hashing
@@ -194,20 +197,20 @@ static void hash_build(struct hash_data *p,
 
 static void hash_free(struct hash_data *p) { free(p->offset); }
 
-struct findptsms_local_data {
+struct findpts_local_data {
   unsigned ntot;
   const double *elx[D];
   const unsigned *nsid;
   struct obbox *obb;
   struct hash_data hd;
-  struct findptsms_el_data fed;
+  struct findpts_el_data fed;
   double tol;
   double *distrsti;
   const double *distfint;
   bool ifms;
 };
 
-void findptsms_local_setup(struct findptsms_local_data *const fd,
+void findptsms_local_setup(struct findpts_local_data *const fd,
                          const double *const elx[D],
                          const unsigned *const nsid,
                          const double *const distfint,
@@ -224,7 +227,7 @@ void findptsms_local_setup(struct findptsms_local_data *const fd,
   fd->obb=tmalloc(struct obbox,nel);
   obbox_calc(fd->obb,elx,n,nel,m,bbox_tol);
   hash_build(&fd->hd,fd->obb,nel,max_hash_size);
-  findptsms_el_setup(&fd->fed,n,npt_max);
+  findpts_el_setup(&fd->fed,n,npt_max);
   fd->tol = newt_tol;
   fd->ifms = ifms;
   if (fd->ifms==true) {
@@ -233,9 +236,9 @@ void findptsms_local_setup(struct findptsms_local_data *const fd,
   }
 }
 
-void findptsms_local_free(struct findptsms_local_data *const fd)
+void findptsms_local_free(struct findpts_local_data *const fd)
 {
-  findptsms_el_free(&fd->fed);
+  findpts_el_free(&fd->fed);
   hash_free(&fd->hd);
   free(fd->obb);
   if (fd->ifms==true) {
@@ -255,7 +258,7 @@ static void map_points_to_els(
         uint   *const  code_base   , const unsigned  code_stride   ,
   const double *const     x_base[D], const unsigned     x_stride[D],
   const uint   *const  session_id_base, const unsigned session_id_stride,
-  const uint npt, const struct findptsms_local_data *const fd,
+  const uint npt, const struct findpts_local_data *const fd,
   buffer *buf)
 {
   uint index;
@@ -307,11 +310,11 @@ void findptsms_local(
   const uint   *const  session_id_base, const unsigned session_id_stride,
         double *const disti_base   , const unsigned disti_stride   ,
         uint   *const elsid_base   , const unsigned elsid_stride   ,
-  const uint npt, struct findptsms_local_data *const fd,
+  const uint npt, struct findpts_local_data *const fd,
   buffer *buf)
 {
-  struct findptsms_el_data *const fed = &fd->fed;
-  struct findptsms_el_pt *const fpt = findptsms_el_points(fed);
+  struct findpts_el_data *const fed = &fd->fed;
+  struct findpts_el_pt *const fpt = findpts_el_points(fed);
   struct array map; /* point -> element map */
   int rsid_stride = 1;
   map_points_to_els(&map, code_base,code_stride, x_base,x_stride, session_id_base, session_id_stride,npt, fd, buf);
@@ -324,7 +327,7 @@ void findptsms_local(
       unsigned d;
       for(d=0;d<D;++d) elx[d]=fd->elx[d]+el_off;
 
-      findptsms_el_start(fed,elx);
+      findpts_el_start(fed,elx);
       do {
         const struct index_el *q;
         unsigned i;
@@ -334,10 +337,10 @@ void findptsms_local(
           for(d=0;d<D;++d) fpt[i].x[d]=*CATD(double,x,q->index,d);
           ++i;
         }
-        findptsms_el(fed,i,fd->tol);
+        findpts_el(fed,i,fd->tol);
         if (fd->ifms==true) {
-           findptsms_el_eval(fd->distrsti, sizeof(double),
-                             &fpt[0].r[0], sizeof(struct findptsms_el_pt), i,
+           findpts_el_eval(fd->distrsti, sizeof(double),
+                             &fpt[0].r[0], sizeof(struct findpts_el_pt), i,
                              fd->distfint+el*fd->ntot  ,fed);
          }
 
@@ -376,9 +379,9 @@ void findptsms_local_eval(
   const uint   *const  el_base, const unsigned  el_stride,
   const double *const   r_base, const unsigned   r_stride,
   const uint npt,
-  const double *const in, struct findptsms_local_data *const fd)
+  const double *const in, struct findpts_local_data *const fd)
 {
-  struct findptsms_el_data *const fed = &fd->fed;
+  struct findpts_el_data *const fed = &fd->fed;
   const unsigned npt_max = fed->npt_max;
   uint p;
   for(p=0;p<npt;) {
@@ -387,12 +390,73 @@ void findptsms_local_eval(
     do {
       unsigned i; uint q;
       for(i=0,q=p;i<npt_max && q<npt && *CAT(uint,el,q)==el;++q) ++i;
-      findptsms_el_eval( AT(double,out,p),out_stride,
+      findpts_el_eval( AT(double,out,p),out_stride,
                       CAT(double,  r,p),  r_stride, i,
                       in_el,fed);
       p=q;
     } while(p<npt && *CAT(uint,el,p)==el);
   }
+}
+
+//findpts
+void findpts_local_setup(struct findpts_local_data *const fd,
+                         const double *const elx[D],
+                         const unsigned n[D], const uint nel,
+                         const unsigned m[D], const double bbox_tol,
+                         const uint max_hash_size,
+                         const unsigned npt_max, const double newt_tol)
+{
+  bool ifms;
+  ifms = false;
+  unsigned int *nsid = tmalloc(uint,1);
+  double *distfint = tmalloc(double,1);
+  *nsid = 0;
+  *distfint = 0;
+  findptsms_local_setup(fd,
+                        elx,
+                        nsid,
+                        distfint,
+                        n,nel,
+                        m,bbox_tol,
+                        max_hash_size,
+                        npt_max,newt_tol,ifms);
+}
+
+void findpts_local_free(struct findpts_local_data *const fd)
+{
+  findptsms_local_free(fd);
+}
+
+void findpts_local(
+        uint   *const  code_base   , const unsigned  code_stride   ,
+        uint   *const    el_base   , const unsigned    el_stride   ,
+        double *const     r_base   , const unsigned     r_stride   ,
+        double *const dist2_base   , const unsigned dist2_stride   ,
+  const double *const     x_base[D], const unsigned     x_stride[D],
+  const uint npt, struct findpts_local_data *const fd,
+  buffer *buf)
+{
+    unsigned int *sess_base = tmalloc(uint,1);
+    double *disti_base = tmalloc(double,1);
+    unsigned int *elsid_base = tmalloc(uint,1);
+    *sess_base = 0;
+    *disti_base = 0;
+    *elsid_base = 0;
+
+    unsigned sess_stride=0;
+    unsigned disti_stride=0;
+    unsigned elsid_stride=0;
+  findptsms_local(
+        code_base   ,code_stride   ,
+        el_base   ,el_stride   ,
+        r_base   , r_stride   ,
+        dist2_base   ,dist2_stride   ,
+        x_base,x_stride,
+        sess_base,sess_stride,
+        disti_base   ,disti_stride   ,
+        elsid_base   ,elsid_stride   ,
+        npt,fd,
+        buf);
 }
 
 /* assumes points are already grouped by elements */
@@ -401,7 +465,7 @@ void findpts_local_eval(
   const uint   *const  el_base, const unsigned  el_stride,
   const double *const   r_base, const unsigned   r_stride,
   const uint npt,
-  const double *const in, struct findptsms_local_data *const fd)
+  const double *const in, struct findpts_local_data *const fd)
 {
   findpts_local_eval(
   out_base,out_stride,
@@ -420,14 +484,14 @@ void findpts_local_eval(
 #undef findptsms_local_free
 #undef findptsms_local_setup
 #undef map_points_to_els
-#undef findptsms_local_data
-#undef findptsms_el_points
-#undef findptsms_el_start
-#undef findptsms_el_eval
-#undef findptsms_el
-#undef findptsms_el_free
-#undef findptsms_el_setup
-#undef findptsms_el_data
+#undef findpts_local_data
+#undef findpts_el_points
+#undef findpts_el_start
+#undef findpts_el_eval
+#undef findpts_el
+#undef findpts_el_free
+#undef findpts_el_setup
+#undef findpts_el_data
 #undef hash_free
 #undef hash_build
 #undef hash_bb
@@ -441,4 +505,7 @@ void findpts_local_eval(
 #undef obbox_calc
 #undef obbox
 
+#undef findpts_local
+#undef findpts_local_free
+#undef findpts_local_setup
 #undef findpts_local_eval

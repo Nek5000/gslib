@@ -241,7 +241,7 @@ void ffindptsms_setup(sint *const handle,
   h = &handle_array[handle_n];
   h->ndim = *ndim;
   if(h->ndim==2) {
-    struct findptsms_data_2 *const fd = tmalloc(struct findptsms_data_2,1);
+    struct findpts_data_2 *const fd = tmalloc(struct findpts_data_2,1);
     const double *elx[2];
     uint n[2], m[2];
     elx[0]=xm,elx[1]=ym;
@@ -254,7 +254,7 @@ void ffindptsms_setup(sint *const handle,
     setupms_aux_2(fd, elx,n,*nel,m,*bbox_tol,
                 *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ifms);
   } else if(h->ndim==3) {
-    struct findptsms_data_3 *const fd = tmalloc(struct findptsms_data_3,1);
+    struct findpts_data_3 *const fd = tmalloc(struct findpts_data_3,1);
     const double *elx[3];
     uint n[3], m[3];
     elx[0]=xm,elx[1]=ym,elx[2]=zm;
@@ -293,7 +293,7 @@ void ffindpts_setup(sint *const handle,
   h = &handle_array[handle_n];
   h->ndim = *ndim;
   if(h->ndim==2) {
-    struct findptsms_data_2 *const fd = tmalloc(struct findptsms_data_2,1);
+    struct findpts_data_2 *const fd = tmalloc(struct findpts_data_2,1);
     const double *elx[2];
     uint n[2], m[2];
     elx[0]=xm,elx[1]=ym;
@@ -310,7 +310,7 @@ void ffindpts_setup(sint *const handle,
     setupms_aux_2(fd, elx,n,*nel,m,*bbox_tol,
                 *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ifms);
   } else if(h->ndim==3) {
-    struct findptsms_data_3 *const fd = tmalloc(struct findptsms_data_3,1);
+    struct findpts_data_3 *const fd = tmalloc(struct findpts_data_3,1);
     const double *elx[3];
     uint n[3], m[3];
     elx[0]=xm,elx[1]=ym,elx[2]=zm;
@@ -557,13 +557,13 @@ void ffindptsms_eval_local(const sint *const handle,
               out_base,(* out_stride)*sizeof(double),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
-      *npt, in, &((struct findptsms_data_2 *)h->data)->local);
+      *npt, in, &((struct findpts_data_2 *)h->data)->local);
   else
     findptsms_local_eval_3(
               out_base,(* out_stride)*sizeof(double),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
-      *npt, in, &((struct findptsms_data_3 *)h->data)->local);
+      *npt, in, &((struct findpts_data_3 *)h->data)->local);
 }
 void ffindpts_eval_local(const sint *const handle,
         double *const  out_base, const sint *const  out_stride,
@@ -577,11 +577,11 @@ void ffindpts_eval_local(const sint *const handle,
               out_base,(* out_stride)*sizeof(double),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
-      *npt, in, &((struct findptsms_data_2 *)h->data)->local);
+      *npt, in, &((struct findpts_data_2 *)h->data)->local);
   else
     findpts_local_eval_3(
               out_base,(* out_stride)*sizeof(double),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
-      *npt, in, &((struct findptsms_data_3 *)h->data)->local);
+      *npt, in, &((struct findpts_data_3 *)h->data)->local);
 }

@@ -13,10 +13,10 @@
 #include "tensor.h"
 #include "poly.h"
 
-#define findptsms_el_setup_2   PREFIXED_NAME(findptsms_el_setup_2)
-#define findptsms_el_free_2    PREFIXED_NAME(findptsms_el_free_2 )
-#define findptsms_el_2         PREFIXED_NAME(findptsms_el_2      )
-#define findptsms_el_eval_2    PREFIXED_NAME(findptsms_el_eval_2 )
+#define findpts_el_setup_2   PREFIXED_NAME(findpts_el_setup_2)
+#define findpts_el_free_2    PREFIXED_NAME(findpts_el_free_2 )
+#define findpts_el_2         PREFIXED_NAME(findpts_el_2      )
+#define findpts_el_eval_2    PREFIXED_NAME(findpts_el_eval_2 )
 /*
 #define DIAGNOSTICS_1
 #define DIAGNOSTICS_2
@@ -36,7 +36,7 @@ static void lin_solve_2(double x[2], const double A[4], const double y[2])
   x[1] = idet*(A[0]*y[1] - A[2]*y[0]);
 }
 
-struct findptsms_el_pt_2 {
+struct findpts_el_pt_2 {
   double x[2],r[2],oldr[2],dist2,dist2p,tr;
   unsigned index,flags;
 };
@@ -97,12 +97,12 @@ static unsigned point_index(const unsigned x)
 
 */
 
-struct findptsms_el_gedge_2 { const double *x[2], *dxdn[2]; };
-struct findptsms_el_gpt_2   { double x[2], jac[4], hes[4]; };
+struct findpts_el_gedge_2 { const double *x[2], *dxdn[2]; };
+struct findpts_el_gpt_2   { double x[2], jac[4], hes[4]; };
 
-struct findptsms_el_data_2 {
+struct findpts_el_data_2 {
   unsigned npt_max;
-  struct findptsms_el_pt_2 *p;
+  struct findpts_el_pt_2 *p;
 
   unsigned n[2];
   double *z[2];
@@ -114,8 +114,8 @@ struct findptsms_el_data_2 {
   
   unsigned side_init;
   double *sides;
-  struct findptsms_el_gedge_2 edge[4]; /* R=-1 S; R=1 S; ... */
-  struct findptsms_el_gpt_2 pt[4];
+  struct findpts_el_gedge_2 edge[4]; /* R=-1 S; R=1 S; ... */
+  struct findpts_el_gpt_2 pt[4];
 
   double *work;
 };
@@ -140,7 +140,7 @@ static unsigned work_size(
   return wsize;
 }
 
-void findptsms_el_setup_2(struct findptsms_el_data_2 *const fd,
+void findpts_el_setup_2(struct findpts_el_data_2 *const fd,
                         const unsigned n[2],
                         const unsigned npt_max)
 {
@@ -149,7 +149,7 @@ void findptsms_el_setup_2(struct findptsms_el_data_2 *const fd,
   unsigned d,i, lag_size[2];
 
   fd->npt_max = npt_max;
-  fd->p = tmalloc(struct findptsms_el_pt_2, npt_max*2);
+  fd->p = tmalloc(struct findpts_el_pt_2, npt_max*2);
 
   fd->n[0]=nr, fd->n[1]=ns;
   for(d=0;d<2;++d) lag_size[d] = gll_lag_size(fd->n[d]);
@@ -191,16 +191,16 @@ void findptsms_el_setup_2(struct findptsms_el_data_2 *const fd,
     fd->edge[3].dxdn[d] = fd->sides + 8*ns + (2+d)*nr;
 }
 
-void findptsms_el_free_2(struct findptsms_el_data_2 *const fd)
+void findpts_el_free_2(struct findpts_el_data_2 *const fd)
 {
   free(fd->p);
   free(fd->z[0]);
 }
 
-typedef void compute_edge_data_fun(struct findptsms_el_data_2 *fd);
+typedef void compute_edge_data_fun(struct findpts_el_data_2 *fd);
 
 /* work[2*(nr+ns)] */
-static void compute_edge_data_r(struct findptsms_el_data_2 *fd)
+static void compute_edge_data_r(struct findpts_el_data_2 *fd)
 {
   const unsigned nr = fd->n[0], ns=fd->n[1], nrsm1 = nr*(ns-1);
   unsigned d;
@@ -217,7 +217,7 @@ static void compute_edge_data_r(struct findptsms_el_data_2 *fd)
 }
 
 /* work[4*(nr+ns)] */
-static void compute_edge_data_s(struct findptsms_el_data_2 *fd)
+static void compute_edge_data_s(struct findpts_el_data_2 *fd)
 {
   const unsigned nr = fd->n[0], ns=fd->n[1];
   unsigned d;
@@ -233,8 +233,8 @@ static void compute_edge_data_s(struct findptsms_el_data_2 *fd)
   }
 }
 
-static const struct findptsms_el_gedge_2 *get_edge(
-  struct findptsms_el_data_2 *fd, unsigned ei)
+static const struct findpts_el_gedge_2 *get_edge(
+  struct findpts_el_data_2 *fd, unsigned ei)
 {
   const unsigned mask = 1u<<(ei/2);
   if((fd->side_init&mask)==0) {
@@ -249,7 +249,7 @@ static const struct findptsms_el_gedge_2 *get_edge(
 }
 
 /* work[6*(nr+6)] */
-static void compute_pt_data(struct findptsms_el_data_2 *fd)
+static void compute_pt_data(struct findpts_el_data_2 *fd)
 {
   const unsigned nr = fd->n[0], ns = fd->n[1];
   double *work = fd->work, *work2 = work+6*nr;
@@ -267,8 +267,8 @@ static void compute_pt_data(struct findptsms_el_data_2 *fd)
   }
 }
 
-static const struct findptsms_el_gpt_2 *get_pt(
-  struct findptsms_el_data_2 *fd, unsigned pi)
+static const struct findpts_el_gpt_2 *get_pt(
+  struct findpts_el_data_2 *fd, unsigned pi)
 {
   if((fd->side_init&4u)==0)
     compute_pt_data(fd), fd->side_init |= 4u;
@@ -280,9 +280,9 @@ static const struct findptsms_el_gpt_2 *get_pt(
    may reject the prior step, returning 1; otherwise returns 0
    sets out->dist2, out->index, out->x, out->oldr in any event,
    leaving out->r, out->dr, out->flags to be set when returning 0 */
-static int reject_prior_step_q(struct findptsms_el_pt_2 *const out,
+static int reject_prior_step_q(struct findpts_el_pt_2 *const out,
                                const double resid[2],
-                               const struct findptsms_el_pt_2 *const p,
+                               const struct findpts_el_pt_2 *const p,
                                const double tol)
 {
   const double old_dist2 = p->dist2;
@@ -341,9 +341,9 @@ static int reject_prior_step_q(struct findptsms_el_pt_2 *const out,
 
 /* minimize ||resid - jac * dr||_2, with |dr| <= tr, |r0+dr|<=1
    (exact solution of trust region problem) */
-static void newton_area(struct findptsms_el_pt_2 *const out,
+static void newton_area(struct findpts_el_pt_2 *const out,
                         const double jac[4], const double resid[2],
-                        const struct findptsms_el_pt_2 *const p, const double tol)
+                        const struct findpts_el_pt_2 *const p, const double tol)
 {
   const double tr = p->tr;
   double bnd[4] = { -1,1, -1,1 };
@@ -501,11 +501,11 @@ newton_area_fin:
   out->flags = flags | (p->flags<<5);
 }
 
-static void newton_edge(struct findptsms_el_pt_2 *const out,
+static void newton_edge(struct findpts_el_pt_2 *const out,
   const double jac[4], const double rhes, const double resid[2],
   const unsigned de, const unsigned dn,
   unsigned flags,
-  const struct findptsms_el_pt_2 *const p, const double tol)
+  const struct findpts_el_pt_2 *const p, const double tol)
 {
   const double tr = p->tr;
   /* A = J^T J - resid_d H_d */
@@ -557,15 +557,15 @@ newton_edge_fin:
 }
 
 typedef void findptms_fun(
-  struct findptsms_el_pt_2 *const out,
-  struct findptsms_el_data_2 *const fd,
-  const struct findptsms_el_pt_2 *const p, const unsigned pn, const double tol);
+  struct findpts_el_pt_2 *const out,
+  struct findpts_el_data_2 *const fd,
+  const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol);
 
 /* work[(6+2*(2*nr+ns))*pn] */
 static void findptms_area(
-  struct findptsms_el_pt_2 *const out,
-  struct findptsms_el_data_2 *const fd,
-  const struct findptsms_el_pt_2 *const p, const unsigned pn, const double tol)
+  struct findpts_el_pt_2 *const out,
+  struct findpts_el_data_2 *const fd,
+  const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol)
 {
   const unsigned nr=fd->n[0],ns=fd->n[1];
   double *const resid = fd->work, *const jac = resid + 2*pn,
@@ -596,9 +596,9 @@ static void findptms_area(
 
 /* work[(10+3*n)*pn] */
 static void findptms_edge(
-  struct findptsms_el_pt_2 *const out,
-  struct findptsms_el_data_2 *const fd,
-  const struct findptsms_el_pt_2 *const p, const unsigned pn, const double tol)
+  struct findpts_el_pt_2 *const out,
+  struct findpts_el_data_2 *const fd,
+  const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol)
 {
   const unsigned pflag = p->flags & FLAG_MASK;
   const unsigned ei = edge_index(pflag);
@@ -606,7 +606,7 @@ static void findptms_edge(
   const unsigned n = fd->n[de];
   double *const resid=fd->work, *const jac=resid+2*pn, *const hes=jac+4*pn,
          *const wt = hes+pn, *const slice = wt+3*n*pn;
-  const struct findptsms_el_gedge_2 *const edge = get_edge(fd,ei);
+  const struct findpts_el_gedge_2 *const edge = get_edge(fd,ei);
   unsigned i; unsigned d;
 
 #ifdef DIAGNOSTICS_1
@@ -659,13 +659,13 @@ static void findptms_edge(
 }
 
 static void findptms_pt(
-  struct findptsms_el_pt_2 *const out,
-  struct findptsms_el_data_2 *const fd,
-  const struct findptsms_el_pt_2 *const p, const unsigned pn, const double tol)
+  struct findpts_el_pt_2 *const out,
+  struct findpts_el_data_2 *const fd,
+  const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol)
 {
   const unsigned pflag = p->flags & FLAG_MASK;
   const unsigned pi = point_index(pflag);
-  const struct findptsms_el_gpt_2 *gpt = get_pt(fd,pi);
+  const struct findpts_el_gpt_2 *gpt = get_pt(fd,pi);
   const double *const x = gpt->x, *const jac = gpt->jac, *const hes = gpt->hes;
   unsigned i;
 
@@ -707,10 +707,10 @@ static void findptms_pt(
   }
 }
 
-static void seed(struct findptsms_el_data_2 *const fd,
-                 struct findptsms_el_pt_2 *const pt, const unsigned npt)
+static void seed(struct findpts_el_data_2 *const fd,
+                 struct findpts_el_pt_2 *const pt, const unsigned npt)
 {
-  struct findptsms_el_pt_2 *p, *const pe = pt+npt;
+  struct findpts_el_pt_2 *p, *const pe = pt+npt;
   const unsigned nr=fd->n[0], ns=fd->n[1];
   unsigned i,j, ii=0;
   for(p=pt;p!=pe;++p) p->dist2=DBL_MAX;
@@ -731,12 +731,12 @@ static void seed(struct findptsms_el_data_2 *const fd,
   }
 }
 
-void findptsms_el_2(struct findptsms_el_data_2 *const fd, const unsigned npt,
+void findpts_el_2(struct findpts_el_data_2 *const fd, const unsigned npt,
                   const double tol)
 {
   findptms_fun *const fun[3] = 
     { &findptms_area, &findptms_edge, &findptms_pt };
-  struct findptsms_el_pt_2 *const pbuf = fd->p, *const pstart = fd->p + npt;
+  struct findpts_el_pt_2 *const pbuf = fd->p, *const pstart = fd->p + npt;
   unsigned nconv = npt;
   unsigned step = 0;
   unsigned count[9] = { 0,0,0, 0,0,0, 0,0,0 } ;
@@ -754,11 +754,11 @@ void findptsms_el_2(struct findptsms_el_data_2 *const fd, const unsigned npt,
   }
   while(nconv && step++ < 50) {
     /* advance each group of points */
-    struct findptsms_el_pt_2 *p, *const pe=pstart+nconv, *pout; unsigned pn;
+    struct findpts_el_pt_2 *p, *const pe=pstart+nconv, *pout; unsigned pn;
     
 #if DIAGNOSTICS_ITERATIONS>1
     { unsigned i; 
-      printf("findptsms_el_2 Newton step (%u), %u unconverged:\n ", step,nconv);
+      printf("findpts_el_2 Newton step (%u), %u unconverged:\n ", step,nconv);
       for(i=0;i<9;++i) printf(" %u",count[i]);
       printf("\n");
     }
@@ -772,7 +772,7 @@ void findptsms_el_2(struct findptsms_el_data_2 *const fd, const unsigned npt,
     /* group points by contsraints */
     {
       unsigned offset[10] = { 0,0,0, 0,0,0, 0,0,0, 0 };
-      struct findptsms_el_pt_2 *const pe = pbuf+nconv;
+      struct findpts_el_pt_2 *const pe = pbuf+nconv;
       for(pout=pbuf; pout!=pe; ++pout)
         ++offset[pt_flags_to_bin(pout->flags & FLAG_MASK)];
       {
@@ -786,19 +786,19 @@ void findptsms_el_2(struct findptsms_el_data_2 *const fd, const unsigned npt,
         pstart[offset[pt_flags_to_bin(pout->flags & FLAG_MASK)]++] = *pout;
     }
   }
-  { struct findptsms_el_pt_2 *p, *const pe=pstart+npt;
+  { struct findpts_el_pt_2 *p, *const pe=pstart+npt;
     for(p=pstart;p!=pe;++p)
       pbuf[p->index]=*p, pbuf[p->index].flags&=FLAG_MASK;
   }
 #if DIAGNOSTICS_ITERATIONS
-  printf("findptsms_el_2 took %u steps\n ", step);
+  printf("findpts_el_2 took %u steps\n ", step);
 #endif
 }
 
-void findptsms_el_eval_2(
+void findpts_el_eval_2(
         double *const out_base, const unsigned out_stride,
   const double *const   r_base, const unsigned   r_stride, const unsigned pn,
-  const double *const in, struct findptsms_el_data_2 *const fd)
+  const double *const in, struct findpts_el_data_2 *const fd)
 {
   const unsigned nr=fd->n[0],ns=fd->n[1];
   double *const wtr = fd->work, *const wts = wtr+nr*pn,
