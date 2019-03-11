@@ -1,7 +1,7 @@
 #include <stdio.h>
 #define obbox           TOKEN_PASTE(obbox_,D)
-#define local_hash_data TOKEN_PASTE(findptsms_local_hash_data_,D)
-#define hash_data       TOKEN_PASTE(findptsms_hash_data_,D)
+#define local_hash_data TOKEN_PASTE(findpts_local_hash_data_,D)
+#define hash_data       TOKEN_PASTE(findpts_hash_data_,D)
 #define hash_index      TOKEN_PASTE(hash_index_       ,D)
 #define hash_setfac     TOKEN_PASTE(hash_setfac_      ,D)
 #define hash_range      TOKEN_PASTE(hash_range_       ,D)
@@ -194,7 +194,7 @@ static void hash_build(struct hash_data *const p,
   set_local_mask(local_mask,local_base,local_n,p,obb,nel);
   nc=count_bits(local_mask,(local_ntot+CHAR_BIT-1)/CHAR_BIT);
   #ifdef DIAGNOSTICS
-  printf("findptsms_hash(%u): local cells : %u / %u\n",cr->comm.id,nc,local_ntot);
+  printf("findpts_hash(%u): local cells : %u / %u\n",cr->comm.id,nc,local_ntot);
   #endif
   array_init(struct proc_index,&hash,nc), hash.n=nc;
   fill_hash(&hash,local_mask,local_base,local_n,p->hash_n,cr->comm.np);

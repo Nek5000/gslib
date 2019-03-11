@@ -15,7 +15,7 @@
 #define findpts_local_2         PREFIXED_NAME(findpts_local_2      )
 #define findpts_local_eval_2    PREFIXED_NAME(findpts_local_eval_2 )
 
-struct findptsms_local_hash_data_2 {
+struct findpts_local_hash_data_2 {
   uint hash_n;
   struct dbl_range bnd[2];
   double fac[2];
@@ -28,7 +28,7 @@ struct findpts_local_data_2 {
   const double *elx[2];
   const unsigned *nsid;
   struct obbox_2 *obb;
-  struct findptsms_local_hash_data_2 hd;
+  struct findpts_local_hash_data_2 hd;
   struct findpts_el_data_2 fed;
   double tol;
   double *distrsti;
@@ -95,7 +95,7 @@ void findpts_local_eval_2(
 #define findpts_local_free_3    PREFIXED_NAME(findpts_local_free_3 )
 #define findpts_local_3         PREFIXED_NAME(findpts_local_3      )
 #define findpts_local_eval_3    PREFIXED_NAME(findpts_local_eval_3 )
-struct findptsms_local_hash_data_3 {
+struct findpts_local_hash_data_3 {
   uint hash_n;
   struct dbl_range bnd[3];
   double fac[3];
@@ -108,7 +108,7 @@ struct findpts_local_data_3 {
   const double *elx[3];
   const unsigned *nsid;
   struct obbox_3 *obb;
-  struct findptsms_local_hash_data_3 hd;
+  struct findpts_local_hash_data_3 hd;
   struct findpts_el_data_3 fed;
   double tol;
   double *distrsti;

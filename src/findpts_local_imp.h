@@ -3,7 +3,7 @@
 #define obbox               TOKEN_PASTE(obbox_             ,D)
 #define obbox_calc          TOKEN_PASTE(PREFIXED_NAME(obbox_calc_),D)
 #define obbox_test          TOKEN_PASTE(obbox_test_        ,D)
-#define hash_data           TOKEN_PASTE(findptsms_local_hash_data_,D)
+#define hash_data           TOKEN_PASTE(findpts_local_hash_data_,D)
 #define hash_index          TOKEN_PASTE(hash_index_        ,D)
 #define hash_setfac         TOKEN_PASTE(hash_setfac_       ,D)
 #define hash_range          TOKEN_PASTE(hash_range_        ,D)
