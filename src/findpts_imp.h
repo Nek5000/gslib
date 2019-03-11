@@ -525,7 +525,7 @@ struct findpts_data *findpts_setup(
 
 void findpts_free(struct findpts_data *fd)
 {
-  findpts_free(fd);
+  findptsms_free(fd);
 }
 
 void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
