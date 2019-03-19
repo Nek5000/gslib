@@ -235,8 +235,9 @@ struct findpts_data *findptsms_setup(
   const unsigned m[D], const double bbox_tol,
   const uint local_hash_size, const uint global_hash_size,
   const unsigned npt_max, const double newt_tol, 
-  const uint *const nsid, const double *const distfint,const bool ifms)
+  const uint *const nsid, const double *const distfint)
 {
+  bool ifms = true;
   struct findpts_data *const fd = tmalloc(struct findpts_data, 1);
   crystal_init(&fd->cr,comm);
   setupms_aux(fd,elx,n,nel,m,bbox_tol,
@@ -391,11 +392,14 @@ void findptsms(      uint   *const  code_base   , const unsigned  code_stride   
       double *disti = AT(double,disti,index);
       uint *elsid = AT(uint,elsid,index);
       if (*code==CODE_INTERNAL && *elsid==opt->elsid) continue;
-      if (*code==CODE_NOT_FOUND || 
-         (*elsid == opt->elsid && (opt->code==CODE_INTERNAL || opt->dist2<=*dist2)) || 
-         (*elsid != opt->elsid && *code==CODE_BORDER && (opt->code==CODE_INTERNAL || opt->dist2<=*dist2)) ||
-         (*elsid != opt->elsid && *code==CODE_INTERNAL && opt->code==CODE_INTERNAL && opt->disti>=*disti)
-                               )
+//    if (*code==CODE_NOT_FOUND || 
+//       (*elsid == opt->elsid && (opt->code==CODE_INTERNAL || opt->dist2<=*dist2)) || 
+//       (*elsid != opt->elsid && *code==CODE_BORDER && (opt->code==CODE_INTERNAL || opt->dist2<=*dist2 || opt->code==CODE_BORDER) && opt->disti>=*disti) ||
+//       (*elsid != opt->elsid && *code==CODE_INTERNAL && (opt->code==CODE_INTERNAL || opt->code==CODE_BORDER) && opt->disti>=*disti)
+//                             )
+      if (*code==CODE_NOT_FOUND ||
+         (*elsid == opt->elsid && (opt->code==CODE_INTERNAL || opt->dist2<=*dist2)) ||
+         (*elsid != opt->elsid && opt->disti>=*disti))
         {
         double *r = AT(double,r,index);
         uint  *el = AT(uint,el,index), *proc = AT(uint,proc,index);
