@@ -54,8 +54,6 @@ void findptsms_2(      uint   *const       code_base, const unsigned       code_
                        double *const      dist2_base, const unsigned      dist2_stride,
                  const double *const       x_base[2], const unsigned       x_stride[2],
                  const uint  *const  session_id_base, const unsigned session_id_stride,
-                       double *const      disti_base, const unsigned      disti_stride,
-                       uint   *const      elsid_base, const unsigned      elsid_stride,
                  const uint                      npt, struct findpts_data_2 *const fd);
 
 void findptsms_3(      uint   *const       code_base, const unsigned       code_stride,
@@ -65,8 +63,6 @@ void findptsms_3(      uint   *const       code_base, const unsigned       code_
                        double *const      dist2_base, const unsigned      dist2_stride,
                  const double *const       x_base[3], const unsigned       x_stride[3],
                  const uint  *const  session_id_base, const unsigned session_id_stride,
-                       double *const      disti_base, const unsigned      disti_stride,
-                       uint   *const      elsid_base, const unsigned      elsid_stride,
                  const uint                      npt, struct findpts_data_3 *const fd);
 
 void findptsms_eval_2(

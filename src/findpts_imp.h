@@ -263,12 +263,16 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
                        double *const      dist2_base, const unsigned      dist2_stride,
                  const double *const       x_base[D], const unsigned       x_stride[D],
                  const uint  * const session_id_base, const unsigned session_id_stride,
-                       double *const      disti_base, const unsigned      disti_stride,
-                       uint   *const      elsid_base, const unsigned      elsid_stride,
                  const uint                      npt, struct findpts_data   *const fd)
 {
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
   struct array hash_pt, src_pt, out_pt;
+  double *distv = tmalloc(double,npt);
+  double *const disti_base = distv;
+  uint disti_stride = sizeof(double);
+  uint *elsidv = tmalloc(uint,npt);
+  uint *const elsid_base = elsidv;
+  uint elsid_stride = sizeof(uint);
   /* look locally first */
   if(npt) findptsms_local(      code_base,      code_stride,
                                   el_base,        el_stride,
@@ -430,6 +434,8 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
     array_free(&out_pt);
     #undef AT
   }
+  free(distv);
+  free(elsidv);
 }
 
 struct eval_src_pt { double r[D]; uint index, proc, el; };
@@ -534,14 +540,8 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
              const uint npt, struct findpts_data *const fd)
 {
     unsigned int *sess_base = tmalloc(uint,1);
-    double *disti_base = tmalloc(double,1);
-    unsigned int *elsid_base = tmalloc(uint,1);
     *sess_base = 0;
-    *disti_base = 0;
-    *elsid_base = 0;
     unsigned sess_stride=0;
-    unsigned disti_stride=0;
-    unsigned elsid_stride=0;
 
     findptsms( code_base, code_stride,
                proc_base, proc_stride,
@@ -550,8 +550,6 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
               dist2_base,dist2_stride,
                   x_base,    x_stride,
                sess_base, sess_stride,
-              disti_base,disti_stride,
-              elsid_base,elsid_stride,
                      npt,         fd);
 }
 

@@ -362,8 +362,6 @@ void ffindptsms(const sint *const handle,
   const double *const          y_base, const sint *const          y_stride,
   const double *const          z_base, const sint *const          z_stride,
   const   uint *const session_id_base, const uint *const session_id_stride,
-        double *const      disti_base, const sint *const      disti_stride,
-          sint *const      elsid_base, const sint *const      elsid_stride,
   const sint *const npt)
 {
   CHECK_HANDLE("findptsms");
@@ -387,8 +385,6 @@ void ffindptsms(const sint *const handle,
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                , 
               sess_base,   sess_stride                ,
-             disti_base,(*disti_stride)*sizeof(double),
-      (uint*)elsid_base,(*elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   } else {
     const double *xv_base[3];
@@ -411,8 +407,6 @@ void ffindptsms(const sint *const handle,
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                ,
               sess_base,   sess_stride                ,
-             disti_base,(*disti_stride)*sizeof(double),
-      (uint*)elsid_base,(*elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   }
 }
@@ -436,12 +430,9 @@ void ffindpts(const sint *const handle,
     xv_stride[0] = *x_stride*sizeof(double),
     xv_stride[1] = *y_stride*sizeof(double);
 
-    unsigned int    * sess_base = 0;
-             double *disti_base = 0;
-             double *elsid_base = 0;
+    unsigned int *sess_base = tmalloc(uint,1);
+    *sess_base = 0;
     unsigned sess_stride=0;
-    unsigned disti_stride=0;
-    unsigned elsid_stride=0;
 
     PREFIXED_NAME(findptsms_2)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
@@ -451,8 +442,6 @@ void ffindpts(const sint *const handle,
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                ,
               sess_base,   sess_stride                ,
-             disti_base,( disti_stride)*sizeof(double),
-      (uint*)elsid_base,( elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   } else {
     const double *xv_base[3];
@@ -462,12 +451,10 @@ void ffindpts(const sint *const handle,
     xv_stride[1] = *y_stride*sizeof(double),
     xv_stride[2] = *z_stride*sizeof(double);
 
-    unsigned int     *sess_base = 0;
-             double *disti_base = 0;
-             double *elsid_base = 0;
+
+    unsigned int *sess_base = tmalloc(uint,1);
+    *sess_base = 0;
     unsigned sess_stride=0;
-    unsigned disti_stride=0;
-    unsigned elsid_stride=0;
 
     PREFIXED_NAME(findptsms_3)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
@@ -477,8 +464,6 @@ void ffindpts(const sint *const handle,
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                ,
               sess_base,   sess_stride                ,
-             disti_base,( disti_stride)*sizeof(double),
-      (uint*)elsid_base,( elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   }
 }

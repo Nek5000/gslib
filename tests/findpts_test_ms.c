@@ -68,10 +68,12 @@ static double zr[NR], zs[NS], zt[NT];
 static double x3[D][MULD(3,3,3)];
 static double mesh[D][NEL*MULD(NR,NS,NT)];
 static double distfint[NEL*MULD(NR,NS,NT)];
+static double gllsid[NEL*MULD(NR,NS,NT)];
 static const double *const elx[D] = INITD(mesh[0],mesh[1],mesh[2]);
 static const double *const dfint = {distfint};
+static const double *const gllsi = {gllsid};
 
-struct pt_data { double x[D], r[D], dist2, ex[D], ptdisti; uint code, proc, el, ptsid, ptelsid, ptmarker;};
+struct pt_data { double x[D], r[D], dist2, ex[D], ptelsid2; uint code, proc, el, ptsid, ptelsid, ptmarker;};
 static struct array testp;
 
 static struct crystal cr;
@@ -173,7 +175,6 @@ static void print_ptdata(const struct comm *const comm)
 {
   uint notfound=0;
   uint notsid=0;
-  uint notsido=0;
   double dist2max=0, ed2max=0;
   const struct pt_data *pt = testp.ptr, *const end = pt+testp.n;
   for(;pt!=end;++pt) {
@@ -218,18 +219,19 @@ static void print_ptdata(const struct comm *const comm)
     if (pt->ptmarker==0) {
      corsid = 0;
      if (pt->x[0] > 0.5) corsid = 1;
-     if (fabs(pt->x[0]-0.5)>1.e-10 && pt->ptelsid!=corsid) ++notsid;
+     if (fabs(pt->x[0]-0.5)>1.e-10 && (fabs(pt->ptelsid2-corsid)>1.e-2)) ++notsid;
     }
     else if (pt->ptmarker==1)
     {
     corsid=0;
     if (idsess==0) {corsid=1;}
     if ((pt->x[0]<xdom0 && pt->x[0]>xdom1) || fabs(pt->x[0]-xdom0)<1.e-10 || fabs(pt->x[0]-xdom1)<1.e-10) {
-       if (pt->ptelsid!=corsid) ++notsid;}
+       if (fabs(pt->ptelsid2-corsid)>1.e-2) ++notsid;
+        }
     else 
-      {if (pt->ptelsid!=idsess) ++notsid;}
+      {if (fabs(pt->ptelsid2-idsess)>1.e-2) ++notsid;
+      }
     }
-      notsido = notsid;
   }
   {
     double distmax=sqrt(dist2max), edmax=sqrt(ed2max);
@@ -313,6 +315,7 @@ static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, do
       mesh[0][idx] = quad_eval(x3[0],r);
       mesh[1][idx] = quad_eval(x3[1],r);
       distfint[idx] = idsess==0?xdom0-mesh[0][idx]:mesh[0][idx]-xdom1;
+      gllsid[idx] = idsess;
       #if D==3
       mesh[2][idx] = quad_eval(x3[2],r);
     }
@@ -358,8 +361,6 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
           &pt->dist2, sizeof(struct pt_data),
            x_base   , x_stride, 
            &pt->ptsid    , sizeof(struct pt_data),
-           &pt->ptdisti  , sizeof(struct pt_data),
-           &pt->ptelsid  , sizeof(struct pt_data),
           testp.n, fd);
   for(d=0;d<D;++d) {
     if(id==0) printf("calling findpts_eval (%u)\n",d);
@@ -370,6 +371,12 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
                   pt->r    , sizeof(struct pt_data),
                   testp.n, mesh[d], fd);
   }
+    findptsms_eval(&pt->ptelsid2, sizeof(struct pt_data),
+                 &pt->code , sizeof(struct pt_data),
+                 &pt->proc , sizeof(struct pt_data),
+                 &pt->el   , sizeof(struct pt_data),
+                  pt->r    , sizeof(struct pt_data),
+                  testp.n, gllsi, fd);
   findpts_free(fd);
   print_ptdata(comm1);
 }
