@@ -32,8 +32,8 @@ struct findpts_local_data_2 {
   struct findpts_el_data_2 fed;
   double tol;
   double *distrsti;
-  const double *distfint; //This is field for distance for all GLL points
-  bool ifms;              //This tells if original fpt or ms fpt
+  const double *distfint;
+  uint ims;
 };
 
 void findptsms_local_setup_2(struct findpts_local_data_2 *const fd,
@@ -43,7 +43,7 @@ void findptsms_local_setup_2(struct findpts_local_data_2 *const fd,
                            const unsigned n[2], const uint nel,
                            const unsigned m[2], const double bbox_tol,
                            const uint max_hash_size,
-                           const unsigned npt_max, const double newt_tol,const bool ifms);
+                           const unsigned npt_max, const double newt_tol,const uint ims);
 void findptsms_local_free_2(struct findpts_local_data_2 *const fd);
 void findptsms_local_2(
         uint   *const  code_base   , const unsigned  code_stride   ,
@@ -112,8 +112,8 @@ struct findpts_local_data_3 {
   struct findpts_el_data_3 fed;
   double tol;
   double *distrsti;
-  const double *distfint; //This is field for distance for all GLL points
-  bool ifms;
+  const double *distfint; 
+  uint ims;
 };
 
 void findptsms_local_setup_3(struct findpts_local_data_3 *const fd,
@@ -123,7 +123,7 @@ void findptsms_local_setup_3(struct findpts_local_data_3 *const fd,
                            const unsigned n[3], const uint nel,
                            const unsigned m[3], const double bbox_tol,
                            const uint max_hash_size,
-                           const unsigned npt_max, const double newt_tol,const bool ifms);
+                           const unsigned npt_max, const double newt_tol,const uint ims);
 void findptsms_local_free_3(struct findpts_local_data_3 *const fd);
 void findptsms_local_3(
         uint   *const  code_base   , const unsigned  code_stride   ,

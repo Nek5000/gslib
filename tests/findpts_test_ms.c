@@ -7,7 +7,7 @@
 #include "gslib.h"
 #include "rand_elt_test.h"
 
-#define D 3
+#define D 2
 
 #if D==3
 #define INITD(a,b,c) {a,b,c}
@@ -37,10 +37,11 @@
 #define findptsms_eval  findptsms_eval_2
 #endif
 
+
 #define NR 5
 #define NS 7
 #define NT 6
-#define K 5
+#define K 4
 #define NEL MULD(K,K,K)
 #define TN 4
 
@@ -108,10 +109,10 @@ static double quad_eval(const double coef[MULD(3,3,3)], const double r[D])
 
 static void test_mesh(void)
 {
-  const uint pn = ceil(pow(np,1.0/D));
-  const uint pi=id%pn, pj=(id/pn)%pn;
+  const uint pn = ceil(pow(np1,1.0/D));
+  const uint pi=id1%pn, pj=(id1/pn)%pn;
   #if D==3
-  const uint pk=(id/pn)/pn;
+  const uint pk=(id1/pn)/pn;
   #endif
   const double pfac = 1.0/pn;
   const double pbase[D] = INITD(-1+2*pfac*pi, -1+2*pfac*pj, -1+2*pfac*pk);
@@ -137,15 +138,13 @@ static void test_mesh(void)
     #endif
     for(j=0;j<TN;++j) { r[1] = pbase[1]+pfac*(1+base[1]+step*j);
     for(i=0;i<TN;++i) { r[0] = pbase[0]+pfac*(1+base[0]+step*i);
-      out->proc = rand()%np;
+      out->proc = rand()%np1;
       out->x[0] = quad_eval(x3[0],r);
       out->x[1] = quad_eval(x3[1],r);
       #if D==3
       out->x[2] = quad_eval(x3[2],r);
       #endif
-//    To half the points we assign a fake session ID i.e. 2 (ptmarker=0 for distance check), and
-//    to other half we assign the actual session ID if it is in the overlap (ptmarker=1 session id check)
-//    ptsid = 2 if it is not in the overlap region (ptmarker=2)
+
       out->ptsid = 2;
       out->ptmarker=2;
       uint corsid;
@@ -214,10 +213,6 @@ static void print_ptdata(const struct comm *const comm)
       dist2max=pt->dist2>dist2max?pt->dist2:dist2max;
       ed2max=ed2>ed2max?ed2:ed2max;
     }
-//    To half the points we assign a fake session ID i.e. 2 (ptmarker=0 for distance check), and
-//    to other half we assign the actual session ID if it is in the overlap (ptmarker=1 session id check)
-//    ptsid = 2 if it is not in the overlap region (ptmarker=2)
-
     uint corsid;
     corsid=0;
     if (pt->ptmarker==0) {
@@ -233,9 +228,7 @@ static void print_ptdata(const struct comm *const comm)
        if (pt->ptelsid!=corsid) ++notsid;}
     else 
       {if (pt->ptelsid!=idsess) ++notsid;}
-     }
-//     if (notsid!=notsido) {
-//    printf("%u %u %f %f %u %u %u %u %f k10\n",idsess,pt->ptmarker,pt->x[0],pt->ptdisti,pt->ptsid,pt->ptelsid,corsid,notsid,pt->dist2);}
+    }
       notsido = notsid;
   }
   {
@@ -243,18 +236,18 @@ static void print_ptdata(const struct comm *const comm)
     slong total=testp.n;
     if(0)
     printf("%u: maximum distance = %g (adv), %g (eval);"
-           " %u/%u points not found\n",
+           " %u/%u points not found in session %u\n",
          (unsigned)id, distmax, edmax,
-         (unsigned)notfound, (unsigned)testp.n);
+         (unsigned)notfound, (unsigned)testp.n,idsess);
     distmax = comm_reduce_double(comm,gs_max,&distmax,1);
     edmax   = comm_reduce_double(comm,gs_max,&edmax  ,1);
     notfound = comm_reduce_sint(comm,gs_add,(sint*)&notfound,1);
     total    = comm_reduce_slong(comm,gs_add,&total,1);
     if(id1==0)
       printf("maximum distance = %g (adv), %g (eval);"
-           " %u/%lu points not found\n",
+           " %u/%lu points not found in session %u\n",
            distmax, edmax,
-           (unsigned)notfound, (unsigned long)total);
+           (unsigned)notfound, (unsigned long)total, idsess);
     if(id1==0)
       printf("Number of points identified with wrong session id: %u/%lu \n",
            (unsigned)notsid, (unsigned long)total);
@@ -263,22 +256,20 @@ static void print_ptdata(const struct comm *const comm)
 
 static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, double z1)
 {
-  const uint pn = ceil(pow(np,1.0/D));
-  const uint pi=id%pn, pj=(id/pn)%pn;
+  const uint pn = ceil(pow(np1,1.0/D));
+  const uint pi=id1%pn, pj=(id1/pn)%pn;
   #if D==3
-  const uint pk=(id/pn)/pn;
+  const uint pk=(id1/pn)/pn;
   #endif
   const double pfac = 1.0/pn;
+  const double pfac0 = pfac;
+  const double pfac1 = 1.0;
+  const double pfac2 = 1.0;
   const double pbase[D] = INITD(-1+2*pfac*pi, -1+2*pfac*pj, -1+2*pfac*pk);
   const double fac = 1.0/K;
   const double z3[3] = {-1,0,1};
   unsigned ki,kj;
-  #if D==3 
   unsigned kk;
-  rand_elt_3(x3[0],x3[1],x3[2], z3,3,z3,3,z3,3);
-  #elif D==2
-  rand_elt_2(x3[0],x3[1],       z3,3,z3,3);
-  #endif
   if(id==0) printf("Global division: %u^%d\n",(unsigned)pn,D);
   if(id==0) printf("Global division: %u^%d\n",(unsigned)pn,D);
 
@@ -301,7 +292,7 @@ static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, do
   #if D==3 
      x3[2][idx] = z0 + dzl*(z3[ii]+1.)/2.;
   #endif
-   idx=idx+1;
+   ++idx;
   }
 
 
@@ -314,10 +305,10 @@ static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, do
     double r[D], base[D] = INITD(-1+2*fac*ki,-1+2*fac*kj,-1+2*fac*kk);
     #if D==3
     unsigned k;
-    for(k=0;k<NT;++k) { r[2]=pbase[2]+pfac*(1+base[2]+fac*(1+zt[k]));
+    for(k=0;k<NT;++k) { r[2]=pbase[2]+pfac2*(1+base[2]+fac*(1+zt[k]));
     #endif
-    for(j=0;j<NS;++j) { r[1]=pbase[1]+pfac*(1+base[1]+fac*(1+zs[j]));
-    for(i=0;i<NR;++i) { r[0]=pbase[0]+pfac*(1+base[0]+fac*(1+zr[i]));
+    for(j=0;j<NS;++j) { r[1]=pbase[1]+pfac1*(1+base[1]+fac*(1+zs[j]));
+    for(i=0;i<NR;++i) { r[0]=pbase[0]+pfac0*(1+base[0]+fac*(1+zr[i]));
       idx = off+INDEXD(i,NR, j,NS, k);
       mesh[0][idx] = quad_eval(x3[0],r);
       mesh[1][idx] = quad_eval(x3[1],r);
@@ -325,6 +316,7 @@ static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, do
       #if D==3
       mesh[2][idx] = quad_eval(x3[2],r);
     }
+ 
     #endif
     }}
   }
@@ -346,7 +338,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
   else {rand_mesh1(xdom1,4.,2.,3.,0.,5.);}
   test_mesh();
   pt = testp.ptr;
-  if(id==0) printf("calling findpts_setup\n");
+  if(id==0) printf("calling findpts_setup for %u elements\n",NEL);
 //  fd=findpts_setup(comm,elx,nr,NEL,mr,BBOX_TOL,
 //                   LOC_HASH_SIZE,GBL_HASH_SIZE,
 //                   NPT_MAX,NEWT_TOL);
@@ -379,7 +371,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
                   testp.n, mesh[d], fd);
   }
   findpts_free(fd);
-  print_ptdata(comm);
+  print_ptdata(comm1);
 }
 
 
@@ -401,21 +393,19 @@ int main(int narg, char *arg[])
 
   if (np<2) {
   printf("Please use atleast 2 processors\n");
-//  #ifdef MPI
-//    MPI_Finalize();
-//  #endif
-//  return 0;
+  #ifdef MPI
+    MPI_Finalize();
+  #endif
+  return 0;
   }
   else
   {
-  idsess = 0;
-  if (id%2==0) {idsess=1;}
+  idsess = 1;
+  if (id%2==0) {idsess=0;}
   } 
   MPI_Comm_split(world,idsess,id,&world1);
   comm_init(&comm1,world1);
   id1 = comm1.id, np1=comm1.np;
-//  printf("My session id is %u %u %u %u %u \n",id,idsess,np,id1,np1);
-  
 
   lobatto_nodes(zr,NR),lobatto_nodes(zs,NS),lobatto_nodes(zt,NT);
   array_init(struct pt_data,&testp,NEL*MULD(TN,TN,TN));
@@ -423,6 +413,7 @@ int main(int narg, char *arg[])
   crystal_init(&cr1,&comm1);
   test(&comm,&comm1);
   crystal_free(&cr1);
+  crystal_free(&cr);
   array_free(&testp);
   
   comm_free(&comm);

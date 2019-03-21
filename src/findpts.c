@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <limits.h>
 #include <math.h>
@@ -232,8 +231,7 @@ void ffindptsms_setup(sint *const handle,
   const uint *const nsid,
   const double *const distfint)
 {
-  bool ifms;
-  ifms = true;
+  uint ims=1;
   struct handle *h;
   if(handle_n==handle_max)
     handle_max+=handle_max/2+1,
@@ -252,7 +250,7 @@ void ffindptsms_setup(sint *const handle,
     buffer_init(&fd->cr.data,1000);
     buffer_init(&fd->cr.work,1000);
     setupms_aux_2(fd, elx,n,*nel,m,*bbox_tol,
-                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ifms);
+                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ims);
   } else if(h->ndim==3) {
     struct findpts_data_3 *const fd = tmalloc(struct findpts_data_3,1);
     const double *elx[3];
@@ -265,7 +263,7 @@ void ffindptsms_setup(sint *const handle,
     buffer_init(&fd->cr.data,1000);
     buffer_init(&fd->cr.work,1000);
     setupms_aux_3(fd, elx,n,*nel,m,*bbox_tol,
-                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ifms);
+                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ims);
   } else
     fail(1,__FILE__,__LINE__,
          "findptsms_setup: ndim must be 2 or 3; given ndim=%u",(unsigned)h->ndim);
@@ -284,8 +282,7 @@ void ffindpts_setup(sint *const handle,
   const sint *const npt_max,
   const double *const newt_tol)
 {
-  bool ifms;
-  ifms = false;
+  uint ims=0;
   struct handle *h;
   if(handle_n==handle_max)
     handle_max+=handle_max/2+1,
@@ -308,7 +305,7 @@ void ffindpts_setup(sint *const handle,
     *nsid = 0;
     *distfint = 0;
     setupms_aux_2(fd, elx,n,*nel,m,*bbox_tol,
-                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ifms);
+                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ims);
   } else if(h->ndim==3) {
     struct findpts_data_3 *const fd = tmalloc(struct findpts_data_3,1);
     const double *elx[3];
@@ -323,7 +320,7 @@ void ffindpts_setup(sint *const handle,
     const uint *nsid;        //dummy pointer
     const double *distfint;  //dummy pointer
     setupms_aux_3(fd, elx,n,*nel,m,*bbox_tol,
-                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ifms);
+                *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ims);
   } else
     fail(1,__FILE__,__LINE__,
          "findpts_setup: ndim must be 2 or 3; given ndim=%u",(unsigned)h->ndim);
@@ -356,17 +353,17 @@ void ffindpts_free(const sint *const handle)
 }
 
 void ffindptsms(const sint *const handle,
-          sint *const  code_base, const sint *const  code_stride,
-          sint *const  proc_base, const sint *const  proc_stride,
-          sint *const    el_base, const sint *const    el_stride,
-        double *const     r_base, const sint *const     r_stride,
-        double *const dist2_base, const sint *const dist2_stride,
-  const double *const     x_base, const sint *const     x_stride,
-  const double *const     y_base, const sint *const     y_stride,
-  const double *const     z_base, const sint *const     z_stride,
-  const   uint *const session_id_base,const uint *const     session_id_stride,
-        double *const disti_base, const sint *const disti_stride,
-          sint *const elsid_base, const sint *const elsid_stride,
+          sint *const       code_base, const sint *const       code_stride,
+          sint *const       proc_base, const sint *const       proc_stride,
+          sint *const         el_base, const sint *const         el_stride,
+        double *const          r_base, const sint *const          r_stride,
+        double *const      dist2_base, const sint *const      dist2_stride,
+  const double *const          x_base, const sint *const          x_stride,
+  const double *const          y_base, const sint *const          y_stride,
+  const double *const          z_base, const sint *const          z_stride,
+  const   uint *const session_id_base, const uint *const session_id_stride,
+        double *const      disti_base, const sint *const      disti_stride,
+          sint *const      elsid_base, const sint *const      elsid_stride,
   const sint *const npt)
 {
   CHECK_HANDLE("findptsms");

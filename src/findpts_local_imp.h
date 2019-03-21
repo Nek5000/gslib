@@ -1,5 +1,4 @@
 #include <float.h>
-#include <stdbool.h>
 #define obbox               TOKEN_PASTE(obbox_             ,D)
 #define obbox_calc          TOKEN_PASTE(PREFIXED_NAME(obbox_calc_),D)
 #define obbox_test          TOKEN_PASTE(obbox_test_        ,D)
@@ -207,7 +206,7 @@ struct findpts_local_data {
   double tol;
   double *distrsti;
   const double *distfint;
-  bool ifms;
+  uint ims;
 };
 
 void findptsms_local_setup(struct findpts_local_data *const fd,
@@ -217,7 +216,7 @@ void findptsms_local_setup(struct findpts_local_data *const fd,
                          const unsigned n[D], const uint nel,
                          const unsigned m[D], const double bbox_tol,
                          const uint max_hash_size,
-                         const unsigned npt_max, const double newt_tol,const bool ifms)
+                         const unsigned npt_max, const double newt_tol,const uint ims)
 {
   unsigned d;
   unsigned ntot=n[0]; for(d=1;d<D;++d) ntot*=n[d];
@@ -229,8 +228,8 @@ void findptsms_local_setup(struct findpts_local_data *const fd,
   hash_build(&fd->hd,fd->obb,nel,max_hash_size);
   findpts_el_setup(&fd->fed,n,npt_max);
   fd->tol = newt_tol;
-  fd->ifms = ifms;
-  if (fd->ifms==true) {
+  fd->ims = ims;
+  if (fd->ims==1) {
    fd->distrsti = tmalloc(double, npt_max);
    fd->distfint = distfint;
   }
@@ -241,7 +240,7 @@ void findptsms_local_free(struct findpts_local_data *const fd)
   findpts_el_free(&fd->fed);
   hash_free(&fd->hd);
   free(fd->obb);
-  if (fd->ifms==true) {
+  if (fd->ims==1) {
    free(fd->distrsti);
   }
 }
@@ -275,7 +274,7 @@ static void map_points_to_els(
       *code = CODE_NOT_FOUND;
       for(; elp!=ele; ++elp) {
         const uint el = *elp;
-        if (fd->ifms==true && *(fd->nsid) == *sess_id) continue;
+        if (fd->ims==1 && *(fd->nsid) == *sess_id) continue;
         if(obbox_test(&fd->obb[el],x)>=0) {
           struct index_el *const p =
             array_reserve(struct index_el,map,map->n+1);
@@ -338,7 +337,7 @@ void findptsms_local(
           ++i;
         }
         findpts_el(fed,i,fd->tol);
-        if (fd->ifms==true) {
+        if (fd->ims==1) {
            findpts_el_eval(fd->distrsti, sizeof(double),
                              &fpt[0].r[0], sizeof(struct findpts_el_pt), i,
                              fd->distfint+el*fd->ntot  ,fed);
@@ -348,7 +347,7 @@ void findptsms_local(
           const uint index=q->index;
           uint *code = AT(uint,code,index);
           double *dist2 = AT(double,dist2,index);
-          double *disti = (fd->ifms) ? AT(double,disti,index) : disti_base;
+          double *disti = (fd->ims) ? AT(double,disti,index) : disti_base;
 
           if(*code==CODE_INTERNAL) continue;
           if (*code==CODE_NOT_FOUND
@@ -360,8 +359,8 @@ void findptsms_local(
             *eli = el;    
             *code = fpt[i].flags==(1u<<(2*D)) ? CODE_INTERNAL : CODE_BORDER;
             *dist2 = fpt[i].dist2;    //dist2
-            *disti = (fd->ifms) ? fd->distrsti[i] : 0.; //interpolated distanxe of point from bndr
-            *elsid = (fd->ifms) ? fd->nsid[0]     : 0;  //session id of owning element
+            *disti = (fd->ims==1) ? fd->distrsti[i] : 0.; //interpolated distanxe of point from bndr
+            *elsid = (fd->ims==1) ? fd->nsid[0]     : 0;  //session id of owning element
 	    for(d=0;d<D;++d) r[d]=fpt[i].r[d];
           }
           ++i;
@@ -406,8 +405,7 @@ void findpts_local_setup(struct findpts_local_data *const fd,
                          const uint max_hash_size,
                          const unsigned npt_max, const double newt_tol)
 {
-  bool ifms;
-  ifms = false;
+  uint ims=0;
   unsigned int *nsid = tmalloc(uint,1);
   double *distfint = tmalloc(double,1);
   *nsid = 0;
@@ -419,7 +417,7 @@ void findpts_local_setup(struct findpts_local_data *const fd,
                         n,nel,
                         m,bbox_tol,
                         max_hash_size,
-                        npt_max,newt_tol,ifms);
+                        npt_max,newt_tol,ims);
 }
 
 void findpts_local_free(struct findpts_local_data *const fd)

@@ -219,11 +219,11 @@ static void setupms_aux(
   const unsigned m[D], const double bbox_tol,
   const uint local_hash_size, const uint global_hash_size,
   const unsigned npt_max, const double newt_tol,
-  const uint *const nsid, const double *const distfint, const bool ifms
+  const uint *const nsid, const double *const distfint, const uint ims
   )
 {
   findptsms_local_setup(&fd->local,elx,nsid,distfint,n,nel,m,bbox_tol,local_hash_size,
-                      npt_max, newt_tol,ifms);
+                      npt_max, newt_tol,ims);
   hash_build(&fd->hash,&fd->local.hd,fd->local.obb,nel,
              global_hash_size,&fd->cr);
 }
@@ -237,11 +237,11 @@ struct findpts_data *findptsms_setup(
   const unsigned npt_max, const double newt_tol, 
   const uint *const nsid, const double *const distfint)
 {
-  bool ifms = true;
+  uint ims=1;
   struct findpts_data *const fd = tmalloc(struct findpts_data, 1);
   crystal_init(&fd->cr,comm);
   setupms_aux(fd,elx,n,nel,m,bbox_tol,
-            local_hash_size,global_hash_size,npt_max,newt_tol,nsid, distfint,ifms);
+            local_hash_size,global_hash_size,npt_max,newt_tol,nsid, distfint,ims);
   return fd;
 }
 
@@ -293,8 +293,8 @@ void findptsms(      uint   *const  code_base   , const unsigned  code_stride   
       double x[D]; for(d=0;d<D;++d) x[d]=*xp[d];
       uint session_id; session_id = *sess_id;
       *proc = id;
-        if ((*code!=CODE_INTERNAL && fd->local.ifms==false) ||
-             fd->local.ifms==true) {
+        if ((*code!=CODE_INTERNAL && fd->local.ims==0) ||
+             fd->local.ims==1) {
         const uint hi = hash_index(&fd->hash,x);
         unsigned d;
         for(d=0;d<D;++d) pt->x[d]=x[d];
@@ -384,7 +384,7 @@ void findptsms(      uint   *const  code_base   , const unsigned  code_stride   
     #define  AT(T,var,i) (T*)((char*)var##_base+(i)*var##_stride)
     uint n=out_pt.n;
     struct out_pt *opt;
-    if (fd->local.ifms==true) {
+    if (fd->local.ims==1) {
      for(opt=out_pt.ptr;n;--n,++opt) {
       const uint index = opt->index;
       uint *code = AT(uint,code,index);
@@ -513,8 +513,7 @@ struct findpts_data *findpts_setup(
   const uint local_hash_size, const uint global_hash_size,
   const unsigned npt_max, const double newt_tol)
 { 
-  bool ifms;
-  ifms = false;
+  uint ims=0;
   unsigned int *nsid = tmalloc(uint,1);
   double *distfint = tmalloc(double,1);
   *nsid = 0;
@@ -523,7 +522,7 @@ struct findpts_data *findpts_setup(
   struct findpts_data *const fd = tmalloc(struct findpts_data, 1);
   crystal_init(&fd->cr,comm);
   setupms_aux(fd,elx,n,nel,m,bbox_tol,
-  local_hash_size,global_hash_size,npt_max,newt_tol,nsid, distfint,ifms);
+  local_hash_size,global_hash_size,npt_max,newt_tol,nsid, distfint,ims);
   return fd;
 }
 
