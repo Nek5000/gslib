@@ -21,6 +21,7 @@
 #define findpts_el_points   TOKEN_PASTE(findpts_el_points_ ,D)
 #define findpts_local_data  TOKEN_PASTE(findpts_local_data_,D)
 #define map_points_to_els   TOKEN_PASTE(map_points_to_els_ ,D)
+
 #define findptsms_local_setup TOKEN_PASTE(PREFIXED_NAME(findptsms_local_setup_),D)
 #define findptsms_local_free  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_free_ ),D)
 #define findptsms_local       TOKEN_PASTE(PREFIXED_NAME(findptsms_local_      ),D)
@@ -253,9 +254,9 @@ void findptsms_local_free(struct findpts_local_data *const fd)
   (const T*)((const char*)var##_base[d]+(i)*var##_stride[d])
 
 static void map_points_to_els(
-  struct array *const map,
-        uint   *const  code_base   , const unsigned  code_stride   ,
-  const double *const     x_base[D], const unsigned     x_stride[D],
+  struct array *const              map,
+        uint   *const        code_base, const unsigned      code_stride,
+  const double *const        x_base[D], const unsigned      x_stride[D],
   const uint   *const  session_id_base, const unsigned session_id_stride,
   const uint npt, const struct findpts_local_data *const fd,
   buffer *buf)
@@ -285,9 +286,9 @@ static void map_points_to_els(
       }
     }
     for(d=0;d<D;++d)
-    xp[d] = (const double*)((const char*)xp[d]+   x_stride[d]);
-    code  =         (uint*)(      (char*)code +code_stride   );
-    sess_id  =(const uint*)((const char*)sess_id +session_id_stride);
+    xp[d]    =(const double*)((const char*)xp[d]  +      x_stride[d]);
+    code     =        (uint*)(      (char*)code   +      code_stride);
+    sess_id  =(const uint*  )((const char*)sess_id+session_id_stride);
   }
   /* group by element */
   sarray_sort(struct index_el,map->ptr,map->n, el,0, buf);
@@ -299,18 +300,17 @@ static void map_points_to_els(
   }
 }
 
-
 void findptsms_local(
-        uint   *const  code_base   , const unsigned  code_stride   ,
-        uint   *const    el_base   , const unsigned    el_stride   ,
-        double *const     r_base   , const unsigned     r_stride   ,
-        double *const dist2_base   , const unsigned dist2_stride   ,
-  const double *const     x_base[D], const unsigned     x_stride[D],
+        uint   *const        code_base, const unsigned       code_stride,
+        uint   *const          el_base, const unsigned         el_stride,
+        double *const           r_base, const unsigned          r_stride,
+        double *const       dist2_base, const unsigned      dist2_stride,
+  const double *const        x_base[D], const unsigned       x_stride[D],
   const uint   *const  session_id_base, const unsigned session_id_stride,
-        double *const disti_base   , const unsigned disti_stride   ,
-        uint   *const elsid_base   , const unsigned elsid_stride   ,
+        double *const       disti_base, const unsigned      disti_stride,
+        uint   *const       elsid_base, const unsigned      elsid_stride,
   const uint npt, struct findpts_local_data *const fd,
-  buffer *buf)
+        buffer *buf)
 {
   struct findpts_el_data *const fed = &fd->fed;
   struct findpts_el_pt *const fpt = findpts_el_points(fed);
@@ -356,11 +356,11 @@ void findptsms_local(
             double *r = AT(double,r,index);
             uint *eli = AT(uint,el,index);
             uint *elsid = AT(uint,elsid,index);
-            *eli = el;    
-            *code = fpt[i].flags==(1u<<(2*D)) ? CODE_INTERNAL : CODE_BORDER;
-            *dist2 = fpt[i].dist2;    //dist2
-            *disti = (fd->ims==1) ? fd->distrsti[i] : 0.; //interpolated distanxe of point from bndr
-            *elsid = (fd->ims==1) ? fd->nsid[0]     : 0;  //session id of owning element
+            *eli   = el;    
+            *code  = fpt[i].flags==(1u<<(2*D)) ? CODE_INTERNAL : CODE_BORDER;
+            *dist2 = fpt[i].dist2;   
+            *disti = (fd->ims==1) ? fd->distrsti[i] : 0.;
+            *elsid = (fd->ims==1) ? fd->nsid[0]     : 0 ;
 	    for(d=0;d<D;++d) r[d]=fpt[i].r[d];
           }
           ++i;
@@ -445,14 +445,14 @@ void findpts_local(
     unsigned disti_stride=0;
     unsigned elsid_stride=0;
   findptsms_local(
-        code_base   ,code_stride   ,
-        el_base   ,el_stride   ,
-        r_base   , r_stride   ,
-        dist2_base   ,dist2_stride   ,
-        x_base,x_stride,
-        sess_base,sess_stride,
-        disti_base   ,disti_stride   ,
-        elsid_base   ,elsid_stride   ,
+         code_base, code_stride,
+           el_base,   el_stride,
+            r_base,    r_stride,
+        dist2_base,dist2_stride,
+            x_base,    x_stride,
+         sess_base, sess_stride,
+        disti_base,disti_stride,
+        elsid_base,elsid_stride,
         npt,fd,
         buf);
 }
@@ -467,10 +467,10 @@ void findpts_local_eval(
 {
   findpts_local_eval(
   out_base,out_stride,
-  el_base,el_stride,
-  r_base,r_stride,
-  npt,
-  in,fd);
+   el_base,el_stride,
+    r_base,r_stride,
+       npt,
+        in,fd);
 }
 
 #undef CATD

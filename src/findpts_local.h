@@ -46,16 +46,16 @@ void findptsms_local_setup_2(struct findpts_local_data_2 *const fd,
                            const unsigned npt_max, const double newt_tol,const uint ims);
 void findptsms_local_free_2(struct findpts_local_data_2 *const fd);
 void findptsms_local_2(
-        uint   *const  code_base   , const unsigned  code_stride   ,
-        uint   *const    el_base   , const unsigned    el_stride   ,
-        double *const     r_base   , const unsigned     r_stride   ,
-        double *const dist2_base   , const unsigned dist2_stride   ,
-  const double *const     x_base[2], const unsigned     x_stride[2],
-  const uint    *const  session_id_base, const unsigned session_id_stride,
-        double *const disti_base   , const unsigned disti_stride   ,
-        uint   *const elsid_base   , const unsigned elsid_stride   ,
-  const uint npt, struct findpts_local_data_2 *const fd,
-  buffer *buf);
+        uint   *const        code_base, const unsigned       code_stride,
+        uint   *const          el_base, const unsigned         el_stride,
+        double *const           r_base, const unsigned          r_stride,
+        double *const       dist2_base, const unsigned      dist2_stride,
+  const double *const        x_base[2], const unsigned       x_stride[2],
+  const uint   *const  session_id_base, const unsigned session_id_stride,
+        double *const       disti_base, const unsigned      disti_stride,
+        uint   *const       elsid_base, const unsigned      elsid_stride,
+  const uint npt, struct findpts_local_data_2 *const fd, 
+        buffer *buf);
 void findptsms_local_eval_2(
         double *const out_base, const unsigned out_stride,
   const uint   *const  el_base, const unsigned  el_stride,
@@ -126,16 +126,16 @@ void findptsms_local_setup_3(struct findpts_local_data_3 *const fd,
                            const unsigned npt_max, const double newt_tol,const uint ims);
 void findptsms_local_free_3(struct findpts_local_data_3 *const fd);
 void findptsms_local_3(
-        uint   *const  code_base   , const unsigned  code_stride   ,
-        uint   *const    el_base   , const unsigned    el_stride   ,
-        double *const     r_base   , const unsigned     r_stride   ,
-        double *const dist2_base   , const unsigned dist2_stride   ,
-  const double *const     x_base[3], const unsigned     x_stride[3],
-  const uint    *const  session_id_base, const unsigned session_id_stride,
-        double *const disti_base   , const unsigned disti_stride   ,
-        uint   *const elsid_base   , const unsigned elsid_stride   ,
-  const uint npt, struct findpts_local_data_3 *const fd,
-  buffer *buf);
+        uint   *const        code_base, const unsigned       code_stride,
+        uint   *const          el_base, const unsigned         el_stride,
+        double *const           r_base, const unsigned          r_stride,
+        double *const       dist2_base, const unsigned      dist2_stride,
+  const double *const        x_base[3], const unsigned       x_stride[3],
+  const uint   *const  session_id_base, const unsigned session_id_stride,
+        double *const       disti_base, const unsigned      disti_stride,
+        uint   *const       elsid_base, const unsigned      elsid_stride,
+  const uint npt, struct findpts_local_data_3 *const fd, 
+        buffer *buf);
 void findptsms_local_eval_3(
         double *const out_base, const unsigned out_stride,
   const uint   *const  el_base, const unsigned  el_stride,

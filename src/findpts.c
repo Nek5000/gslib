@@ -27,7 +27,7 @@
 
 #define CODE_INTERNAL 0
 #define CODE_BORDER 1
-#define CODE_NOT_FOUND 2 
+#define CODE_NOT_FOUND 2
 
 struct ulong_range { ulong min, max; };
 struct proc_index { uint proc, index; };
@@ -374,20 +374,20 @@ void ffindptsms(const sint *const handle,
     xv_stride[0] = *x_stride*sizeof(double),
     xv_stride[1] = *y_stride*sizeof(double);
 
-    const uint *sess_base;
-    unsigned sess_stride;
-    sess_base = session_id_base;
+    const uint * sess_base;
+    unsigned   sess_stride;
+    sess_base   =  session_id_base;
     sess_stride = *session_id_stride*sizeof(uint);
      
     PREFIXED_NAME(findptsms_2)(
-      (uint*)code_base,(* code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(* proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*   el_stride)*sizeof(sint  ),
-                r_base,(*    r_stride)*sizeof(double),
-            dist2_base,(*dist2_stride)*sizeof(double),
-               xv_base,     xv_stride,
-               sess_base, sess_stride,
-            disti_base,(*disti_stride)*sizeof(double),
+      (uint*) code_base,(* code_stride)*sizeof(sint  ),
+      (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
+      (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
+                 r_base,(*    r_stride)*sizeof(double),
+             dist2_base,(*dist2_stride)*sizeof(double),
+                xv_base,     xv_stride                , 
+              sess_base,   sess_stride                ,
+             disti_base,(*disti_stride)*sizeof(double),
       (uint*)elsid_base,(*elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   } else {
@@ -397,19 +397,21 @@ void ffindptsms(const sint *const handle,
     xv_stride[0] = *x_stride*sizeof(double),
     xv_stride[1] = *y_stride*sizeof(double),
     xv_stride[2] = *z_stride*sizeof(double);
-    const uint *sess_base;
-    unsigned sess_stride;
-    sess_base = session_id_base;
+
+    const uint * sess_base;
+    unsigned   sess_stride;
+    sess_base   =  session_id_base;
     sess_stride = *session_id_stride*sizeof(uint);
+
     PREFIXED_NAME(findptsms_3)(
-      (uint*)code_base,(* code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(* proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*   el_stride)*sizeof(sint  ),
-                r_base,(*    r_stride)*sizeof(double),
-            dist2_base,(*dist2_stride)*sizeof(double),
-               xv_base,     xv_stride,
-               sess_base, sess_stride,
-            disti_base,(*disti_stride)*sizeof(double),
+      (uint*) code_base,(* code_stride)*sizeof(sint  ),
+      (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
+      (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
+                 r_base,(*    r_stride)*sizeof(double),
+             dist2_base,(*dist2_stride)*sizeof(double),
+                xv_base,     xv_stride                ,
+              sess_base,   sess_stride                ,
+             disti_base,(*disti_stride)*sizeof(double),
       (uint*)elsid_base,(*elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   }
@@ -425,7 +427,7 @@ void ffindpts(const sint *const handle,
   const double *const     y_base, const sint *const     y_stride,
   const double *const     z_base, const sint *const     z_stride,
   const sint *const npt)
-{ 
+{
   CHECK_HANDLE("findpts");
   if(h->ndim==2) {
     const double *xv_base[2];
@@ -434,28 +436,23 @@ void ffindpts(const sint *const handle,
     xv_stride[0] = *x_stride*sizeof(double),
     xv_stride[1] = *y_stride*sizeof(double);
 
-    unsigned int *sess_base = tmalloc(uint,1);
-    double *disti_base = tmalloc(double,1);
-    unsigned int *elsid_base = tmalloc(uint,1);
-    *sess_base = 0;
-    *disti_base = 0;
-    *elsid_base = 0;
-
+    unsigned int    * sess_base = 0;
+             double *disti_base = 0;
+             double *elsid_base = 0;
     unsigned sess_stride=0;
     unsigned disti_stride=0;
     unsigned elsid_stride=0;
 
-
     PREFIXED_NAME(findptsms_2)(
-      (uint*)code_base,(* code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(* proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*   el_stride)*sizeof(sint  ),
-                r_base,(*    r_stride)*sizeof(double),
-            dist2_base,(*dist2_stride)*sizeof(double),
-               xv_base,     xv_stride,
-               sess_base, sess_stride,
-            disti_base,(disti_stride)*sizeof(double),
-      (uint*)elsid_base,(elsid_stride)*sizeof(sint  ),
+      (uint*) code_base,(* code_stride)*sizeof(sint  ),
+      (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
+      (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
+                 r_base,(*    r_stride)*sizeof(double),
+             dist2_base,(*dist2_stride)*sizeof(double),
+                xv_base,     xv_stride                ,
+              sess_base,   sess_stride                ,
+             disti_base,( disti_stride)*sizeof(double),
+      (uint*)elsid_base,( elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   } else {
     const double *xv_base[3];
@@ -465,24 +462,23 @@ void ffindpts(const sint *const handle,
     xv_stride[1] = *y_stride*sizeof(double),
     xv_stride[2] = *z_stride*sizeof(double);
 
-    unsigned int *sess_base;
-    double *disti_base;
-    double *elsid_base;
-
+    unsigned int     *sess_base = 0;
+             double *disti_base = 0;
+             double *elsid_base = 0;
     unsigned sess_stride=0;
     unsigned disti_stride=0;
     unsigned elsid_stride=0;
 
     PREFIXED_NAME(findptsms_3)(
-      (uint*)code_base,(* code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(* proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*   el_stride)*sizeof(sint  ),
-                r_base,(*    r_stride)*sizeof(double),
-            dist2_base,(*dist2_stride)*sizeof(double),
-               xv_base,     xv_stride,
-               sess_base, sess_stride,
-            disti_base,(disti_stride)*sizeof(double),
-      (uint*)elsid_base,(elsid_stride)*sizeof(sint  ),
+      (uint*) code_base,(* code_stride)*sizeof(sint  ),
+      (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
+      (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
+                 r_base,(*    r_stride)*sizeof(double),
+             dist2_base,(*dist2_stride)*sizeof(double),
+                xv_base,     xv_stride                ,
+              sess_base,   sess_stride                ,
+             disti_base,( disti_stride)*sizeof(double),
+      (uint*)elsid_base,( elsid_stride)*sizeof(sint  ),
       *npt, h->data);
   }
 }
