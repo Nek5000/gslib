@@ -350,7 +350,7 @@ void findptsms_local(
           double *disti = (fd->ims) ? AT(double,disti,index) : disti_base;
 
           if(*code==CODE_INTERNAL) continue;
-          if (*code==CODE_NOT_FOUND
+          if(*code==CODE_NOT_FOUND
           || fpt[i].flags==(1u<<(2*D)) /* converged, no constraints */
           || fpt[i].dist2<*dist2) {
             double *r = AT(double,r,index);

@@ -912,13 +912,13 @@ newton_edge_fin:
 #endif
 }
 
-typedef void findptms_fun(
+typedef void findpt_fun(
   struct findpts_el_pt_3 *const out,
   struct findpts_el_data_3 *const fd,
   const struct findpts_el_pt_3 *const p, const unsigned pn, const double tol);
 
 /* work[(3+9+2*(nr+ns+nt+nrs))*pn + max(2*nr,ns) ] */
-static void findptms_vol(
+static void findpt_vol(
   struct findpts_el_pt_3 *const out,
   struct findpts_el_data_3 *const fd,
   const struct findpts_el_pt_3 *const p, const unsigned pn, const double tol)
@@ -955,7 +955,7 @@ static void findptms_vol(
 }
 
 /* work[(3+9+3+3*(n1+n2+n1))*pn ] */
-static void findptms_face(
+static void findpt_face(
   struct findpts_el_pt_3 *const out,
   struct findpts_el_data_3 *const fd,
   const struct findpts_el_pt_3 *const p, const unsigned pn, const double tol)
@@ -1031,7 +1031,7 @@ static void findptms_face(
 }
 
 /* work[ 3*n ] */
-static void findptms_edge(
+static void findpt_edge(
   struct findpts_el_pt_3 *const out,
   struct findpts_el_data_3 *const fd,
   const struct findpts_el_pt_3 *const p, const unsigned pn, const double tol)
@@ -1112,7 +1112,7 @@ static void findptms_edge(
   }
 }
 
-static void findptms_pt(
+static void findpt_pt(
   struct findpts_el_pt_3 *const out,
   struct findpts_el_data_3 *const fd,
   const struct findpts_el_pt_3 *const p, const unsigned pn, const double tol)
@@ -1146,25 +1146,25 @@ static void findptms_pt(
     /* check constraints */
     if(sr[0]<0) {
       if(sr[1]<0) {
-        if(sr[2]<0) goto findptms_pt_vol;
-        else { d1=0,d2=1,dn=2, hi0=0,hi1=1,hi2=3; goto findptms_pt_face; }
+        if(sr[2]<0) goto findpt_pt_vol;
+        else { d1=0,d2=1,dn=2, hi0=0,hi1=1,hi2=3; goto findpt_pt_face; }
       }
-      else if(sr[2]<0) {d1=2,d2=0,dn=1, hi0=5,hi1=2,hi2=0; goto findptms_pt_face;}
-      else { de=0,dn1=1,dn2=2, hi0=0; goto findptms_pt_edge; }
+      else if(sr[2]<0) {d1=2,d2=0,dn=1, hi0=5,hi1=2,hi2=0; goto findpt_pt_face;}
+      else { de=0,dn1=1,dn2=2, hi0=0; goto findpt_pt_edge; }
     }
     else if(sr[1]<0) {
-      if(sr[2]<0) { d1=1,d2=2,dn=0, hi0=3,hi1=4,hi2=5; goto findptms_pt_face; }
-      else { de=1,dn1=2,dn2=0, hi0=3; goto findptms_pt_edge; }
+      if(sr[2]<0) { d1=1,d2=2,dn=0, hi0=3,hi1=4,hi2=5; goto findpt_pt_face; }
+      else { de=1,dn1=2,dn2=0, hi0=3; goto findpt_pt_edge; }
     }
-    else if(sr[2]<0) { de=2,dn1=0,dn2=1, hi0=5; goto findptms_pt_edge; }
+    else if(sr[2]<0) { de=2,dn1=0,dn2=1, hi0=5; goto findpt_pt_edge; }
     out[i].r[0]=p[i].r[0],out[i].r[1]=p[i].r[1],out[i].r[2]=p[i].r[2];
     out[i].dist2p=0;
     out[i].flags = pflag | CONVERGED_FLAG;
     continue;
-    findptms_pt_vol:
+    findpt_pt_vol:
       newton_vol(out+i, jac,resid, p+i, tol);
       continue;
-    findptms_pt_face: {
+    findpt_pt_face: {
       double rh[3];
       rh[0] = resid[0]*hes[hi0]+resid[1]*hes[6+hi0]+resid[2]*hes[12+hi0],
       rh[1] = resid[0]*hes[hi1]+resid[1]*hes[6+hi1]+resid[2]*hes[12+hi1],
@@ -1172,7 +1172,7 @@ static void findptms_pt(
       newton_face(out+i, jac,rh,resid, d1,d2,dn,
                   pflag&(3u<<(2*dn)), p+i, tol);
     } continue;
-    findptms_pt_edge: {
+    findpt_pt_edge: {
       const double rh =
         resid[0]*hes[hi0]+resid[1]*hes[6+hi0]+resid[2]*hes[12+hi0];
       newton_edge(out+i, jac,rh,resid, de,dn1,dn2,
@@ -1211,8 +1211,8 @@ static void seed(struct findpts_el_data_3 *const fd,
 void findpts_el_3(struct findpts_el_data_3 *const fd, const unsigned npt,
                   const double tol)
 {
-  findptms_fun *const fun[4] = 
-    { &findptms_vol, &findptms_face, &findptms_edge, &findptms_pt };
+  findpt_fun *const fun[4] = 
+    { &findpt_vol, &findpt_face, &findpt_edge, &findpt_pt };
   struct findpts_el_pt_3 *const pbuf = fd->p, *const pstart = fd->p + npt;
   unsigned nconv = npt;
   unsigned step = 0;

@@ -556,13 +556,13 @@ newton_edge_fin:
 #endif
 }
 
-typedef void findptms_fun(
+typedef void findpt_fun(
   struct findpts_el_pt_2 *const out,
   struct findpts_el_data_2 *const fd,
   const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol);
 
 /* work[(6+2*(2*nr+ns))*pn] */
-static void findptms_area(
+static void findpt_area(
   struct findpts_el_pt_2 *const out,
   struct findpts_el_data_2 *const fd,
   const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol)
@@ -595,7 +595,7 @@ static void findptms_area(
 }
 
 /* work[(10+3*n)*pn] */
-static void findptms_edge(
+static void findpt_edge(
   struct findpts_el_pt_2 *const out,
   struct findpts_el_data_2 *const fd,
   const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol)
@@ -658,7 +658,7 @@ static void findptms_edge(
   }
 }
 
-static void findptms_pt(
+static void findpt_pt(
   struct findpts_el_pt_2 *const out,
   struct findpts_el_data_2 *const fd,
   const struct findpts_el_pt_2 *const p, const unsigned pn, const double tol)
@@ -688,18 +688,18 @@ static void findptms_pt(
     if(reject_prior_step_q(out+i,resid,p+i,tol)) continue;
     /* check constraints */
     if(sr[0]<0) {
-      if(sr[1]<0) goto findptms_pt_area;
-      else { de=0,dn=1; goto findptms_pt_edge; }
+      if(sr[1]<0) goto findpt_pt_area;
+      else { de=0,dn=1; goto findpt_pt_edge; }
     }
-    else if(sr[1]<0) { de=1,dn=0; goto findptms_pt_edge; }
+    else if(sr[1]<0) { de=1,dn=0; goto findpt_pt_edge; }
     out[i].r[0]=p[i].r[0],out[i].r[1]=p[i].r[1];
     out[i].dist2p=0;
     out[i].flags = pflag | CONVERGED_FLAG;
     continue;
-    findptms_pt_area:
+    findpt_pt_area:
       newton_area(out+i, jac,resid, p+i, tol);
       continue;
-    findptms_pt_edge: {
+    findpt_pt_edge: {
       const double rh = resid[0]*hes[de]+resid[1]*hes[2+de];
       newton_edge(out+i, jac,rh,resid, de,dn,
                   pflag&(3u<<(2*dn)), p+i, tol);
@@ -734,8 +734,8 @@ static void seed(struct findpts_el_data_2 *const fd,
 void findpts_el_2(struct findpts_el_data_2 *const fd, const unsigned npt,
                   const double tol)
 {
-  findptms_fun *const fun[3] = 
-    { &findptms_area, &findptms_edge, &findptms_pt };
+  findpt_fun *const fun[3] = 
+    { &findpt_area, &findpt_edge, &findpt_pt };
   struct findpts_el_pt_2 *const pbuf = fd->p, *const pstart = fd->p + npt;
   unsigned nconv = npt;
   unsigned step = 0;

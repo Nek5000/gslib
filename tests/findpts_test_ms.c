@@ -7,17 +7,17 @@
 #include "gslib.h"
 #include "rand_elt_test.h"
 
-#define D 2
+#define D 3
 
 #if D==3
 #define INITD(a,b,c) {a,b,c}
 #define MULD(a,b,c) ((a)*(b)*(c))
 #define INDEXD(a,na, b,nb, c) (((c)*(nb)+(b))*(na)+(a))
-#define findpts_data  findpts_data_3
-#define findpts_setup findpts_setup_3
-#define findpts_free  findpts_free_3
-#define findpts       findpts_3
-#define findpts_eval  findpts_eval_3
+#define findpts_data    findpts_data_3
+#define findpts_setup   findpts_setup_3
+#define findpts_free    findpts_free_3
+#define findpts         findpts_3
+#define findpts_eval    findpts_eval_3
 #define findptsms_setup findptsms_setup_3
 #define findptsms_free  findptsms_free_3
 #define findptsms       findptsms_3
@@ -26,11 +26,11 @@
 #define INITD(a,b,c) {a,b}
 #define MULD(a,b,c) ((a)*(b))
 #define INDEXD(a,na, b,nb, c) ((b)*(na)+(a))
-#define findpts_data  findpts_data_2
-#define findpts_setup findpts_setup_2
-#define findpts_free  findpts_free_2
-#define findpts       findpts_2
-#define findpts_eval  findpts_eval_2
+#define findpts_data    findpts_data_2
+#define findpts_setup   findpts_setup_2
+#define findpts_free    findpts_free_2
+#define findpts         findpts_2
+#define findpts_eval    findpts_eval_2
 #define findptsms_setup findptsms_setup_2
 #define findptsms_free  findptsms_free_2
 #define findptsms       findptsms_2
@@ -73,7 +73,7 @@ static const double *const elx[D] = INITD(mesh[0],mesh[1],mesh[2]);
 static const double *const dfint = {distfint};
 static const double *const gllsi = {gllsid};
 
-struct pt_data { double x[D], r[D], dist2, ex[D], ptelsid2; uint code, proc, el, ptsid, ptelsid, ptmarker;};
+struct pt_data { double x[D], r[D], dist2, ex[D], ptelsid; uint code, proc, el, ptsid, ptmarker;};
 static struct array testp;
 
 static struct crystal cr;
@@ -149,8 +149,6 @@ static void test_mesh(void)
 
       out->ptsid = 2;
       out->ptmarker=2;
-      uint corsid;
-      corsid = idsess;
 
       if (out->x[0]<xdom0 && out->x[0]>xdom1)
       {
@@ -219,17 +217,17 @@ static void print_ptdata(const struct comm *const comm)
     if (pt->ptmarker==0) {
      corsid = 0;
      if (pt->x[0] > 0.5) corsid = 1;
-     if (fabs(pt->x[0]-0.5)>1.e-10 && (fabs(pt->ptelsid2-corsid)>1.e-2)) ++notsid;
+     if (fabs(pt->x[0]-0.5)>1.e-10 && (fabs(pt->ptelsid-corsid)>1.e-2)) ++notsid;
     }
     else if (pt->ptmarker==1)
     {
     corsid=0;
     if (idsess==0) {corsid=1;}
     if ((pt->x[0]<xdom0 && pt->x[0]>xdom1) || fabs(pt->x[0]-xdom0)<1.e-10 || fabs(pt->x[0]-xdom1)<1.e-10) {
-       if (fabs(pt->ptelsid2-corsid)>1.e-2) ++notsid;
+       if (fabs(pt->ptelsid-corsid)>1.e-2) ++notsid;
         }
     else 
-      {if (fabs(pt->ptelsid2-idsess)>1.e-2) ++notsid;
+      {if (fabs(pt->ptelsid-idsess)>1.e-2) ++notsid;
       }
     }
   }
@@ -297,7 +295,6 @@ static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, do
    ++idx;
   }
 
-
   #if D==3
   for(kk=0;kk<K;++kk)
   #endif
@@ -319,7 +316,6 @@ static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, do
       #if D==3
       mesh[2][idx] = quad_eval(x3[2],r);
     }
- 
     #endif
     }}
   }
@@ -341,10 +337,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
   else {rand_mesh1(xdom1,4.,2.,3.,0.,5.);}
   test_mesh();
   pt = testp.ptr;
-  if(id==0) printf("calling findpts_setup for %u elements\n",NEL);
-//  fd=findpts_setup(comm,elx,nr,NEL,mr,BBOX_TOL,
-//                   LOC_HASH_SIZE,GBL_HASH_SIZE,
-//                   NPT_MAX,NEWT_TOL);
+  if(id==0) printf("calling findpts_setup\n");
   fd=findptsms_setup(comm,elx,nr,NEL,mr,BBOX_TOL,
                    LOC_HASH_SIZE,GBL_HASH_SIZE,
                    NPT_MAX,NEWT_TOL,&idsess,dfint);
@@ -353,30 +346,29 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
   #if D==3
   x_base[2]=pt->x+2;
   #endif
-//  findpts(&pt->code , sizeof(struct pt_data),
-   findptsms(&pt->code , sizeof(struct pt_data),
-          &pt->proc , sizeof(struct pt_data),
-          &pt->el   , sizeof(struct pt_data),
-           pt->r    , sizeof(struct pt_data),
-          &pt->dist2, sizeof(struct pt_data),
-           x_base   , x_stride, 
-           &pt->ptsid    , sizeof(struct pt_data),
-          testp.n, fd);
+   findptsms(&pt->code ,sizeof(struct pt_data),
+             &pt->proc ,sizeof(struct pt_data),
+             &pt->el   ,sizeof(struct pt_data),
+             pt->r     ,sizeof(struct pt_data),
+             &pt->dist2,sizeof(struct pt_data),
+             x_base    ,x_stride, 
+             &pt->ptsid,sizeof(struct pt_data),
+             testp.n, fd);
   for(d=0;d<D;++d) {
     if(id==0) printf("calling findpts_eval (%u)\n",d);
-    findptsms_eval(&pt->ex[d], sizeof(struct pt_data),
-                 &pt->code , sizeof(struct pt_data),
-                 &pt->proc , sizeof(struct pt_data),
-                 &pt->el   , sizeof(struct pt_data),
-                  pt->r    , sizeof(struct pt_data),
-                  testp.n, mesh[d], fd);
+    findptsms_eval(&pt->ex[d],sizeof(struct pt_data),
+                   &pt->code ,sizeof(struct pt_data),
+                   &pt->proc ,sizeof(struct pt_data),
+                   &pt->el   ,sizeof(struct pt_data),
+                   pt->r     ,sizeof(struct pt_data),
+                   testp.n, mesh[d], fd);
   }
-    findptsms_eval(&pt->ptelsid2, sizeof(struct pt_data),
-                 &pt->code , sizeof(struct pt_data),
-                 &pt->proc , sizeof(struct pt_data),
-                 &pt->el   , sizeof(struct pt_data),
-                  pt->r    , sizeof(struct pt_data),
-                  testp.n, gllsi, fd);
+    findptsms_eval(&pt->ptelsid,sizeof(struct pt_data),
+                   &pt->code   ,sizeof(struct pt_data),
+                   &pt->proc   ,sizeof(struct pt_data),
+                   &pt->el     ,sizeof(struct pt_data),
+                   pt->r       ,sizeof(struct pt_data),
+                   testp.n, gllsi, fd);
   findpts_free(fd);
   print_ptdata(comm1);
 }

@@ -89,6 +89,9 @@ static uint count_bits(unsigned char *p, uint n)
   call findpts_setup(h, comm,np, ndim, xm,ym,zm, nr,ns,nt,nel,
                      mr,ms,mt, bbox_tol, loc_hash_size, gbl_hash_size,
                      npt_max, newt_tol)
+  call findptsms_setup(h, comm,np, ndim, xm,ym,zm, nr,ns,nt,nel,
+                     mr,ms,mt, bbox_tol, loc_hash_size, gbl_hash_size,
+                     npt_max, newt_tol,idsess,distf)
 
     (zm,nt,mt all ignored when ndim==2)
                      
@@ -131,9 +134,16 @@ static uint count_bits(unsigned char *p, uint n)
                    the 1-norm of the step in (r,s,t) is smaller than newt_tol
                 or the objective (dist^2) increases while the predicted (model)
                   decrease is smaller than newt_tol * (the objective)
+  Additional arguments for multisession findpts
+    idsess: integer session ID number of the domain.. same for all elements
+            on a processor. findpts will ignore elements who have the 
+            same session ID as that of the sought point by findpts
+    distf : e.g. distance of each node from a surface
+            nodal field which will be maximized during search in findpts. 
 
   --------------------------------------------------------------------------
   call findpts_free(h)
+  call findptsms_free(h)
   
   --------------------------------------------------------------------------
   call findpts(h, code_base,  code_stride,
@@ -144,6 +154,16 @@ static uint count_bits(unsigned char *p, uint n)
                      x_base,     x_stride,
                      y_base,     y_stride,
                      z_base,     z_stride, npt)
+
+  call findptsms(h, code_base,  code_stride,
+                  proc_base,  proc_stride,
+                    el_base,    el_stride,
+                     r_base,     r_stride,
+                 dist2_base, dist2_stride,
+                     x_base,     x_stride,
+                     y_base,     y_stride,
+                     z_base,     z_stride, 
+                  sess_base,  sess_stride,npt)
 
     (z_base, z_stride ignored when ndim==2)
 
@@ -160,6 +180,8 @@ static uint count_bits(unsigned char *p, uint n)
           dist2: distance squared from found to sought point (in xyz space)
         input:
           x, y, z: coordinates of sought point
+   Additional input for findptsms
+          sess: session ID of the sought point
     
     the *_base arguments point to the data for the first point,
       each is advanced by the corresponding *_stride argument for the next point
@@ -430,18 +452,13 @@ void ffindpts(const sint *const handle,
     xv_stride[0] = *x_stride*sizeof(double),
     xv_stride[1] = *y_stride*sizeof(double);
 
-    unsigned int *sess_base = tmalloc(uint,1);
-    *sess_base = 0;
-    unsigned sess_stride=0;
-
-    PREFIXED_NAME(findptsms_2)(
+    PREFIXED_NAME(findpts_2)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
       (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
       (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
                  r_base,(*    r_stride)*sizeof(double),
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                ,
-              sess_base,   sess_stride                ,
       *npt, h->data);
   } else {
     const double *xv_base[3];
@@ -451,19 +468,13 @@ void ffindpts(const sint *const handle,
     xv_stride[1] = *y_stride*sizeof(double),
     xv_stride[2] = *z_stride*sizeof(double);
 
-
-    unsigned int *sess_base = tmalloc(uint,1);
-    *sess_base = 0;
-    unsigned sess_stride=0;
-
-    PREFIXED_NAME(findptsms_3)(
+    PREFIXED_NAME(findpts_3)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
       (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
       (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
                  r_base,(*    r_stride)*sizeof(double),
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                ,
-              sess_base,   sess_stride                ,
       *npt, h->data);
   }
 }

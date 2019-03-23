@@ -539,6 +539,10 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
              const double *const     x_base[D], const unsigned     x_stride[D],
              const uint npt, struct findpts_data *const fd)
 {
+    if (fd->local.ims==1) {
+       printf("Please use findptsms\n");
+       die(1);
+    }
     unsigned int *sess_base = tmalloc(uint,1);
     *sess_base = 0;
     unsigned sess_stride=0;
