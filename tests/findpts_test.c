@@ -4,6 +4,7 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
+#include <time.h>
 #include "gslib.h"
 #include "rand_elt_test.h"
 
@@ -13,20 +14,21 @@
 #define INITD(a,b,c) {a,b,c}
 #define MULD(a,b,c) ((a)*(b)*(c))
 #define INDEXD(a,na, b,nb, c) (((c)*(nb)+(b))*(na)+(a))
-#define findpts_data  findpts_data_3
-#define findpts_setup findpts_setup_3
-#define findpts_free  findpts_free_3
-#define findpts       findpts_3
-#define findpts_eval  findpts_eval_3
+#define findpts_data       findpts_data_3
+#define findpts_setup      findpts_setup_3
+#define findpts_free       findpts_free_3
+#define findpts            findpts_3
+#define findpts_eval       findpts_eval_3
+#define findpts_multi_eval findpts_multi_eval_3
 #elif D==2
 #define INITD(a,b,c) {a,b}
 #define MULD(a,b,c) ((a)*(b))
 #define INDEXD(a,na, b,nb, c) ((b)*(na)+(a))
-#define findpts_data  findpts_data_2
-#define findpts_setup findpts_setup_2
-#define findpts_free  findpts_free_2
-#define findpts       findpts_2
-#define findpts_eval  findpts_eval_2
+#define findpts_data       findpts_data_2
+#define findpts_setup      findpts_setup_2
+#define findpts_free       findpts_free_2
+#define findpts            findpts_2
+#define findpts_multi_eval findpts_multi_eval_2
 #endif
 
 #define NR 5
@@ -273,15 +275,34 @@ static void test(const struct comm *const comm)
            pt->r    , sizeof(struct pt_data),
           &pt->dist2, sizeof(struct pt_data),
            x_base   , x_stride, testp.n, fd);
-  for(d=0;d<D;++d) {
+clock_t begin = clock();
+    for(d=0;d<D;++d) {
+      if(id==0) printf("calling findpts_eval (%u)\n",d);
+      findpts_eval(&pt->ex[d], sizeof(struct pt_data),
+                   &pt->code , sizeof(struct pt_data),
+                   &pt->proc , sizeof(struct pt_data),
+                   &pt->el   , sizeof(struct pt_data),
+                    pt->r    , sizeof(struct pt_data),
+                    testp.n, mesh[d], fd);
+    }
+clock_t end = clock();
+double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+double time_spent_tot;
+time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
+if (id==0) {printf(" time spent approach 1 %f \n",time_spent_tot/np);}
+
+begin = clock();
     if(id==0) printf("calling findpts_eval (%u)\n",d);
-    findpts_eval(&pt->ex[d], sizeof(struct pt_data),
+    findpts_multi_eval(&pt->ex[0], sizeof(struct pt_data),
                  &pt->code , sizeof(struct pt_data),
                  &pt->proc , sizeof(struct pt_data),
                  &pt->el   , sizeof(struct pt_data),
                   pt->r    , sizeof(struct pt_data),
-                  testp.n, mesh[d], fd);
-  }
+                  testp.n,GBL_HASH_SIZE,D, sizeof(double), mesh[0], fd);
+end = clock();
+time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
+if (id==0) {printf(" time spent approach 1 %f \n",time_spent_tot/np);}
   findpts_free(fd);
   print_ptdata(comm);
 }

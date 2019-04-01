@@ -1315,4 +1315,3 @@ void findpts_el_eval_3(
     out = (double*)((char*)out + out_stride);
   }
 }
-

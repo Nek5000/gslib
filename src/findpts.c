@@ -204,6 +204,7 @@ static uint count_bits(unsigned char *p, uint n)
 #define ffindpts_free       FORTRAN_NAME(findpts_free      ,FINDPTS_FREE      )
 #define ffindpts            FORTRAN_NAME(findpts           ,FINDPTS           )
 #define ffindpts_eval       FORTRAN_NAME(findpts_eval      ,FINDPTS_EVAL      )
+#define ffindpts_multi_eval FORTRAN_NAME(findpts_multi_eval,FINDPTS_MULTI_EVAL)
 #define ffindpts_eval_local FORTRAN_NAME(findpts_eval_local,FINDPTS_EVAL_LOCAL)
 
 struct handle { void *data; unsigned ndim; };
@@ -366,4 +367,35 @@ void ffindpts_eval_local(const sint *const handle,
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
       *npt, in, &((struct findpts_data_3 *)h->data)->local);
+}
+
+void ffindpts_multi_eval(const sint *const handle,
+        double *const  out_base, const sint *const     out_stride,
+  const   sint *const code_base, const sint *const    code_stride,
+  const   sint *const proc_base, const sint *const    proc_stride,
+  const   sint *const   el_base, const sint *const      el_stride,
+  const double *const    r_base, const sint *const       r_stride,
+  const   sint *const       npt, const sint *const       fld_size,
+  const   uint *const      nfld, const sint *const out_fld_stride,
+  const double *const in)
+{
+  CHECK_HANDLE("findpts_eval");
+  if(h->ndim==2)
+    PREFIXED_NAME(findpts_multi_eval_2)(
+              out_base,(*    out_stride)*sizeof(double),
+      (uint*)code_base,(*   code_stride)*sizeof(sint  ),
+      (uint*)proc_base,(*   proc_stride)*sizeof(sint  ),
+      (uint*)  el_base,(*     el_stride)*sizeof(sint  ),
+                r_base,(*      r_stride)*sizeof(double),
+  *npt,*fld_size,*nfld,(*out_fld_stride)*sizeof(double),
+      in, h->data);
+  else
+    PREFIXED_NAME(findpts_multi_eval_3)(
+              out_base,(* out_stride)*sizeof(double),
+      (uint*)code_base,(*code_stride)*sizeof(sint  ),
+      (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
+      (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
+                r_base,(*   r_stride)*sizeof(double),
+  *npt,*fld_size,*nfld,(*out_fld_stride)*sizeof(double),
+      in, h->data);
 }

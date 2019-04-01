@@ -5,14 +5,16 @@
 #warning "findpts.h" requires "comm.h"
 #endif
 
-#define findpts_setup_2   PREFIXED_NAME(findpts_setup_2)
-#define findpts_free_2    PREFIXED_NAME(findpts_free_2 )
-#define findpts_2         PREFIXED_NAME(findpts_2      )
-#define findpts_eval_2    PREFIXED_NAME(findpts_eval_2 )
-#define findpts_setup_3   PREFIXED_NAME(findpts_setup_3)
-#define findpts_free_3    PREFIXED_NAME(findpts_free_3 )
-#define findpts_3         PREFIXED_NAME(findpts_3      )
-#define findpts_eval_3    PREFIXED_NAME(findpts_eval_3 )
+#define findpts_setup_2      PREFIXED_NAME(findpts_setup_2)
+#define findpts_free_2       PREFIXED_NAME(findpts_free_2 )
+#define findpts_2            PREFIXED_NAME(findpts_2      )
+#define findpts_eval_2       PREFIXED_NAME(findpts_eval_2 )
+#define findpts_multi_eval_2 PREFIXED_NAME(findpts_multi_eval_2 )
+#define findpts_setup_3      PREFIXED_NAME(findpts_setup_3)
+#define findpts_free_3       PREFIXED_NAME(findpts_free_3 )
+#define findpts_3            PREFIXED_NAME(findpts_3      )
+#define findpts_eval_3       PREFIXED_NAME(findpts_eval_3 )
+#define findpts_multi_eval_3 PREFIXED_NAME(findpts_multi_eval_3 )
 
 struct findpts_data_2;
 struct findpts_data_3;
@@ -68,6 +70,26 @@ void findpts_eval_3(
   const uint   *const   el_base, const unsigned   el_stride,
   const double *const    r_base, const unsigned    r_stride,
   const uint npt,
+  const double *const in, struct findpts_data_3 *const fd);
+
+void findpts_multi_eval_2(
+        double *const  out_base, const unsigned     out_stride,
+  const uint   *const code_base, const unsigned    code_stride,
+  const uint   *const proc_base, const unsigned    proc_stride,
+  const uint   *const   el_base, const unsigned      el_stride,
+  const double *const    r_base, const unsigned       r_stride,
+  const uint npt               , const uint           fld_size,
+  const uint nfld              , const unsigned out_fld_stride,
+  const double *const in, struct findpts_data_2 *const fd);
+
+void findpts_multi_eval_3(
+        double *const  out_base, const unsigned     out_stride,
+  const uint   *const code_base, const unsigned    code_stride,
+  const uint   *const proc_base, const unsigned    proc_stride,
+  const uint   *const   el_base, const unsigned      el_stride,
+  const double *const    r_base, const unsigned       r_stride,
+  const uint npt               , const uint           fld_size,
+  const uint nfld              , const unsigned out_fld_stride,
   const double *const in, struct findpts_data_3 *const fd);
 
 #endif
