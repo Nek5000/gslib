@@ -172,7 +172,7 @@ static void test_mesh(void)
 static void print_ptdata(const struct comm *const comm)
 {
   uint notfound=0;
-  uint notsid=0;
+  uint notsid  =0;
   double dist2max=0, ed2max=0;
   const struct pt_data *pt = testp.ptr, *const end = pt+testp.n;
   for(;pt!=end;++pt) {
