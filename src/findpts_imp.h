@@ -1,4 +1,3 @@
-
 #define obbox           TOKEN_PASTE(obbox_,D)
 #define local_hash_data TOKEN_PASTE(findpts_local_hash_data_,D)
 #define hash_data       TOKEN_PASTE(findpts_hash_data_,D)
@@ -12,23 +11,28 @@
 #define hash_build      TOKEN_PASTE(hash_build_       ,D)
 #define hash_free       TOKEN_PASTE(hash_free_        ,D)
 
-#define findpts_local_data  TOKEN_PASTE(findpts_local_data_,D)
-#define findpts_local_setup TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
-#define findpts_local_free  TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
-#define findpts_local       TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
-#define findpts_local_eval  TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
-#define findpts_data        TOKEN_PASTE(findpts_data_,D)
-#define src_pt              TOKEN_PASTE(src_pt_      ,D)
-#define out_pt              TOKEN_PASTE(out_pt_      ,D)
-#define eval_src_pt         TOKEN_PASTE(eval_src_pt_ ,D)
-#define eval_out_pt         TOKEN_PASTE(eval_out_pt_ ,D)
-#define eval_out_ptf        TOKEN_PASTE(eval_out_ptf_,D)
-#define setup_aux           TOKEN_PASTE(setup_aux_,D)
-#define findpts_setup       TOKEN_PASTE(PREFIXED_NAME(findpts_setup_),D)
-#define findpts_free        TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
-#define findpts             TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
-#define findpts_eval        TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
-#define findpts_multi_eval  TOKEN_PASTE(PREFIXED_NAME(findpts_multi_eval_),D)
+#define findpts_local_data       TOKEN_PASTE(findpts_local_data_,D)
+#define findpts_local_setup      TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
+#define findpts_local_free       TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
+#define findpts_local            TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
+#define findpts_local_eval       TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
+#define findpts_data             TOKEN_PASTE(findpts_data_,D)
+#define findpts_fast_eval_data   TOKEN_PASTE(findpts_fast_eval_data_,D)
+#define src_pt                   TOKEN_PASTE(src_pt_      ,D)
+#define out_pt                   TOKEN_PASTE(out_pt_      ,D)
+#define eval_src_pt              TOKEN_PASTE(eval_src_pt_ ,D)
+#define eval_out_pt              TOKEN_PASTE(eval_out_pt_ ,D)
+#define eval_out_pt_multi        TOKEN_PASTE(eval_out_pt_multi_,D)
+#define setup_aux                TOKEN_PASTE(setup_aux_,D)
+#define setup_fev_aux            TOKEN_PASTE(setup_fev_aux_,D)
+#define findpts_setup            TOKEN_PASTE(PREFIXED_NAME(findpts_setup_),D)
+#define findpts_free             TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
+#define findpts                  TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
+#define findpts_eval             TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
+#define findpts_fast_eval_setup  TOKEN_PASTE(PREFIXED_NAME(findpts_fast_eval_setup_),D)
+#define findpts_fast_eval        TOKEN_PASTE(PREFIXED_NAME(findpts_fast_eval_),D)
+#define findpts_fast_eval_free   TOKEN_PASTE(PREFIXED_NAME(findpts_fast_eval_free_ ),D)
+#define findpts_multi_eval       TOKEN_PASTE(PREFIXED_NAME(findpts_multi_eval_),D)
 
 struct hash_data {
   ulong hash_n;
@@ -378,7 +382,7 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
 
 struct eval_src_pt { double r[D]; uint index, proc, el; };
 struct eval_out_pt { double out; uint index, proc; };
-struct eval_out_ptf { double out; uint index, proc, fi; };
+struct eval_out_pt_multi { double out; uint index, proc, fi; };
 
 void findpts_eval(
         double *const  out_base, const unsigned  out_stride,
@@ -443,6 +447,116 @@ void findpts_eval(
   }
 }
 
+struct findpts_fast_eval_data {
+    struct array savpt;
+};
+
+static void setup_fev_aux(struct findpts_fast_eval_data *const fevd,
+  const uint   *const code_base, const unsigned code_stride,
+  const uint   *const proc_base, const unsigned proc_stride,
+  const uint   *const   el_base, const unsigned   el_stride,
+  const double *const    r_base, const unsigned    r_stride,
+  const uint npt, struct findpts_data *const fd)
+{
+  struct array src;
+  /* copy user data, weed out unfound points, send out */
+  {
+    uint index;
+    const uint *code=code_base, *proc=proc_base, *el=el_base;
+    const double *r=r_base;
+    struct eval_src_pt *pt;
+    array_init(struct eval_src_pt, &src, npt), pt=src.ptr;
+    for(index=0;index<npt;++index) {
+      if(*code!=CODE_NOT_FOUND) {
+        unsigned d;
+        for(d=0;d<D;++d) pt->r[d]=r[d];
+        pt->index=index;
+        pt->proc=*proc;
+        pt->el=*el;
+        ++pt;
+      }
+      r    = (const double*)((const char*)r   +   r_stride);
+      code = (const   uint*)((const char*)code+code_stride);
+      proc = (const   uint*)((const char*)proc+proc_stride);
+      el   = (const   uint*)((const char*)el  +  el_stride);
+    }
+    src.n = pt - (struct eval_src_pt*)src.ptr;
+    sarray_transfer(struct eval_src_pt,&src,proc,1,&fd->cr);
+  }
+  /* setup space for source points*/
+  {
+    uint n=src.n;
+    const struct eval_src_pt *spt;
+    struct eval_src_pt *opt;
+    /* group points by element */
+    sarray_sort(struct eval_src_pt,src.ptr,n, el,0, &fd->cr.data);
+    array_init(struct eval_src_pt,&fevd->savpt,n), fevd->savpt.n=n;
+    spt=src.ptr, opt=fevd->savpt.ptr;
+    for(;n;--n,++spt,++opt) {
+        opt->index= spt->index;
+        opt->proc = spt->proc;
+        opt->el   = spt->el  ;
+        for(uint d=0;d<D;++d) opt->r[d] = spt->r[d];
+    }
+    array_free(&src);
+  }
+}
+
+struct findpts_fast_eval_data *findpts_fast_eval_setup(
+  const uint   *const code_base, const unsigned code_stride,
+  const uint   *const proc_base, const unsigned proc_stride,
+  const uint   *const   el_base, const unsigned   el_stride,
+  const double *const    r_base, const unsigned    r_stride,
+  const uint npt, struct findpts_data *const fd)
+{
+  struct findpts_fast_eval_data *const fevd = tmalloc(struct findpts_fast_eval_data, 1);
+  setup_fev_aux(fevd,code_base,code_stride,proc_base,proc_stride,el_base,el_stride,r_base,r_stride,
+                npt,fd);
+  return fevd;
+}
+
+void findpts_fast_eval(
+  double *const  out_base, const unsigned  out_stride,
+  const uint npt, const double *const in, struct findpts_data *const fd,
+  struct findpts_fast_eval_data *const fevd)
+{ 
+  struct array src, savpt;
+  /* evaluate points, send back */
+  { 
+    uint norig = fevd->savpt.n;
+    uint n     = norig;
+    struct eval_src_pt *opt;
+    struct eval_out_pt *opto;
+    array_init(struct eval_out_pt,&savpt,n), savpt.n=n;
+    opto=savpt.ptr;
+    opt=fevd->savpt.ptr;
+    for(;n;--n,++opto,++opt) opto->index=opt->index,opto->proc=opt->proc;
+    opto=savpt.ptr;
+    opt=fevd->savpt.ptr;
+    n=norig;
+    findpts_local_eval(&opto->out ,sizeof(struct eval_out_pt),
+                       &opt->el  ,sizeof(struct eval_src_pt),
+                       opt->r   ,sizeof(struct eval_src_pt),
+                       norig, in,&fd->local);
+    sarray_transfer(struct eval_out_pt,&savpt,proc,1,&fd->cr);
+  }
+  /* copy results to user data */
+  {
+    #define  AT(T,var,i) (T*)((char*)var##_base+(i)*var##_stride)
+    uint n=savpt.n;
+    struct eval_out_pt *opt;
+    for(opt=savpt.ptr;n;--n,++opt) *AT(double,out,opt->index)=opt->out;
+    array_free(&savpt);
+    #undef AT
+  }
+}
+
+void findpts_fast_eval_free(struct findpts_fast_eval_data *fevd)
+{
+  free(fevd);
+}
+
+
 void findpts_multi_eval(
         double *const  out_base, const unsigned  out_stride,
   const uint   *const code_base, const unsigned code_stride,
@@ -482,10 +596,10 @@ void findpts_multi_eval(
   {
     uint n=src.n;
     const struct eval_src_pt *spt;
-    struct eval_out_ptf *optf;
+    struct eval_out_pt_multi *optf;
     /* group points by element */
     sarray_sort(struct eval_src_pt,src.ptr,n, el,0, &fd->cr.data);
-    array_init(struct eval_out_ptf,&outpt,n*nfld), outpt.n=n*nfld;
+    array_init(struct eval_out_pt_multi,&outpt,n*nfld), outpt.n=n*nfld;
     optf = outpt.ptr;
     for (uint j=0;j<nfld;++j) 
     {
@@ -496,20 +610,20 @@ void findpts_multi_eval(
       optf->index=spt->index,optf->proc=spt->proc,optf->fi=j; 
      }
      spt=src.ptr;optf -= src.n;
-     findpts_local_eval(&optf->out,sizeof(struct eval_out_ptf),
+     findpts_local_eval(&optf->out,sizeof(struct eval_out_pt_multi),
                         &spt->el  ,sizeof(struct eval_src_pt),
                         spt->r    ,sizeof(struct eval_src_pt),
                         src.n     ,in+j*fld_size,&fd->local);
      optf += src.n;
     }
     array_free(&src);
-    sarray_transfer(struct eval_out_ptf,&outpt,proc,1,&fd->cr);
+    sarray_transfer(struct eval_out_pt_multi,&outpt,proc,1,&fd->cr);
   }
   /* copy results to user data */
   { 
     #define  ATNFLD(T,var,i,j) (T*)((char*)var##_base+(i)*var##_stride+(j)*var##_fld_stride)
     uint n=outpt.n;
-    struct eval_out_ptf *optf;
+    struct eval_out_pt_multi *optf;
     optf = outpt.ptr;
     for(uint k=0;k<n;++k,++optf) {
         *ATNFLD(double,out,optf->index,optf->fi)=optf->out;
@@ -521,13 +635,17 @@ void findpts_multi_eval(
 
 
 #undef findpts_eval
+#undef findpts_fast_eval_setup
+#undef findpts_fast_eval
+#undef findpts_fast_eval_data
 #undef findpts_multi_eval
 #undef findpts
 #undef findpts_free
 #undef findpts_setup
 #undef setup_aux
+#undef setup_fev_aux
 #undef eval_out_pt
-#undef eval_out_ptf
+#undef eval_out_pt_multi
 #undef eval_src_pt
 #undef out_pt
 #undef src_pt

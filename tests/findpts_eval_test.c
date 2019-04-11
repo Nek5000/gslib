@@ -20,6 +20,10 @@
 #define findpts            findpts_3
 #define findpts_eval       findpts_eval_3
 #define findpts_fast_eval  findpts_fast_eval_3
+#define findpts_fast_eval_data  findpts_fast_eval_data_3
+#define findpts_fast_eval_free  findpts_fast_eval_free_3
+#define findpts_fast_eval_setup  findpts_fast_eval_setup_3
+#define findpts_multi_eval findpts_multi_eval_3
 #elif D==2
 #define INITD(a,b,c) {a,b}
 #define MULD(a,b,c) ((a)*(b))
@@ -29,6 +33,10 @@
 #define findpts_free       findpts_free_2
 #define findpts            findpts_2
 #define findpts_fast_eval  findpts_fast_eval_2
+#define findpts_fast_eval_data  findpts_fast_eval_data_2
+#define findpts_fast_eval_free  findpts_fast_eval_free_2
+#define findpts_fast_eval_setup  findpts_fast_eval_setup_2
+#define findpts_multi_eval findpts_multi_eval_2
 #endif
 
 #define NR 5
@@ -61,7 +69,7 @@ static double x3[D][MULD(3,3,3)];
 static double mesh[D][NEL*MULD(NR,NS,NT)];
 static const double *const elx[D] = INITD(mesh[0],mesh[1],mesh[2]);
 
-struct pt_data { double x[D], r[D], dist2, ex[D]; uint code, proc, el; };
+struct pt_data { double x[D], r[D], dist2, ex[D], mx[D], fx[D]; uint code, proc, el; };
 static struct array testp;
 
 static struct crystal cr;
@@ -187,7 +195,7 @@ static void test_mesh(void)
 static void print_ptdata(const struct comm *const comm)
 {
   uint notfound=0;
-  double dist2max=0, ed2max=0;
+  double dist2max=0, ed2max=0,edm2max=0,edf2max=0;
   const struct pt_data *pt = testp.ptr, *const end = pt+testp.n;
   for(;pt!=end;++pt) {
     if(0&&id==0)
@@ -221,14 +229,18 @@ static void print_ptdata(const struct comm *const comm)
       );
     if(pt->code==2) ++notfound;
     else {
-      double ed2=0, dx;
+      double ed2=0, edm2=0,edf2=0, dx,dmx,dfx;
       unsigned d; for(d=0;d<D;++d) dx=pt->x[d]-pt->ex[d], ed2+=dx*dx;
+                  for(d=0;d<D;++d) dmx=pt->x[d]-pt->mx[d], edm2+=dmx*dmx;
+                  for(d=0;d<D;++d) dfx=pt->x[d]-pt->fx[d], edf2+=dfx*dfx;
       dist2max=pt->dist2>dist2max?pt->dist2:dist2max;
       ed2max=ed2>ed2max?ed2:ed2max;
+      edm2max=edm2>edm2max?edm2:edm2max;
+      edf2max=edf2>edf2max?edf2:edf2max;
     }
   }
   {
-    double distmax=sqrt(dist2max), edmax=sqrt(ed2max);
+    double distmax=sqrt(dist2max), edmax=sqrt(ed2max), edmmax=sqrt(edm2max),edfmax=sqrt(edf2max);
     slong total=testp.n;
     if(0)
     printf("%u: maximum distance = %g (adv), %g (eval);"
@@ -237,12 +249,14 @@ static void print_ptdata(const struct comm *const comm)
          (unsigned)notfound, (unsigned)testp.n);
     distmax = comm_reduce_double(comm,gs_max,&distmax,1);
     edmax   = comm_reduce_double(comm,gs_max,&edmax  ,1);
+    edmmax   = comm_reduce_double(comm,gs_max,&edmmax  ,1);
+    edfmax   = comm_reduce_double(comm,gs_max,&edfmax  ,1);
     notfound = comm_reduce_sint(comm,gs_add,(sint*)&notfound,1);
     total    = comm_reduce_slong(comm,gs_add,&total,1);
     if(id==0)
-      printf("maximum distance = %g (adv), %g (eval);"
+      printf("maximum distance = %g (adv), \n %g (eval), \n %g (multi-eval),\n %g (fast-eval), \n"
            " %u/%lu points not found\n",
-           distmax, edmax,
+           distmax, edmax,edmmax,edfmax,
            (unsigned)notfound, (unsigned long)total);
   }
 }
@@ -254,6 +268,7 @@ static void test(const struct comm *const comm)
                                      sizeof(struct pt_data),
                                      sizeof(struct pt_data));
   struct findpts_data *fd;
+  struct findpts_fast_eval_data *fevd;
   struct pt_data *pt;
   unsigned d;
   if(id==0) printf("Initializing mesh\n");
@@ -289,8 +304,47 @@ clock_t end = clock();
 double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 double time_spent_tot;
 time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
-if (id==0) {printf(" time spent approach 1 %f \n",time_spent_tot/np);}
+if (id==0) {printf(" time spent approach old %f \n",time_spent_tot/np);}
+
+begin = clock();
+    if(id==0) printf("calling findpts_multi_eval (%u)\n",d);
+    findpts_multi_eval(&pt->mx[0], sizeof(struct pt_data),
+                 &pt->code , sizeof(struct pt_data),
+                 &pt->proc , sizeof(struct pt_data),
+                 &pt->el   , sizeof(struct pt_data),
+                  pt->r    , sizeof(struct pt_data),
+                  testp.n,GBL_HASH_SIZE,D, sizeof(double), mesh[0], fd);
+end = clock();
+time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
+if (id==0) {printf(" time spent approach multi %f \n",time_spent_tot/np);}
+
+begin = clock();
+   fevd = findpts_fast_eval_setup(
+                   &pt->code , sizeof(struct pt_data),
+                   &pt->proc , sizeof(struct pt_data),
+                   &pt->el   , sizeof(struct pt_data),
+                    pt->r    , sizeof(struct pt_data),
+                    testp.n, fd);
+end = clock();
+time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
+if (id==0) {printf(" time spent approach fast setup  %f \n",time_spent_tot/np);}
+
+begin = clock();
+    for(d=0;d<D;++d) {
+      if(id==0) printf("calling findpts_fast_eval (%u)\n",d);
+      findpts_fast_eval(&pt->fx[d], sizeof(struct pt_data),
+                    testp.n, mesh[d], fd, fevd);
+    }
+end = clock();
+time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
+if (id==0) {printf(" time spent approach fast  %f \n",time_spent_tot/np);}
+
+
   findpts_free(fd);
+  findpts_fast_eval_free(fevd);
   print_ptdata(comm);
 }
 
