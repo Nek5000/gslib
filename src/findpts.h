@@ -94,13 +94,13 @@ struct findpts_fast_eval_data_3 *findpts_fast_eval_setup_3(
 
 void findpts_fast_eval_2(
         double *const  out_base, const unsigned         out_stride,
-  const uint                npt, const double    *const in        , 
+  const double    *const in        , 
   struct findpts_data_2           *const fd,
   struct findpts_fast_eval_data_2 *const fevd);
 
 void findpts_fast_eval_3(
         double *const  out_base, const unsigned         out_stride,
-  const uint                npt, const double    *const in        , 
+  const double    *const in        , 
   struct findpts_data_3           *const fd,
   struct findpts_fast_eval_data_3 *const fevd);
 

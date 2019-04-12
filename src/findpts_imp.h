@@ -515,15 +515,14 @@ struct findpts_fast_eval_data *findpts_fast_eval_setup(
 }
 
 void findpts_fast_eval(
-  double *const  out_base, const unsigned  out_stride,
-  const uint npt, const double *const in, struct findpts_data *const fd,
-  struct findpts_fast_eval_data *const fevd)
+        double *const  out_base, const unsigned  out_stride,
+  const double *const        in, 
+  struct findpts_data *const fd, struct findpts_fast_eval_data *const fevd)
 { 
-  struct array src, savpt;
+  struct array savpt;
   /* evaluate points, send back */
   { 
-    uint norig = fevd->savpt.n;
-    uint n     = norig;
+    uint n = fevd->savpt.n;
     struct eval_src_pt *opt;
     struct eval_out_pt *opto;
     array_init(struct eval_out_pt,&savpt,n), savpt.n=n;
@@ -532,11 +531,10 @@ void findpts_fast_eval(
     for(;n;--n,++opto,++opt) opto->index=opt->index,opto->proc=opt->proc;
     opto=savpt.ptr;
     opt=fevd->savpt.ptr;
-    n=norig;
     findpts_local_eval(&opto->out ,sizeof(struct eval_out_pt),
                        &opt->el  ,sizeof(struct eval_src_pt),
                        opt->r   ,sizeof(struct eval_src_pt),
-                       norig, in,&fd->local);
+                       fevd->savpt.n, in,&fd->local);
     sarray_transfer(struct eval_out_pt,&savpt,proc,1,&fd->cr);
   }
   /* copy results to user data */

@@ -317,7 +317,7 @@ begin = clock();
     for(d=0;d<D;++d) {
       if(id==0) printf("calling findpts_fast_eval (%u)\n",d);
       findpts_fast_eval(&pt->fx[d], sizeof(struct pt_data),
-                    testp.n, mesh[d], fd, fevd);
+                    mesh[d], fd, fevd);
     }
 end = clock();
 time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

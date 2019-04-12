@@ -420,18 +420,18 @@ void ffindpts_fast_eval_setup(sint *const fevhandle, const sint *const handle,
 
 void ffindpts_fast_eval(const sint *const fevhandle, const sint *const handle,
                         double *const  out_base, const sint *const  out_stride,
-                        const sint *const npt, const double *const in)
+                        const double *const in)
 { 
   CHECK_HANDLE("findpts_eval");
   CHECK_FEVHANDLE("findpts_fast_eval");
   if(h->ndim==2)
     PREFIXED_NAME(findpts_fast_eval_2)(
               out_base,(* out_stride)*sizeof(double),
-              *npt, in, h->data,fevh->data);
+              in, h->data,fevh->data);
   else
     PREFIXED_NAME(findpts_fast_eval_3)(
               out_base,(* out_stride)*sizeof(double),
-              *npt, in, h->data,fevh->data);
+              in, h->data,fevh->data);
 }
 
 void ffindpts_fast_eval_free(const sint *const fevhandle)
