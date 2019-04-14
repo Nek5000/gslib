@@ -22,7 +22,6 @@
 #define findpts_fast_eval        findpts_fast_eval_3
 #define findpts_fast_eval_data   findpts_fast_eval_data_3
 #define findpts_fast_eval_free   findpts_fast_eval_free_3
-#define findpts_fast_eval_setup  findpts_fast_eval_setup_3
 #elif D==2
 #define INITD(a,b,c) {a,b}
 #define MULD(a,b,c) ((a)*(b))
@@ -34,7 +33,6 @@
 #define findpts_fast_eval        findpts_fast_eval_2
 #define findpts_fast_eval_data   findpts_fast_eval_data_2
 #define findpts_fast_eval_free   findpts_fast_eval_free_2
-#define findpts_fast_eval_setup  findpts_fast_eval_setup_2
 #endif
 
 #define NR 5
@@ -301,22 +299,14 @@ time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
 if (id==0) {printf(" time spent approach old %f \n",time_spent_tot/np);}
 
 begin = clock();
-   findpts_fast_eval_setup(
+    for(d=0;d<D;++d) {
+      if(id==0) printf("calling findpts_fast_eval (%u)\n",d);
+      findpts_fast_eval(&pt->fx[d], sizeof(struct pt_data),
                    &pt->code , sizeof(struct pt_data),
                    &pt->proc , sizeof(struct pt_data),
                    &pt->el   , sizeof(struct pt_data),
                     pt->r    , sizeof(struct pt_data),
-                    testp.n, fd);
-end = clock();
-time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
-if (id==0) {printf(" time spent approach fast setup  %f \n",time_spent_tot/np);}
-
-begin = clock();
-    for(d=0;d<D;++d) {
-      if(id==0) printf("calling findpts_fast_eval (%u)\n",d);
-      findpts_fast_eval(&pt->fx[d], sizeof(struct pt_data),
-                    mesh[d], fd);
+                    mesh[d], testp.n, fd);
     }
 end = clock();
 time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

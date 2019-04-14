@@ -28,7 +28,6 @@
 #define findpts_free             TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
 #define findpts                  TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
 #define findpts_eval             TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
-#define findpts_fast_eval_setup  TOKEN_PASTE(PREFIXED_NAME(findpts_fast_eval_setup_),D)
 #define findpts_fast_eval        TOKEN_PASTE(PREFIXED_NAME(findpts_fast_eval_),D)
 
 struct hash_data {
@@ -204,6 +203,7 @@ struct findpts_data {
   struct findpts_local_data local;
   struct hash_data hash;
   struct array savpt;
+  uint         fevsetup;
 };
 
 static void setup_aux(
@@ -218,6 +218,7 @@ static void setup_aux(
                       npt_max, newt_tol);
   hash_build(&fd->hash,&fd->local.hd,fd->local.obb,nel,
              global_hash_size,&fd->cr);
+  fd->fevsetup = 0;
 }
 
 struct findpts_data *findpts_setup(
@@ -496,25 +497,22 @@ static void setup_fev_aux(
   }
 }
 
-void findpts_fast_eval_setup(
+void findpts_fast_eval(
+        double *const  out_base, const unsigned  out_stride,
   const uint   *const code_base, const unsigned code_stride,
   const uint   *const proc_base, const unsigned proc_stride,
   const uint   *const   el_base, const unsigned   el_stride,
   const double *const    r_base, const unsigned    r_stride,
-  const uint npt, struct findpts_data *const fd)
-{
-  setup_fev_aux(code_base,code_stride,
-                proc_base,proc_stride,
-                  el_base,  el_stride,
-                   r_base,   r_stride,
-                      npt,         fd);
-}
-
-void findpts_fast_eval(
-        double *const  out_base, const unsigned  out_stride,
-  const double *const        in, 
-  struct findpts_data *const fd)
+  const double *const        in, const uint npt,  struct findpts_data *const fd)
 { 
+  if (fd->fevsetup==0) {
+    setup_fev_aux(code_base,code_stride,
+                  proc_base,proc_stride,
+                    el_base,  el_stride,
+                     r_base,   r_stride,
+                        npt,         fd);
+    fd->fevsetup=1;
+  }
   struct array savpt;
   /* evaluate points, send back */
   { 
@@ -545,7 +543,6 @@ void findpts_fast_eval(
 }
 
 #undef findpts_eval
-#undef findpts_fast_eval_setup
 #undef findpts_fast_eval
 #undef findpts
 #undef findpts_free
