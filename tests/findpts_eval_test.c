@@ -263,7 +263,6 @@ static void test(const struct comm *const comm)
                                      sizeof(struct pt_data),
                                      sizeof(struct pt_data));
   struct findpts_data *fd;
-  struct findpts_fast_eval_data *fevd;
   struct pt_data *pt;
   unsigned d;
   if(id==0) printf("Initializing mesh\n");
@@ -302,7 +301,7 @@ time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
 if (id==0) {printf(" time spent approach old %f \n",time_spent_tot/np);}
 
 begin = clock();
-   fevd = findpts_fast_eval_setup(
+   findpts_fast_eval_setup(
                    &pt->code , sizeof(struct pt_data),
                    &pt->proc , sizeof(struct pt_data),
                    &pt->el   , sizeof(struct pt_data),
@@ -317,7 +316,7 @@ begin = clock();
     for(d=0;d<D;++d) {
       if(id==0) printf("calling findpts_fast_eval (%u)\n",d);
       findpts_fast_eval(&pt->fx[d], sizeof(struct pt_data),
-                    mesh[d], fd, fevd);
+                    mesh[d], fd);
     }
 end = clock();
 time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
@@ -326,7 +325,7 @@ if (id==0) {printf(" time spent approach fast  %f \n",time_spent_tot/np);}
 
 
   findpts_free(fd);
-  findpts_fast_eval_free(fevd);
+//  findpts_fast_eval_free(fevd);
   print_ptdata(comm);
 }
 

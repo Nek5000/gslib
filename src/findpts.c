@@ -371,17 +371,7 @@ void ffindpts_eval_local(const sint *const handle,
       *npt, in, &((struct findpts_data_3 *)h->data)->local);
 }
 
-#define CHECK_FEVHANDLE(func) \
-  struct fevhandle *fevh; \
-  if(*fevhandle<0 || *fevhandle>=fevhandle_n || !(fevh=&fevhandle_array[*fevhandle])->data) \
-    fail(1,__FILE__,__LINE__,func ": invalid handle")
-
-struct fevhandle { void *data;};
-static struct fevhandle *fevhandle_array = 0;
-static int fevhandle_max = 0;
-static int fevhandle_n = 0;
-
-void ffindpts_fast_eval_setup(sint *const fevhandle, const sint *const handle,
+void ffindpts_fast_eval_setup(const sint *const handle,
   const   sint *const code_base, const sint *const code_stride,
   const   sint *const proc_base, const sint *const proc_stride,
   const   sint *const   el_base, const sint *const   el_stride,
@@ -389,24 +379,15 @@ void ffindpts_fast_eval_setup(sint *const fevhandle, const sint *const handle,
   const sint *const npt)
 { 
   CHECK_HANDLE("findpts_eval");
-  struct fevhandle *fevh;
-  if(fevhandle_n==fevhandle_max)
-    fevhandle_max+=fevhandle_max/2+1,
-    fevhandle_array=trealloc(struct fevhandle,fevhandle_array,fevhandle_max);
-  fevh = &fevhandle_array[fevhandle_n];
   if(h->ndim==2) {
-    struct findpts_fast_eval_data_2 *const fevd = tmalloc(struct findpts_fast_eval_data_2,1);
-    fevh->data = fevd;
-    setup_fev_aux_2(fevd,
+    setup_fev_aux_2(
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
                 *npt,h->data);
   } else if(h->ndim==3) {
-    struct findpts_fast_eval_data_3 *const fevd = tmalloc(struct findpts_fast_eval_data_3,1);
-    fevh->data = fevd;
-    setup_fev_aux_3(fevd,
+    setup_fev_aux_3(
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
@@ -415,27 +396,19 @@ void ffindpts_fast_eval_setup(sint *const fevhandle, const sint *const handle,
   } else 
     fail(1,__FILE__,__LINE__,
          "findpts_fast_eval_setup: ndim must be 2 or 3; given ndim=%u",(unsigned)h->ndim);
-   *fevhandle = fevhandle_n++;
 }
 
-void ffindpts_fast_eval(const sint *const fevhandle, const sint *const handle,
+void ffindpts_fast_eval(const sint *const handle,
                         double *const  out_base, const sint *const  out_stride,
                         const double *const in)
 { 
   CHECK_HANDLE("findpts_eval");
-  CHECK_FEVHANDLE("findpts_fast_eval");
   if(h->ndim==2)
     PREFIXED_NAME(findpts_fast_eval_2)(
               out_base,(* out_stride)*sizeof(double),
-              in, h->data,fevh->data);
+              in, h->data);
   else
     PREFIXED_NAME(findpts_fast_eval_3)(
               out_base,(* out_stride)*sizeof(double),
-              in, h->data,fevh->data);
-}
-
-void ffindpts_fast_eval_free(const sint *const fevhandle)
-{
-  CHECK_FEVHANDLE("findpts_free");
-  free(fevh->data);
+              in, h->data);
 }
