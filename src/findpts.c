@@ -206,7 +206,6 @@ static uint count_bits(unsigned char *p, uint n)
 #define ffindpts_eval            FORTRAN_NAME(findpts_eval           ,FINDPTS_EVAL           )
 #define ffindpts_eval_local      FORTRAN_NAME(findpts_eval_local     ,FINDPTS_EVAL_LOCAL     )
 #define ffindpts_fast_eval       FORTRAN_NAME(findpts_fast_eval      ,FINDPTS_FAST_EVAL      )
-#define ffindpts_fast_eval_free  FORTRAN_NAME(findpts_fast_eval_free ,FINDPTS_FAST_EVAL_FREE )
 
 struct handle { void *data; unsigned ndim; };
 static struct handle *handle_array = 0;
@@ -370,33 +369,6 @@ void ffindpts_eval_local(const sint *const handle,
       *npt, in, &((struct findpts_data_3 *)h->data)->local);
 }
 
-void ffindpts_fast_eval_setup(const sint *const handle,
-  const   sint *const code_base, const sint *const code_stride,
-  const   sint *const proc_base, const sint *const proc_stride,
-  const   sint *const   el_base, const sint *const   el_stride,
-  const double *const    r_base, const sint *const    r_stride,
-  const sint *const npt)
-{ 
-  CHECK_HANDLE("findpts_eval");
-  if(h->ndim==2) {
-    setup_fev_aux_2(
-      (uint*)code_base,(*code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
-                r_base,(*   r_stride)*sizeof(double),
-                *npt,h->data);
-  } else if(h->ndim==3) {
-    setup_fev_aux_3(
-      (uint*)code_base,(*code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
-                r_base,(*   r_stride)*sizeof(double),
-                *npt,h->data);
-  } else 
-    fail(1,__FILE__,__LINE__,
-         "findpts_fast_eval_setup: ndim must be 2 or 3; given ndim=%u",(unsigned)h->ndim);
-}
-
 void ffindpts_fast_eval(const sint *const handle,
         double *const  out_base, const sint *const  out_stride,
   const   sint *const code_base, const sint *const code_stride,
@@ -413,7 +385,7 @@ void ffindpts_fast_eval(const sint *const handle,
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
-              in, *npt, h->data);
+      *npt, in, h->data);
   else
     PREFIXED_NAME(findpts_fast_eval_3)(
               out_base,(* out_stride)*sizeof(double),
@@ -421,5 +393,5 @@ void ffindpts_fast_eval(const sint *const handle,
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
-              in, *npt, h->data);
+      *npt, in, h->data);
 }

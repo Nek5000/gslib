@@ -20,8 +20,6 @@
 #define findpts                  findpts_3
 #define findpts_eval             findpts_eval_3
 #define findpts_fast_eval        findpts_fast_eval_3
-#define findpts_fast_eval_data   findpts_fast_eval_data_3
-#define findpts_fast_eval_free   findpts_fast_eval_free_3
 #elif D==2
 #define INITD(a,b,c) {a,b}
 #define MULD(a,b,c) ((a)*(b))
@@ -31,8 +29,6 @@
 #define findpts_free             findpts_free_2
 #define findpts                  findpts_2
 #define findpts_fast_eval        findpts_fast_eval_2
-#define findpts_fast_eval_data   findpts_fast_eval_data_2
-#define findpts_fast_eval_free   findpts_fast_eval_free_2
 #endif
 
 #define NR 5
@@ -306,7 +302,7 @@ begin = clock();
                    &pt->proc , sizeof(struct pt_data),
                    &pt->el   , sizeof(struct pt_data),
                     pt->r    , sizeof(struct pt_data),
-                    mesh[d], testp.n, fd);
+                    testp.n, mesh[d], fd);
     }
 end = clock();
 time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

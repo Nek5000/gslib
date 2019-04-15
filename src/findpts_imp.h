@@ -503,7 +503,8 @@ void findpts_fast_eval(
   const uint   *const proc_base, const unsigned proc_stride,
   const uint   *const   el_base, const unsigned   el_stride,
   const double *const    r_base, const unsigned    r_stride,
-  const double *const        in, const uint npt,  struct findpts_data *const fd)
+  const uint npt,
+  const double *const in, struct findpts_data *const fd)
 { 
   if (fd->fevsetup==0) {
     setup_fev_aux(code_base,code_stride,

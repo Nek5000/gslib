@@ -78,8 +78,8 @@ void findpts_fast_eval_2(
   const uint   *const proc_base, const unsigned    proc_stride,
   const uint   *const   el_base, const unsigned      el_stride,
   const double *const    r_base, const unsigned       r_stride,
-  const double    *const in    , const uint npt               , 
-  struct findpts_data_2           *const fd);
+  const uint npt,
+  const double *const in, struct findpts_data_3 *const fd);
 
 void findpts_fast_eval_3(
         double *const  out_base, const unsigned    out_stride,
@@ -87,7 +87,7 @@ void findpts_fast_eval_3(
   const uint   *const proc_base, const unsigned    proc_stride,
   const uint   *const   el_base, const unsigned      el_stride,
   const double *const    r_base, const unsigned       r_stride,
-  const double    *const in    , const uint npt               , 
-  struct findpts_data_3           *const fd);
+  const uint npt,
+  const double *const in, struct findpts_data_3 *const fd);
 
 #endif
