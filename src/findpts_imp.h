@@ -255,6 +255,7 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
              const double *const     x_base[D], const unsigned     x_stride[D],
              const uint npt, struct findpts_data *const fd)
 {
+  if (fd->fevsetup==1) free(&fd->savpt), fd->fevsetup=0;
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
   struct array hash_pt, src_pt, out_pt;
   /* look locally first */
