@@ -255,7 +255,7 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
              const double *const     x_base[D], const unsigned     x_stride[D],
              const uint npt, struct findpts_data *const fd)
 {
-  if (fd->fevsetup==1) free(&fd->savpt), fd->fevsetup=0;
+  if (fd->fevsetup==1) free(fd->savpt.ptr), fd->fevsetup=0;
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
   struct array hash_pt, src_pt, out_pt;
   /* look locally first */
@@ -382,7 +382,6 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
 
 struct eval_src_pt { double r[D]; uint index, proc, el; };
 struct eval_out_pt { double out; uint index, proc; };
-struct eval_out_pt_multi { double out; uint index, proc, fi; };
 
 void findpts_eval(
         double *const  out_base, const unsigned  out_stride,
