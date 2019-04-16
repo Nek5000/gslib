@@ -27,6 +27,7 @@
 #define findpts_setup findpts_setup_2
 #define findpts_free  findpts_free_2
 #define findpts       findpts_2
+#define findpts_eval  findpts_eval_2
 #endif
 
 #define NR 5
