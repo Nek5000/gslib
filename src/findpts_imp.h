@@ -450,31 +450,31 @@ void findpts_eval(
                         npt,         fd);
     fd->fevsetup=1;
   }
-  struct array savpt;
+  struct array outpt;
   /* evaluate points, send back */
   { 
     uint n = fd->savpt.n;
     struct eval_src_pt *opt;
     struct eval_out_pt *opto;
-    array_init(struct eval_out_pt,&savpt,n), savpt.n=n;
-    opto=savpt.ptr;
+    array_init(struct eval_out_pt,&outpt,n), outpt.n=n;
+    opto=outpt.ptr;
     opt=fd->savpt.ptr;
     for(;n;--n,++opto,++opt) opto->index=opt->index,opto->proc=opt->proc;
-    opto=savpt.ptr;
+    opto=outpt.ptr;
     opt=fd->savpt.ptr;
     findpts_local_eval(&opto->out ,sizeof(struct eval_out_pt),
                        &opt->el  ,sizeof(struct eval_src_pt),
                        opt->r   ,sizeof(struct eval_src_pt),
                        fd->savpt.n, in,&fd->local);
-    sarray_transfer(struct eval_out_pt,&savpt,proc,1,&fd->cr);
+    sarray_transfer(struct eval_out_pt,&outpt,proc,1,&fd->cr);
   }
   /* copy results to user data */
   {
     #define  AT(T,var,i) (T*)((char*)var##_base+(i)*var##_stride)
-    uint n=savpt.n;
+    uint n=outpt.n;
     struct eval_out_pt *opt;
-    for(opt=savpt.ptr;n;--n,++opt) *AT(double,out,opt->index)=opt->out;
-    array_free(&savpt);
+    for(opt=outpt.ptr;n;--n,++opt) *AT(double,out,opt->index)=opt->out;
+    array_free(&outpt);
     #undef AT
   }
 }
