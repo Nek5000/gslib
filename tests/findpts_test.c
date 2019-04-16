@@ -4,7 +4,6 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
-#include <time.h>
 #include "gslib.h"
 #include "rand_elt_test.h"
 

@@ -417,6 +417,7 @@ static void setup_fev_aux(
   /* setup space for source points*/
   {
     uint n=src.n;
+    uint d;
     const struct eval_src_pt *spt;
     struct eval_src_pt *opt;
     /* group points by element */
@@ -427,7 +428,7 @@ static void setup_fev_aux(
         opt->index= spt->index;
         opt->proc = spt->proc;
         opt->el   = spt->el  ;
-        for(uint d=0;d<D;++d) opt->r[d] = spt->r[d];
+        for(d=0;d<D;++d) opt->r[d] = spt->r[d];
     }
     array_free(&src);
   }
