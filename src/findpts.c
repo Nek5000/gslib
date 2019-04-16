@@ -205,7 +205,6 @@ static uint count_bits(unsigned char *p, uint n)
 #define ffindpts                 FORTRAN_NAME(findpts                ,FINDPTS                )
 #define ffindpts_eval            FORTRAN_NAME(findpts_eval           ,FINDPTS_EVAL           )
 #define ffindpts_eval_local      FORTRAN_NAME(findpts_eval_local     ,FINDPTS_EVAL_LOCAL     )
-#define ffindpts_fast_eval       FORTRAN_NAME(findpts_fast_eval      ,FINDPTS_FAST_EVAL      )
 
 struct handle { void *data; unsigned ndim; };
 static struct handle *handle_array = 0;
@@ -367,31 +366,4 @@ void ffindpts_eval_local(const sint *const handle,
       (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
                 r_base,(*   r_stride)*sizeof(double),
       *npt, in, &((struct findpts_data_3 *)h->data)->local);
-}
-
-void ffindpts_fast_eval(const sint *const handle,
-        double *const  out_base, const sint *const  out_stride,
-  const   sint *const code_base, const sint *const code_stride,
-  const   sint *const proc_base, const sint *const proc_stride,
-  const   sint *const   el_base, const sint *const   el_stride,
-  const double *const    r_base, const sint *const    r_stride,
-  const sint *const npt,         const double *const in)
-{ 
-  CHECK_HANDLE("findpts_eval");
-  if(h->ndim==2)
-    PREFIXED_NAME(findpts_fast_eval_2)(
-              out_base,(* out_stride)*sizeof(double),
-      (uint*)code_base,(*code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
-                r_base,(*   r_stride)*sizeof(double),
-      *npt, in, h->data);
-  else
-    PREFIXED_NAME(findpts_fast_eval_3)(
-              out_base,(* out_stride)*sizeof(double),
-      (uint*)code_base,(*code_stride)*sizeof(sint  ),
-      (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
-      (uint*)  el_base,(*  el_stride)*sizeof(sint  ),
-                r_base,(*   r_stride)*sizeof(double),
-      *npt, in, h->data);
 }

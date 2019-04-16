@@ -275,7 +275,6 @@ static void test(const struct comm *const comm)
            pt->r    , sizeof(struct pt_data),
           &pt->dist2, sizeof(struct pt_data),
            x_base   , x_stride, testp.n, fd);
-clock_t begin = clock();
     for(d=0;d<D;++d) {
       if(id==0) printf("calling findpts_eval (%u)\n",d);
       findpts_eval(&pt->ex[d], sizeof(struct pt_data),
@@ -285,11 +284,6 @@ clock_t begin = clock();
                     pt->r    , sizeof(struct pt_data),
                     testp.n, mesh[d], fd);
     }
-clock_t end = clock();
-double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-double time_spent_tot;
-time_spent_tot= comm_reduce_double(comm,gs_add,&time_spent,1);
-if (id==0) {printf(" time spent approach 1 %f \n",time_spent_tot/np);}
   findpts_free(fd);
   print_ptdata(comm);
 }

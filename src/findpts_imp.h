@@ -28,7 +28,6 @@
 #define findpts_free             TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
 #define findpts                  TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
 #define findpts_eval             TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
-#define findpts_fast_eval        TOKEN_PASTE(PREFIXED_NAME(findpts_fast_eval_),D)
 
 struct hash_data {
   ulong hash_n;
@@ -241,7 +240,7 @@ void findpts_free(struct findpts_data *fd)
   hash_free(&fd->hash);
   findpts_local_free(&fd->local);
   crystal_free(&fd->cr);
-  array_free(&fd->savpt)
+  array_free(&fd->savpt);
   free(fd);
 }
 
@@ -384,69 +383,6 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
 struct eval_src_pt { double r[D]; uint index, proc, el; };
 struct eval_out_pt { double out; uint index, proc; };
 
-void findpts_eval(
-        double *const  out_base, const unsigned  out_stride,
-  const uint   *const code_base, const unsigned code_stride,
-  const uint   *const proc_base, const unsigned proc_stride,
-  const uint   *const   el_base, const unsigned   el_stride,
-  const double *const    r_base, const unsigned    r_stride,
-  const uint npt,
-  const double *const in, struct findpts_data *const fd)
-{
-  struct array src, outpt;
-  /* copy user data, weed out unfound points, send out */
-  {
-    uint index;
-    const uint *code=code_base, *proc=proc_base, *el=el_base;
-    const double *r=r_base;
-    struct eval_src_pt *pt;
-    array_init(struct eval_src_pt, &src, npt), pt=src.ptr;
-    for(index=0;index<npt;++index) {
-      if(*code!=CODE_NOT_FOUND) {
-        unsigned d;
-        for(d=0;d<D;++d) pt->r[d]=r[d];
-        pt->index=index;
-        pt->proc=*proc;
-        pt->el=*el;
-        ++pt;
-      }
-      r    = (const double*)((const char*)r   +   r_stride);
-      code = (const   uint*)((const char*)code+code_stride);
-      proc = (const   uint*)((const char*)proc+proc_stride);
-      el   = (const   uint*)((const char*)el  +  el_stride);
-    }
-    src.n = pt - (struct eval_src_pt*)src.ptr;
-    sarray_transfer(struct eval_src_pt,&src,proc,1,&fd->cr);
-  }
-  /* evaluate points, send back */
-  {
-    uint n=src.n;
-    const struct eval_src_pt *spt;
-    struct eval_out_pt *opt;
-    /* group points by element */
-    sarray_sort(struct eval_src_pt,src.ptr,n, el,0, &fd->cr.data);
-    array_init(struct eval_out_pt,&outpt,n), outpt.n=n;
-    spt=src.ptr, opt=outpt.ptr;
-    for(;n;--n,++spt,++opt) opt->index=spt->index,opt->proc=spt->proc;
-    spt=src.ptr, opt=outpt.ptr;
-    findpts_local_eval(&opt->out ,sizeof(struct eval_out_pt),
-                       &spt->el  ,sizeof(struct eval_src_pt),
-                        spt->r   ,sizeof(struct eval_src_pt),
-                       src.n, in,&fd->local);
-    array_free(&src);
-    sarray_transfer(struct eval_out_pt,&outpt,proc,1,&fd->cr);
-  }
-  /* copy results to user data */
-  {
-    #define  AT(T,var,i) (T*)((char*)var##_base+(i)*var##_stride)
-    uint n=outpt.n;
-    struct eval_out_pt *opt;
-    for(opt=outpt.ptr;n;--n,++opt) *AT(double,out,opt->index)=opt->out;
-    array_free(&outpt);
-    #undef AT
-  }
-}
-
 static void setup_fev_aux(
   const uint   *const code_base, const unsigned code_stride,
   const uint   *const proc_base, const unsigned proc_stride,
@@ -498,7 +434,7 @@ static void setup_fev_aux(
   }
 }
 
-void findpts_fast_eval(
+void findpts_eval(
         double *const  out_base, const unsigned  out_stride,
   const uint   *const code_base, const unsigned code_stride,
   const uint   *const proc_base, const unsigned proc_stride,
@@ -545,7 +481,6 @@ void findpts_fast_eval(
 }
 
 #undef findpts_eval
-#undef findpts_fast_eval
 #undef findpts
 #undef findpts_free
 #undef findpts_setup
