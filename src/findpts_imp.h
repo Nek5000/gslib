@@ -11,23 +11,22 @@
 #define hash_build      TOKEN_PASTE(hash_build_       ,D)
 #define hash_free       TOKEN_PASTE(hash_free_        ,D)
 
-#define findpts_local_data       TOKEN_PASTE(findpts_local_data_,D)
-#define findpts_local_setup      TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
-#define findpts_local_free       TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
-#define findpts_local            TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
-#define findpts_local_eval       TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
-#define findpts_data             TOKEN_PASTE(findpts_data_,D)
-#define src_pt                   TOKEN_PASTE(src_pt_      ,D)
-#define out_pt                   TOKEN_PASTE(out_pt_      ,D)
-#define eval_src_pt              TOKEN_PASTE(eval_src_pt_ ,D)
-#define eval_out_pt              TOKEN_PASTE(eval_out_pt_ ,D)
-#define eval_out_pt_multi        TOKEN_PASTE(eval_out_pt_multi_,D)
-#define setup_aux                TOKEN_PASTE(setup_aux_,D)
-#define setup_fev_aux            TOKEN_PASTE(setup_fev_aux_,D)
-#define findpts_setup            TOKEN_PASTE(PREFIXED_NAME(findpts_setup_),D)
-#define findpts_free             TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
-#define findpts                  TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
-#define findpts_eval             TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
+#define findpts_local_data  TOKEN_PASTE(findpts_local_data_,D)
+#define findpts_local_setup TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
+#define findpts_local_free  TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
+#define findpts_local       TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
+#define findpts_local_eval  TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
+#define findpts_data        TOKEN_PASTE(findpts_data_,D)
+#define src_pt              TOKEN_PASTE(src_pt_      ,D)
+#define out_pt              TOKEN_PASTE(out_pt_      ,D)
+#define eval_src_pt         TOKEN_PASTE(eval_src_pt_ ,D)
+#define eval_out_pt         TOKEN_PASTE(eval_out_pt_ ,D)
+#define setup_aux           TOKEN_PASTE(setup_aux_,D)
+#define setup_fev_aux       TOKEN_PASTE(setup_fev_aux_,D)
+#define findpts_setup       TOKEN_PASTE(PREFIXED_NAME(findpts_setup_),D)
+#define findpts_free        TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
+#define findpts             TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
+#define findpts_eval        TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
 
 struct hash_data {
   ulong hash_n;
@@ -487,7 +486,6 @@ void findpts_eval(
 #undef setup_aux
 #undef setup_fev_aux
 #undef eval_out_pt
-#undef eval_out_pt_multi
 #undef eval_src_pt
 #undef out_pt
 #undef src_pt

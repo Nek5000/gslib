@@ -200,11 +200,11 @@ static uint count_bits(unsigned char *p, uint n)
 
   --------------------------------------------------------------------------*/
 
-#define ffindpts_setup           FORTRAN_NAME(findpts_setup          ,FINDPTS_SETUP          )
-#define ffindpts_free            FORTRAN_NAME(findpts_free           ,FINDPTS_FREE           )
-#define ffindpts                 FORTRAN_NAME(findpts                ,FINDPTS                )
-#define ffindpts_eval            FORTRAN_NAME(findpts_eval           ,FINDPTS_EVAL           )
-#define ffindpts_eval_local      FORTRAN_NAME(findpts_eval_local     ,FINDPTS_EVAL_LOCAL     )
+#define ffindpts_setup      FORTRAN_NAME(findpts_setup     ,FINDPTS_SETUP          )
+#define ffindpts_free       FORTRAN_NAME(findpts_free      ,FINDPTS_FREE           )
+#define ffindpts            FORTRAN_NAME(findpts           ,FINDPTS                )
+#define ffindpts_eval       FORTRAN_NAME(findpts_eval      ,FINDPTS_EVAL           )
+#define ffindpts_eval_local FORTRAN_NAME(findpts_eval_local,FINDPTS_EVAL_LOCAL     )
 
 struct handle { void *data; unsigned ndim; };
 static struct handle *handle_array = 0;

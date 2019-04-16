@@ -14,21 +14,19 @@
 #define INITD(a,b,c) {a,b,c}
 #define MULD(a,b,c) ((a)*(b)*(c))
 #define INDEXD(a,na, b,nb, c) (((c)*(nb)+(b))*(na)+(a))
-#define findpts_data       findpts_data_3
-#define findpts_setup      findpts_setup_3
-#define findpts_free       findpts_free_3
-#define findpts            findpts_3
-#define findpts_eval       findpts_eval_3
-#define findpts_fast_eval  findpts_fast_eval_3
+#define findpts_data  findpts_data_3
+#define findpts_setup findpts_setup_3
+#define findpts_free  findpts_free_3
+#define findpts       findpts_3
+#define findpts_eval  findpts_eval_3
 #elif D==2
 #define INITD(a,b,c) {a,b}
 #define MULD(a,b,c) ((a)*(b))
 #define INDEXD(a,na, b,nb, c) ((b)*(na)+(a))
-#define findpts_data       findpts_data_2
-#define findpts_setup      findpts_setup_2
-#define findpts_free       findpts_free_2
-#define findpts            findpts_2
-#define findpts_fast_eval  findpts_fast_eval_2
+#define findpts_data  findpts_data_2
+#define findpts_setup findpts_setup_2
+#define findpts_free  findpts_free_2
+#define findpts       findpts_2
 #endif
 
 #define NR 5
@@ -275,15 +273,15 @@ static void test(const struct comm *const comm)
            pt->r    , sizeof(struct pt_data),
           &pt->dist2, sizeof(struct pt_data),
            x_base   , x_stride, testp.n, fd);
-    for(d=0;d<D;++d) {
-      if(id==0) printf("calling findpts_eval (%u)\n",d);
-      findpts_eval(&pt->ex[d], sizeof(struct pt_data),
-                   &pt->code , sizeof(struct pt_data),
-                   &pt->proc , sizeof(struct pt_data),
-                   &pt->el   , sizeof(struct pt_data),
-                    pt->r    , sizeof(struct pt_data),
-                    testp.n, mesh[d], fd);
-    }
+  for(d=0;d<D;++d) {
+    if(id==0) printf("calling findpts_eval (%u)\n",d);
+    findpts_eval(&pt->ex[d], sizeof(struct pt_data),
+                 &pt->code , sizeof(struct pt_data),
+                 &pt->proc , sizeof(struct pt_data),
+                 &pt->el   , sizeof(struct pt_data),
+                  pt->r    , sizeof(struct pt_data),
+                  testp.n, mesh[d], fd);
+  }
   findpts_free(fd);
   print_ptdata(comm);
 }
