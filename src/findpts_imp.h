@@ -239,7 +239,7 @@ void findpts_free(struct findpts_data *fd)
   hash_free(&fd->hash);
   findpts_local_free(&fd->local);
   crystal_free(&fd->cr);
-  array_free(&fd->savpt);
+  if (fd->fevsetup==1) array_free(&fd->savpt);
   free(fd);
 }
 
