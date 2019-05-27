@@ -393,90 +393,90 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
      sarray_sort_2(struct out_pt,out_pt.ptr,out_pt.n,index,0,elsid,0,&fd->cr.data); // sort by pt and session of donor element
      uint oldindex,nextindex;
      uint oldelsid,nextelsid;
-     uint ictr,itemp;
-     oldindex = 0;
-     ictr     = 0;
-     itemp    = 0;
-     double swdisti,swdist2,swr[D];
-     uint   swcode,swelsid,swproc,swel;  //winner of all session
+     uint istart,ioriginator;
+     oldindex    = 0;
+     istart      = 0;
+     ioriginator = 0;
+     double asdisti,asdist2,asr[D];
+     uint   ascode,aselsid,asproc,asel;  //winner of all session
 
-     double cwdisti,cwdist2,cwr[D];
-     uint   cwcode,cwelsid,cwproc,cwel;  //winner of current session
+     double csdisti,csdist2,csr[D];
+     uint   cscode,cselsid,csproc,csel;  //winner of current session
 
      for(opt=out_pt.ptr;n;--n,++opt) {
       const uint index = opt->index;
       nextindex        = n>1 ? (opt+1)->index : index;
       nextelsid        = n>1 ? (opt+1)->elsid : opt->elsid;
 
-      uint *code = AT(uint,code,index);
+      uint    *code = AT(uint,code,index);
       double *dist2 = AT(double,dist2,index);
       double *disti = AT(double,disti,index);
-      uint *elsid = AT(uint,elsid,index);
-      double *r = AT(double,r,index);
-      uint  *el = AT(uint,el,index), *proc = AT(uint,proc,index);
+      uint   *elsid = AT(uint,elsid,index);
+      double     *r = AT(double,r,index);
+      uint      *el = AT(uint,el,index);
+      uint    *proc = AT(uint,proc,index);
 
-      if (index!=oldindex || n==out_pt.n) {
-      //set dummy-overall winners
-        oldindex = index;
-        swdisti  = -DBL_MAX; 
-        oldelsid = 0;
-        ictr     = 0;
-        itemp    = 0;
+      if (index!=oldindex || n==out_pt.n) { //initialize overall winner for each pt
+        oldindex   = index;
+        asdisti    = -DBL_MAX; 
+        oldelsid   = 0;
+        istart     = 0;
+        ioriginator= 0;
         if (*code!=CODE_NOT_FOUND) {
-          itemp = 1;
+          ioriginator = 1;
         }
       } 
-      if (opt->elsid!=oldelsid || ictr == 0) {
-        //set dummy-current winners
+      if (opt->elsid!=oldelsid || istart == 0)    { //initialize winner for current session
+        istart  = 1;
         oldelsid = opt->elsid;
-        if (*code!=CODE_NOT_FOUND && *elsid==opt->elsid) {
-          cwdisti = *disti;
-          cwdist2 = *dist2;
-          cwcode  = *code;
-          cwelsid = *elsid;
-          cwproc  = *proc;
-          cwel    = *el;
-          unsigned d; for(d=0;d<D;++d) cwr[d]=r[d];
-          itemp = 0;
+        if (ioriginator==1 && *elsid==opt->elsid) { //if the originating session found the pt
+          csdisti = *disti;
+          csdist2 = *dist2;
+          cscode  = *code;
+          cselsid = *elsid;
+          csproc  = *proc;
+          csel    = *el;
+          unsigned d; for(d=0;d<D;++d) csr[d]=r[d];
+          ioriginator = 0;
         }
         else {
-          cwcode  = 2;
+          cscode=CODE_NOT_FOUND;
         }
-        ictr  = 1;
       }
-      if(cwcode!=CODE_INTERNAL) {
-      if(cwcode==CODE_NOT_FOUND
+
+      if(cscode!=CODE_INTERNAL) {
+      if(cscode==CODE_NOT_FOUND
         || opt->code==CODE_INTERNAL
-        || opt->dist2<cwdist2) {
-        cwdisti = opt->disti;
-        cwdist2 = opt->dist2;
-        cwcode  = opt->code;
-        cwelsid = opt->elsid;
-        cwproc  = opt->proc;
-        cwel    = opt->el;
-        unsigned d; for(d=0;d<D;++d) cwr[d]=opt->r[d];
+        || opt->dist2<csdist2) {
+        csdisti = opt->disti;
+        csdist2 = opt->dist2;
+        cscode  = opt->code;
+        cselsid = opt->elsid;
+        csproc  = opt->proc;
+        csel    = opt->el;
+        unsigned d; for(d=0;d<D;++d) csr[d]=opt->r[d];
       }
       }
 
-      if (n==1 || opt->elsid!=nextelsid || index!=nextindex){
-        if (cwdisti >= swdisti) {
-          swdisti  = cwdisti;
-          swdist2  = cwdist2;
-          swcode   = cwcode;
-          swelsid  = cwelsid;
-          swproc   = cwproc;
-          swel     = cwel;
-          unsigned d; for(d=0;d<D;++d) swr[d]=cwr[d];
+      if (n==1 || opt->elsid!=nextelsid || index!=nextindex){ //update overall winnder
+        if (csdisti >= asdisti) {
+          asdisti  = csdisti;
+          asdist2  = csdist2;
+          ascode   = cscode;
+          aselsid  = cselsid;
+          asproc   = csproc;
+          asel     = csel;
+          unsigned d; for(d=0;d<D;++d) asr[d]=csr[d];
         }
-        if (index!=nextindex || n==1) {
-          if (!(itemp==1 && swdisti < *disti)) {
-            *disti = swdisti;
-            *dist2 = swdist2;
-            *code  = swcode;
-            *elsid = swelsid;
-            *proc  = swproc;
-            *el    = swel;
-            unsigned d; for(d=0;d<D;++d) r[d]=swr[d];
+        if (index!=nextindex || n==1) {                      //copy overall winner to output array
+          if (!(ioriginator==1 && asdisti < *disti)) {
+            *disti = asdisti;
+            *dist2 = asdist2;
+            *code  = ascode;
+            *elsid = aselsid;
+            *proc  = asproc;
+            *el    = asel;
+            unsigned d; for(d=0;d<D;++d) r[d]=asr[d];
           }
         }
       }
