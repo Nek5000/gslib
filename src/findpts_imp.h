@@ -13,7 +13,6 @@
 #define hash_build      TOKEN_PASTE(hash_build_       ,D)
 #define hash_free       TOKEN_PASTE(hash_free_        ,D)
 
-#define findpts_local_data    TOKEN_PASTE(findpts_local_data_,D)
 #define findptsms_local_setup TOKEN_PASTE(PREFIXED_NAME(findptsms_local_setup_),D)
 #define findptsms_local_free  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_free_ ),D)
 #define findptsms_local       TOKEN_PASTE(PREFIXED_NAME(findptsms_local_      ),D)
@@ -29,6 +28,7 @@
 #define findptsms             TOKEN_PASTE(PREFIXED_NAME(findptsms_      ),D)
 #define findptsms_eval        TOKEN_PASTE(PREFIXED_NAME(findptsms_eval_ ),D)
 
+#define findpts_local_data    TOKEN_PASTE(findpts_local_data_,D)
 #define findpts_local_setup   TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
 #define findpts_local_free    TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
 #define findpts_local         TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
@@ -38,6 +38,7 @@
 #define findpts               TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
 #define findpts_eval          TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
 #define findpts_local_eval    TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
+#define setup_fev_aux         TOKEN_PASTE(setup_fev_aux_,D)
 
 struct hash_data {
   ulong hash_n;
@@ -211,6 +212,8 @@ struct findpts_data {
   struct crystal cr;
   struct findpts_local_data local;
   struct hash_data hash;
+  struct array savpt;
+  uint         fevsetup;
 };
 
 static void setupms_aux(
@@ -227,6 +230,7 @@ static void setupms_aux(
                       npt_max, newt_tol,ims);
   hash_build(&fd->hash,&fd->local.hd,fd->local.obb,nel,
              global_hash_size,&fd->cr);
+  fd->fevsetup = 0;
 }
 
 struct findpts_data *findptsms_setup(
@@ -251,6 +255,7 @@ void findptsms_free(struct findpts_data *fd)
   hash_free(&fd->hash);
   findptsms_local_free(&fd->local);
   crystal_free(&fd->cr);
+  if (fd->fevsetup==1) array_free(&fd->savpt);
   free(fd);
 }
 
@@ -266,6 +271,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
                  const uint  * const session_id_base, const unsigned session_id_stride,
                  const uint                      npt, struct findpts_data   *const fd)
 {
+  if (fd->fevsetup==1) array_free(&fd->savpt); fd->fevsetup=0;
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
   struct array hash_pt, src_pt, out_pt;
   double *distv = tmalloc(double,npt);
@@ -458,7 +464,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
       }
       }
 
-      if (n==1 || opt->elsid!=nextelsid || index!=nextindex){ //update overall winnder
+      if (n==1 || opt->elsid!=nextelsid || index!=nextindex){ //update overall winner
         if (csdisti >= asdisti) {
           asdisti  = csdisti;
           asdist2  = csdist2;
@@ -512,16 +518,14 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
 struct eval_src_pt { double r[D]; uint index, proc, el; };
 struct eval_out_pt { double out; uint index, proc; };
 
-void findptsms_eval(
-        double *const  out_base, const unsigned  out_stride,
+static void setup_fev_aux(
   const uint   *const code_base, const unsigned code_stride,
   const uint   *const proc_base, const unsigned proc_stride,
   const uint   *const   el_base, const unsigned   el_stride,
   const double *const    r_base, const unsigned    r_stride,
-  const uint npt,
-  const double *const in, struct findpts_data *const fd)
+  const uint npt, struct findpts_data *const fd)
 {
-  struct array src, outpt;
+  struct array src;
   /* copy user data, weed out unfound points, send out */
   {
     uint index;
@@ -546,22 +550,59 @@ void findptsms_eval(
     src.n = pt - (struct eval_src_pt*)src.ptr;
     sarray_transfer(struct eval_src_pt,&src,proc,1,&fd->cr);
   }
-  /* evaluate points, send back */
+  /* setup space for source points*/
   {
     uint n=src.n;
+    uint d;
     const struct eval_src_pt *spt;
-    struct eval_out_pt *opt;
+    struct eval_src_pt *opt;
     /* group points by element */
     sarray_sort(struct eval_src_pt,src.ptr,n, el,0, &fd->cr.data);
-    array_init(struct eval_out_pt,&outpt,n), outpt.n=n;
-    spt=src.ptr, opt=outpt.ptr;
-    for(;n;--n,++spt,++opt) opt->index=spt->index,opt->proc=spt->proc;
-    spt=src.ptr, opt=outpt.ptr;
-    findptsms_local_eval(&opt->out ,sizeof(struct eval_out_pt),
-                       &spt->el  ,sizeof(struct eval_src_pt),
-                        spt->r   ,sizeof(struct eval_src_pt),
-                       src.n, in,&fd->local);
+    array_init(struct eval_src_pt,&fd->savpt,n), fd->savpt.n=n;
+    spt=src.ptr, opt=fd->savpt.ptr;
+    for(;n;--n,++spt,++opt) {
+        opt->index= spt->index;
+        opt->proc = spt->proc;
+        opt->el   = spt->el  ;
+        for(d=0;d<D;++d) opt->r[d] = spt->r[d];
+    }
     array_free(&src);
+  }
+}
+
+void findptsms_eval(
+        double *const  out_base, const unsigned  out_stride,
+  const uint   *const code_base, const unsigned code_stride,
+  const uint   *const proc_base, const unsigned proc_stride,
+  const uint   *const   el_base, const unsigned   el_stride,
+  const double *const    r_base, const unsigned    r_stride,
+  const uint npt,
+  const double *const in, struct findpts_data *const fd)
+{ 
+  if (fd->fevsetup==0) {
+    setup_fev_aux(code_base,code_stride,
+                  proc_base,proc_stride,
+                    el_base,  el_stride,
+                     r_base,   r_stride,
+                        npt,         fd);
+    fd->fevsetup=1;
+  }
+  struct array outpt;
+  /* evaluate points, send back */
+  { 
+    uint n = fd->savpt.n;
+    struct eval_src_pt *opt;
+    struct eval_out_pt *opto;
+    array_init(struct eval_out_pt,&outpt,n), outpt.n=n;
+    opto=outpt.ptr;
+    opt=fd->savpt.ptr;
+    for(;n;--n,++opto,++opt) opto->index=opt->index,opto->proc=opt->proc;
+    opto=outpt.ptr;
+    opt=fd->savpt.ptr;
+    findptsms_local_eval(&opto->out ,sizeof(struct eval_out_pt),
+                       &opt->el  ,sizeof(struct eval_src_pt),
+                       opt->r   ,sizeof(struct eval_src_pt),
+                       fd->savpt.n, in,&fd->local);
     sarray_transfer(struct eval_out_pt,&outpt,proc,1,&fd->cr);
   }
   /* copy results to user data */
@@ -651,6 +692,11 @@ void findpts_eval(
 #undef findptsms_free
 #undef findptsms_setup
 #undef setupms_aux
+#undef findpts
+#undef findpts_free
+#undef findpts_setup
+#undef setup_aux
+#undef setup_fev_aux
 #undef eval_out_pt
 #undef eval_src_pt
 #undef out_pt

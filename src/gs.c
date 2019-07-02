@@ -1555,7 +1555,7 @@ static void fgs_check_handle(sint handle, const char *func, unsigned line)
     fail(1,__FILE__,line,"%s: invalid handle", func);
 }
 
-static const gs_dom fgs_dom[4] = { 0, gs_double, gs_sint, gs_slong };
+static const gs_dom fgs_dom[4] = { gs_float, gs_double, gs_sint, gs_slong };
 
 static void fgs_check_parms(sint handle, sint dom, sint op,
                             const char *func, unsigned line)
