@@ -15,6 +15,7 @@ env:
     - TEST=findpts_el_2_test2      NP=2
     - TEST=findpts_local_test      NP=2
     - TEST=findpts_test            NP=2
+    - TEST=findpts_test_ms         NP=2
     - TEST=gs_test                 NP=2
     - TEST=gs_test_gop_nonblocking NP=2
     - TEST=gs_test_gop_blocking    NP=2
