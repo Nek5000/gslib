@@ -163,7 +163,8 @@ static uint count_bits(unsigned char *p, uint n)
                      x_base,     x_stride,
                      y_base,     y_stride,
                      z_base,     z_stride, 
-                  sess_base,  sess_stride,npt)
+                  sess_base,  sess_stride, 
+                 sess_match,          npt)
 
     (z_base, z_stride ignored when ndim==2)
 
@@ -182,6 +183,10 @@ static uint count_bits(unsigned char *p, uint n)
           x, y, z: coordinates of sought point
    Additional input for findptsms
           sess: session ID of the sought point
+    sess_match: 1 - find points in elements who session id is same from points
+	      : 0 - find points in elements who session id is different from
+                    points
+                
     
     the *_base arguments point to the data for the first point,
       each is advanced by the corresponding *_stride argument for the next point
