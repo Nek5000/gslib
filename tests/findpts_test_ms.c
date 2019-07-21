@@ -61,6 +61,7 @@
 
 static uint np, id, idsess,np1,id1;
 static double xdom0,xdom1;
+static double volv,totalvolv;
 
 static const unsigned nr[D] = INITD(NR,NS,NT);
 static const unsigned mr[D] = INITD(2*NR,2*NS,2*NT);
@@ -333,8 +334,14 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
   if(id==0) printf("Initializing mesh\n");
   xdom0 = 1;
   xdom1 = 0;
-  if (idsess==0) {rand_mesh1(-3.,xdom0,2.,3.,0.,5.);}
-  else {rand_mesh1(xdom1,4.,2.,3.,0.,5.);}
+  double xmn,xmx,ymn= 2.,ymx= 3.,zmn= 0.,zmx= 5.;
+  if (idsess==0) {
+    xmn=-3;xmx=xdom0;
+  }
+  else {
+    xmn=xdom1;xmx=4.;
+  }
+  rand_mesh1(xmn,xmx,ymn,ymx,zmn,zmx);
   test_mesh();
   pt = testp.ptr;
   if(id==0) printf("calling findpts_setup\n");
@@ -370,6 +377,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
                    &pt->el     ,sizeof(struct pt_data),
                    pt->r       ,sizeof(struct pt_data),
                    testp.n, gllsi, fd);
+
   findpts_free(fd);
   print_ptdata(comm1);
 }
