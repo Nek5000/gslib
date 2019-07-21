@@ -217,8 +217,8 @@ static void print_ptdata(const struct comm *const comm)
     corsid=0;
     if (pt->ptmarker==0) {
      corsid = 0;
-     if (pt->x[0] > 0.5) corsid = 1;
-     if (fabs(pt->x[0]-0.5)>1.e-10 && (fabs(pt->ptelsid-corsid)>1.e-2)) ++notsid;
+     if (pt->x[0] > 0.5*(xdom0+xdom1)) corsid = 1;
+     if (fabs(pt->x[0]-0.5*(xdom0+xdom1))>1.e-10 && (fabs(pt->ptelsid-corsid)>1.e-2)) ++notsid;
     }
     else if (pt->ptmarker==1)
     {
@@ -332,8 +332,8 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
   struct pt_data *pt;
   unsigned d;
   if(id==0) printf("Initializing mesh\n");
-  xdom0 = 1;
-  xdom1 = 0;
+  xdom0 = 1.0;
+  xdom1 = 0.5;
   double xmn,xmx,ymn= 2.,ymx= 3.,zmn= 0.,zmx= 5.;
   if (idsess==0) {
     xmn=-3;xmx=xdom0;
