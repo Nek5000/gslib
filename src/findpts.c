@@ -375,16 +375,16 @@ void ffindpts_free(const sint *const handle)
 }
 
 void ffindptsms(const sint *const handle,
-          sint *const       code_base, const sint *const       code_stride,
-          sint *const       proc_base, const sint *const       proc_stride,
-          sint *const         el_base, const sint *const         el_stride,
-        double *const          r_base, const sint *const          r_stride,
-        double *const      dist2_base, const sint *const      dist2_stride,
-  const double *const          x_base, const sint *const          x_stride,
-  const double *const          y_base, const sint *const          y_stride,
-  const double *const          z_base, const sint *const          z_stride,
-  const   uint *const session_id_base, const uint *const session_id_stride,
-  const sint *const npt)
+            sint *const        code_base, const sint *const       code_stride,
+            sint *const        proc_base, const sint *const       proc_stride,
+            sint *const          el_base, const sint *const         el_stride,
+          double *const           r_base, const sint *const          r_stride,
+          double *const       dist2_base, const sint *const      dist2_stride,
+    const double *const           x_base, const sint *const          x_stride,
+    const double *const           y_base, const sint *const          y_stride,
+    const double *const           z_base, const sint *const          z_stride,
+    const   uint *const  session_id_base, const uint *const session_id_stride,
+    const   uint *const session_id_match, const sint *const npt)
 {
   CHECK_HANDLE("findptsms");
   if(h->ndim==2) {
@@ -394,10 +394,11 @@ void ffindptsms(const sint *const handle,
     xv_stride[0] = *x_stride*sizeof(double),
     xv_stride[1] = *y_stride*sizeof(double);
 
-    const uint * sess_base;
+    const uint *sess_base,*sess_match;
     unsigned   sess_stride;
     sess_base   =  session_id_base;
     sess_stride = *session_id_stride*sizeof(uint);
+    sess_match  =  session_id_match;
      
     PREFIXED_NAME(findptsms_2)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
@@ -407,7 +408,7 @@ void ffindptsms(const sint *const handle,
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                , 
               sess_base,   sess_stride                ,
-      *npt, h->data);
+             sess_match, *npt, h->data);
   } else {
     const double *xv_base[3];
     unsigned xv_stride[3];
@@ -416,10 +417,11 @@ void ffindptsms(const sint *const handle,
     xv_stride[1] = *y_stride*sizeof(double),
     xv_stride[2] = *z_stride*sizeof(double);
 
-    const uint * sess_base;
+    const uint *sess_base,*sess_match;
     unsigned   sess_stride;
     sess_base   =  session_id_base;
     sess_stride = *session_id_stride*sizeof(uint);
+    sess_match  =  session_id_match;
 
     PREFIXED_NAME(findptsms_3)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
@@ -429,7 +431,7 @@ void ffindptsms(const sint *const handle,
              dist2_base,(*dist2_stride)*sizeof(double),
                 xv_base,     xv_stride                ,
               sess_base,   sess_stride                ,
-      *npt, h->data);
+             sess_match, *npt, h->data);
   }
 }
 

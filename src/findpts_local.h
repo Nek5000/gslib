@@ -54,8 +54,8 @@ void findptsms_local_2(
   const uint   *const  session_id_base, const unsigned session_id_stride,
         double *const       disti_base, const unsigned      disti_stride,
         uint   *const       elsid_base, const unsigned      elsid_stride,
-  const uint npt, struct findpts_local_data_2 *const fd, 
-        buffer *buf);
+  const uint   *const session_id_match, const     uint               npt,
+ struct findpts_local_data_2 *const fd, buffer *buf);
 void findptsms_local_eval_2(
         double *const out_base, const unsigned out_stride,
   const uint   *const  el_base, const unsigned  el_stride,
@@ -134,8 +134,8 @@ void findptsms_local_3(
   const uint   *const  session_id_base, const unsigned session_id_stride,
         double *const       disti_base, const unsigned      disti_stride,
         uint   *const       elsid_base, const unsigned      elsid_stride,
-  const uint npt, struct findpts_local_data_3 *const fd, 
-        buffer *buf);
+  const uint   *const session_id_match, const     uint               npt,
+ struct findpts_local_data_3 *const fd, buffer *buf);
 void findptsms_local_eval_3(
         double *const out_base, const unsigned out_stride,
   const uint   *const  el_base, const unsigned  el_stride,

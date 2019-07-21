@@ -254,17 +254,18 @@ void findptsms_local_free(struct findpts_local_data *const fd)
   (const T*)((const char*)var##_base[d]+(i)*var##_stride[d])
 
 static void map_points_to_els(
-  struct array *const              map,
-        uint   *const        code_base, const unsigned      code_stride,
-  const double *const        x_base[D], const unsigned      x_stride[D],
-  const uint   *const  session_id_base, const unsigned session_id_stride,
-  const uint npt, const struct findpts_local_data *const fd,
-  buffer *buf)
+  struct array *const               map,
+        uint   *const         code_base, const unsigned       code_stride,
+  const double *const         x_base[D], const unsigned       x_stride[D],
+  const uint   *const   session_id_base, const unsigned session_id_stride,
+  const uint   *const  session_id_match, const uint                   npt, 
+  const struct findpts_local_data *const fd, buffer *buf)
 {
   uint index;
   const double *xp[D]; uint *code=code_base;
   unsigned d; for(d=0;d<D;++d) xp[d]=x_base[d];
   array_init(struct index_el,map,npt+(npt>>2)+1);
+  uint sessm = *(session_id_match);
 
   const uint *sess_id; sess_id = session_id_base;
   for(index=0;index<npt;++index) {
@@ -275,7 +276,8 @@ static void map_points_to_els(
       *code = CODE_NOT_FOUND;
       for(; elp!=ele; ++elp) {
         const uint el = *elp;
-        if (fd->ims==1 && *(fd->nsid) == *sess_id) continue;
+        if (fd->ims==1 && sessm!=1 && *(fd->nsid) == *sess_id) continue;
+        if (fd->ims==1 && sessm==1 && *(fd->nsid) != *sess_id) continue;
         if(obbox_test(&fd->obb[el],x)>=0) {
           struct index_el *const p =
             array_reserve(struct index_el,map,map->n+1);
@@ -309,14 +311,14 @@ void findptsms_local(
   const uint   *const  session_id_base, const unsigned session_id_stride,
         double *const       disti_base, const unsigned      disti_stride,
         uint   *const       elsid_base, const unsigned      elsid_stride,
-  const uint npt, struct findpts_local_data *const fd,
-        buffer *buf)
+  const uint   *const session_id_match, const uint                   npt, 
+   struct findpts_local_data *const fd,  buffer *buf)
 {
   struct findpts_el_data *const fed = &fd->fed;
   struct findpts_el_pt *const fpt = findpts_el_points(fed);
   struct array map; /* point -> element map */
   int rsid_stride = 1;
-  map_points_to_els(&map, code_base,code_stride, x_base,x_stride, session_id_base, session_id_stride,npt, fd, buf);
+  map_points_to_els(&map, code_base,code_stride, x_base,x_stride, session_id_base, session_id_stride,session_id_match,npt, fd, buf);
   {
     const unsigned npt_max = fd->fed.npt_max;
     const struct index_el *p, *const pe = (struct index_el *)map.ptr+map.n;
@@ -437,9 +439,12 @@ void findpts_local(
     unsigned int *sess_base = tmalloc(uint,1);
     double *disti_base = tmalloc(double,1);
     unsigned int *elsid_base = tmalloc(uint,1);
+    unsigned int *sess_match = tmalloc(uint,1);
     *sess_base = 0;
+    *sess_match = 0;
     *disti_base = 0;
     *elsid_base = 0;
+    
 
     unsigned sess_stride=0;
     unsigned disti_stride=0;
@@ -453,8 +458,7 @@ void findpts_local(
          sess_base, sess_stride,
         disti_base,disti_stride,
         elsid_base,elsid_stride,
-        npt,fd,
-        buf);
+        sess_match,npt,fd,buf);
 }
 
 /* assumes points are already grouped by elements */

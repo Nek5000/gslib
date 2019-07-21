@@ -346,6 +346,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
   #if D==3
   x_base[2]=pt->x+2;
   #endif
+   uint match = 0;
    findptsms(&pt->code ,sizeof(struct pt_data),
              &pt->proc ,sizeof(struct pt_data),
              &pt->el   ,sizeof(struct pt_data),
@@ -353,7 +354,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
              &pt->dist2,sizeof(struct pt_data),
              x_base    ,x_stride, 
              &pt->ptsid,sizeof(struct pt_data),
-             testp.n, fd);
+             &match, testp.n, fd);
   for(d=0;d<D;++d) {
     if(id==0) printf("calling findpts_eval (%u)\n",d);
     findptsms_eval(&pt->ex[d],sizeof(struct pt_data),
