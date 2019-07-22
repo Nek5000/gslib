@@ -403,6 +403,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
                    testp.n     , gllsi, fd);
    print_ptdata(comm1);
    pt = testp.ptr;
+// Test finding points in specified session ID
    match = 1;
    findptsms(&pt->code ,sizeof(struct pt_data),
              &pt->proc ,sizeof(struct pt_data),
@@ -420,9 +421,6 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
                   testp.n, gllsi, fd);
   print_ptdata_match(comm1);
   findpts_free(fd);
-
-// Test if findptsms can find points in specified session ID
-
 }
 
 
