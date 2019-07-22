@@ -74,7 +74,7 @@ static const double *const elx[D] = INITD(mesh[0],mesh[1],mesh[2]);
 static const double *const dfint = {distfint};
 static const double *const gllsi = {gllsid};
 
-struct pt_data { double x[D], r[D], dist2, ex[D], ptelsid; uint code, proc, el, ptsid, ptmarker;};
+struct pt_data { double x[D], r[D], dist2, ex[D], esid, esidm; uint code, proc, el, sid, ptmarker, sidm;};
 static struct array testp;
 
 static struct crystal cr;
@@ -148,16 +148,18 @@ static void test_mesh(void)
       out->x[2] = quad_eval(x3[2],r);
       #endif
 
-      out->ptsid = 2;
+      out->sidm=0;
+      if (idsess==0) {out->sidm=1;}
+      out->sid = 2;
       out->ptmarker=2;
 
       if (out->x[0]<xdom0 && out->x[0]>xdom1)
       {
-       if (idx%2==0) {out->ptmarker=1;out->ptsid=idsess;}
-       else {out->ptmarker=0;out->ptsid=2;};
+       if (idx%2==0) {out->ptmarker=1;out->sid=idsess;}
+       else {out->ptmarker=0;out->sid=2;};
       }
-      if (idsess==0 && fabs(out->x[0]-xdom0)<1.e-10) {out->ptmarker=1;out->ptsid=idsess;};
-      if (idsess==1 && fabs(out->x[0]-xdom1)<1.e-10) {out->ptmarker=1;out->ptsid=idsess;};
+      if (idsess==0 && fabs(out->x[0]-xdom0)<1.e-10) {out->ptmarker=1;out->sid=idsess;};
+      if (idsess==1 && fabs(out->x[0]-xdom1)<1.e-10) {out->ptmarker=1;out->sid=idsess;};
       ++idx;
       ++out;
     }}
@@ -218,17 +220,17 @@ static void print_ptdata(const struct comm *const comm)
     if (pt->ptmarker==0) {
      corsid = 0;
      if (pt->x[0] > 0.5*(xdom0+xdom1)) corsid = 1;
-     if (fabs(pt->x[0]-0.5*(xdom0+xdom1))>1.e-10 && (fabs(pt->ptelsid-corsid)>1.e-2)) ++notsid;
+     if (fabs(pt->x[0]-0.5*(xdom0+xdom1))>1.e-10 && (fabs(pt->esid-corsid)>1.e-2)) ++notsid;
     }
     else if (pt->ptmarker==1)
     {
     corsid=0;
     if (idsess==0) {corsid=1;}
     if ((pt->x[0]<xdom0 && pt->x[0]>xdom1) || fabs(pt->x[0]-xdom0)<1.e-10 || fabs(pt->x[0]-xdom1)<1.e-10) {
-       if (fabs(pt->ptelsid-corsid)>1.e-2) ++notsid;
+       if (fabs(pt->esid-corsid)>1.e-2) ++notsid;
         }
     else 
-      {if (fabs(pt->ptelsid-idsess)>1.e-2) ++notsid;
+      {if (fabs(pt->esid-idsess)>1.e-2) ++notsid;
       }
     }
   }
@@ -253,6 +255,28 @@ static void print_ptdata(const struct comm *const comm)
       printf("Number of points identified with wrong session id: %u/%lu \n",
            (unsigned)notsid, (unsigned long)total);
   }
+}
+
+static void print_ptdata_match(const struct comm *const comm)
+{
+  uint notfound=0;
+  const struct pt_data *pt = testp.ptr, *const end = pt+testp.n;
+  for(;pt!=end;++pt) {
+    if (idsess==0) {
+      double diff = fabs(pt->esidm-1);
+      if (pt->x[0]>xdom1 && (pt->code==2 || diff>1.e-2)) ++notfound;
+    }
+    else {
+      double diff = fabs(pt->esidm-0);
+      if (pt->x[0]<xdom0 && (pt->code==2 || diff>1.e-2)) ++notfound;
+    }
+    }
+    slong total=testp.n;
+    notfound = comm_reduce_sint(comm,gs_add,(sint*)&notfound,1);
+    total    = comm_reduce_slong(comm,gs_add,&total,1);
+    if(id1==0)
+      printf("Number of points identified with wrong session id using findpts session matching: %u/%lu \n",
+           (unsigned)notfound, (unsigned long)total);
 }
 
 static void rand_mesh1(double x0, double x1, double y0, double y1, double z0, double z1)
@@ -360,7 +384,7 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
              pt->r     ,sizeof(struct pt_data),
              &pt->dist2,sizeof(struct pt_data),
              x_base    ,x_stride, 
-             &pt->ptsid,sizeof(struct pt_data),
+             &pt->sid,sizeof(struct pt_data),
              &match, testp.n, fd);
   for(d=0;d<D;++d) {
     if(id==0) printf("calling findpts_eval (%u)\n",d);
@@ -369,17 +393,36 @@ static void test(const struct comm *const comm, const struct comm *const comm1)
                    &pt->proc ,sizeof(struct pt_data),
                    &pt->el   ,sizeof(struct pt_data),
                    pt->r     ,sizeof(struct pt_data),
-                   testp.n, mesh[d], fd);
+                   testp.n   , mesh[d], fd);
   }
-    findptsms_eval(&pt->ptelsid,sizeof(struct pt_data),
+    findptsms_eval(&pt->esid   ,sizeof(struct pt_data),
                    &pt->code   ,sizeof(struct pt_data),
                    &pt->proc   ,sizeof(struct pt_data),
                    &pt->el     ,sizeof(struct pt_data),
                    pt->r       ,sizeof(struct pt_data),
-                   testp.n, gllsi, fd);
-
+                   testp.n     , gllsi, fd);
+   print_ptdata(comm1);
+   pt = testp.ptr;
+   match = 1;
+   findptsms(&pt->code ,sizeof(struct pt_data),
+             &pt->proc ,sizeof(struct pt_data),
+             &pt->el   ,sizeof(struct pt_data),
+             pt->r     ,sizeof(struct pt_data),
+             &pt->dist2,sizeof(struct pt_data),
+             x_base    ,x_stride,
+             &pt->sidm ,sizeof(struct pt_data),
+             &match, testp.n, fd);
+   findptsms_eval(&pt->esidm  ,sizeof(struct pt_data),
+                  &pt->code   ,sizeof(struct pt_data),
+                  &pt->proc   ,sizeof(struct pt_data),
+                  &pt->el     ,sizeof(struct pt_data),
+                  pt->r       ,sizeof(struct pt_data),
+                  testp.n, gllsi, fd);
+  print_ptdata_match(comm1);
   findpts_free(fd);
-  print_ptdata(comm1);
+
+// Test if findptsms can find points in specified session ID
+
 }
 
 
