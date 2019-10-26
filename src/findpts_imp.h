@@ -396,7 +396,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
     uint n=out_pt.n;
     struct out_pt *opt;
     if (fd->local.ims==1) {
-     sarray_sort_2(struct out_pt,out_pt.ptr,out_pt.n,index,0,elsid,0,&fd->cr.data); // sort by pt and session of donor element
+     sarray_sort_2(struct out_pt,out_pt.ptr,out_pt.n,index,0,elsid,0,&fd->cr.data); /* sort by pt and session of donor element */
      uint oldindex,nextindex;
      uint oldelsid,nextelsid;
      uint istart,ioriginator;
@@ -404,10 +404,10 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
      istart      = 0;
      ioriginator = 0;
      double asdisti,asdist2,asr[D];
-     uint   ascode,aselsid,asproc,asel;  //winner of all session
+     uint   ascode,aselsid,asproc,asel;  /*winner of all session */
 
      double csdisti,csdist2,csr[D];
-     uint   cscode,cselsid,csproc,csel;  //winner of current session
+     uint   cscode,cselsid,csproc,csel;  /*winner of current session */
 
      for(opt=out_pt.ptr;n;--n,++opt) {
       const uint index = opt->index;
@@ -422,7 +422,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
       uint      *el = AT(uint,el,index);
       uint    *proc = AT(uint,proc,index);
 
-      if (index!=oldindex || n==out_pt.n) { //initialize overall winner for each pt
+      if (index!=oldindex || n==out_pt.n) { /* initialize overall winner for each pt */
         oldindex   = index;
         asdisti    = -DBL_MAX; 
         oldelsid   = 0;
@@ -432,10 +432,10 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
           ioriginator = 1;
         }
       } 
-      if (opt->elsid!=oldelsid || istart == 0)    { //initialize winner for current session
+      if (opt->elsid!=oldelsid || istart == 0)    { /* initialize winner for current session */
         istart  = 1;
         oldelsid = opt->elsid;
-        if (ioriginator==1 && *elsid==opt->elsid) { //if the originating session found the pt
+        if (ioriginator==1 && *elsid==opt->elsid) { /* if the originating session found the pt */
           csdisti = *disti;
           csdist2 = *dist2;
           cscode  = *code;
@@ -464,7 +464,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
       }
       }
 
-      if (n==1 || opt->elsid!=nextelsid || index!=nextindex){ //update overall winner
+      if (n==1 || opt->elsid!=nextelsid || index!=nextindex){ /* update overall winner */
         if (csdisti >= asdisti) {
           asdisti  = csdisti;
           asdist2  = csdist2;
@@ -474,7 +474,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
           asel     = csel;
           unsigned d; for(d=0;d<D;++d) asr[d]=csr[d];
         }
-        if (index!=nextindex || n==1) {                      //copy overall winner to output array
+        if (index!=nextindex || n==1) {                      /* copy overall winner to output array */
           if (!(ioriginator==1 && asdisti < *disti)) {
             *disti = asdisti;
             *dist2 = asdist2;
@@ -616,7 +616,6 @@ void findptsms_eval(
   }
 }
 
-//findpts_setup
 struct findpts_data *findpts_setup(
   const struct comm *const comm,
   const double *const elx[D],

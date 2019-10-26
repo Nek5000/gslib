@@ -63,7 +63,6 @@ void findptsms_local_eval_2(
   const uint npt,
   const double *const in, struct findpts_local_data_2 *const fd);
 
-//findpts
 void findpts_local_setup_2(struct findpts_local_data_2 *const fd,
                            const double *const elx[2],
                            const unsigned n[2], const uint nel,
@@ -143,7 +142,6 @@ void findptsms_local_eval_3(
   const uint npt,
   const double *const in, struct findpts_local_data_3 *const fd);
 
-//findpts
 void findpts_local_setup_3(struct findpts_local_data_3 *const fd,
                            const double *const elx[3],
                            const unsigned n[3], const uint nel,

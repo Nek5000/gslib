@@ -1008,7 +1008,7 @@ static void allreduce_exec_wait(
   unsigned unit_size = gs_dom_size[dom];
   char *ardbuf = buf+unit_size*gvn;
 
-  // Why do I need this? Ugly !!!
+  /* Why do I need this? Ugly */
   if (comm->np > 1)
     comm_wait(ard->req, 1);
 #ifdef MPI

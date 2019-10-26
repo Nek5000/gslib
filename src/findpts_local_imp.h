@@ -397,7 +397,6 @@ void findptsms_local_eval(
   }
 }
 
-//findpts
 void findpts_local_setup(struct findpts_local_data *const fd,
                          const double *const elx[D],
                          const unsigned n[D], const uint nel,

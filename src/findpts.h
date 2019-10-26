@@ -83,7 +83,6 @@ void findptsms_eval_3(
   const uint npt,
   const double *const in, struct findpts_data_3 *const fd);
 
-//findpts
 struct findpts_data_2 *findpts_setup_2(
   const struct comm *const comm,
   const double *const elx[2],
