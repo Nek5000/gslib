@@ -262,14 +262,15 @@ void findptsms_free(struct findpts_data *fd)
 struct src_pt { double x[D]; uint index, proc, session_id; };
 struct out_pt { double r[D], dist2, disti; uint index, code, el, proc, elsid; };
 
-void findptsms(        uint   *const       code_base, const unsigned       code_stride,
-                       uint   *const       proc_base, const unsigned       proc_stride,
-                       uint   *const         el_base, const unsigned         el_stride,
-                       double *const          r_base, const unsigned          r_stride,
-                       double *const      dist2_base, const unsigned      dist2_stride,
-                 const double *const       x_base[D], const unsigned       x_stride[D],
-                 const uint  * const session_id_base, const unsigned session_id_stride,
-                 const uint                      npt, struct findpts_data   *const fd)
+void findptsms(        uint   *const        code_base, const unsigned       code_stride,
+                       uint   *const        proc_base, const unsigned       proc_stride,
+                       uint   *const          el_base, const unsigned         el_stride,
+                       double *const           r_base, const unsigned          r_stride,
+                       double *const       dist2_base, const unsigned      dist2_stride,
+                 const double *const        x_base[D], const unsigned       x_stride[D],
+                 const uint   *const  session_id_base, const unsigned session_id_stride,
+                 const uint   *const session_id_match, const uint                   npt,
+                       struct findpts_data *const fd)
 {
   if (fd->fevsetup==1) array_free(&fd->savpt); fd->fevsetup=0;
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
@@ -289,7 +290,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
                           session_id_base,session_id_stride,
                                disti_base,     disti_stride,
                                elsid_base,     elsid_stride,
-                               npt,&fd->local,&fd->cr.data);
+              session_id_match,npt,&fd->local,&fd->cr.data);
   /* send unfound and border points to global hash cells */
   {
     uint index;
@@ -378,7 +379,7 @@ void findptsms(        uint   *const       code_base, const unsigned       code_
                       spt_sid_base,        spt_sid_stride,
                      &opt[0].disti, sizeof(struct out_pt),
                      &opt[0].elsid, sizeof(struct out_pt),
-                     src_pt.n,&fd->local,&fd->cr.data);
+    session_id_match,src_pt.n,&fd->local,&fd->cr.data);
     }
     array_free(&src_pt);
     /* group by code to eliminate unfound points */
@@ -656,7 +657,9 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
     }
     unsigned int *sess_base = tmalloc(uint,1);
     *sess_base = 0;
-    unsigned sess_stride=0;
+    unsigned sess_stride = 0;
+    unsigned int *sess_match = tmalloc(uint,1);
+    *sess_match = 0;
 
     findptsms( code_base, code_stride,
                proc_base, proc_stride,
@@ -665,7 +668,7 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
               dist2_base,dist2_stride,
                   x_base,    x_stride,
                sess_base, sess_stride,
-                     npt,         fd);
+              sess_match,    npt, fd);
 }
 
 void findpts_eval(

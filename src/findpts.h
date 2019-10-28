@@ -47,23 +47,25 @@ struct findpts_data_3 *findptsms_setup_3(
 void findptsms_free_2(struct findpts_data_2 *fd);
 void findptsms_free_3(struct findpts_data_3 *fd);
 
-void findptsms_2(      uint   *const       code_base, const unsigned       code_stride,
-                       uint   *const       proc_base, const unsigned       proc_stride,
-                       uint   *const         el_base, const unsigned         el_stride,
-                       double *const          r_base, const unsigned          r_stride,
-                       double *const      dist2_base, const unsigned      dist2_stride,
-                 const double *const       x_base[2], const unsigned       x_stride[2],
-                 const uint  *const  session_id_base, const unsigned session_id_stride,
-                 const uint                      npt, struct findpts_data_2 *const fd);
-
-void findptsms_3(      uint   *const       code_base, const unsigned       code_stride,
-                       uint   *const       proc_base, const unsigned       proc_stride,
-                       uint   *const         el_base, const unsigned         el_stride,
-                       double *const          r_base, const unsigned          r_stride,
-                       double *const      dist2_base, const unsigned      dist2_stride,
-                 const double *const       x_base[3], const unsigned       x_stride[3],
-                 const uint  *const  session_id_base, const unsigned session_id_stride,
-                 const uint                      npt, struct findpts_data_3 *const fd);
+void findptsms_2(      uint   *const        code_base, const unsigned       code_stride,
+                       uint   *const        proc_base, const unsigned       proc_stride,
+                       uint   *const          el_base, const unsigned         el_stride,
+                       double *const           r_base, const unsigned          r_stride,
+                       double *const       dist2_base, const unsigned      dist2_stride,
+                 const double *const        x_base[2], const unsigned       x_stride[2],
+                 const uint   *const  session_id_base, const unsigned session_id_stride,
+                 const uint   *const session_id_match, const uint                   npt,
+                      struct findpts_data_2 *const fd);
+ 
+void findptsms_3(      uint   *const        code_base, const unsigned       code_stride,
+                       uint   *const        proc_base, const unsigned       proc_stride,
+                       uint   *const          el_base, const unsigned         el_stride,
+                       double *const           r_base, const unsigned          r_stride,
+                       double *const       dist2_base, const unsigned      dist2_stride,
+                 const double *const        x_base[3], const unsigned       x_stride[3],
+                 const uint   *const  session_id_base, const unsigned session_id_stride,
+                 const uint   *const session_id_match, const uint                   npt,
+                      struct findpts_data_3 *const fd);
 
 void findptsms_eval_2(
         double *const  out_base, const unsigned  out_stride,
