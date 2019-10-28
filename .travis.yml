@@ -3,7 +3,7 @@ language: c
 before_install:
    - export ROOT_DIR=`pwd`
    - sudo apt-get update -qq
-   - sudo apt-get install -y mpich mpich-dev
+   - sudo apt-get install -y libmpich-dev mpich 
 
 env:
   matrix:
