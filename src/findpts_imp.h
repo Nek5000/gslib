@@ -659,11 +659,9 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
        printf("Please use findptsms\n");
        die(1);
     }
-    unsigned int *sess_base = tmalloc(uint,1);
-    unsigned int *sess_match = tmalloc(uint,1);
-    *sess_base = 0;
+    unsigned int sess_base = 0;
+    unsigned int sess_match = 0;
     unsigned sess_stride = 0;
-    *sess_match = 0;
 
     findptsms( code_base, code_stride,
                proc_base, proc_stride,
@@ -671,11 +669,8 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
                   r_base,    r_stride,
               dist2_base,dist2_stride,
                   x_base,    x_stride,
-               sess_base, sess_stride,
-              sess_match,    npt, fd);
-
-    free(sess_base);
-    free(sess_match);
+              &sess_base, sess_stride,
+             &sess_match,    npt, fd);
 }
 
 void findpts_eval(
