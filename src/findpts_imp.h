@@ -17,6 +17,7 @@
 #define findptsms_local_free  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_free_ ),D)
 #define findptsms_local       TOKEN_PASTE(PREFIXED_NAME(findptsms_local_      ),D)
 #define findptsms_local_eval  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_eval_ ),D)
+#define findpts_dummy_ms_data TOKEN_PASTE(findpts_dummy_ms_data_,D)
 #define findpts_data          TOKEN_PASTE(findpts_data_,D)
 #define src_pt                TOKEN_PASTE(src_pt_      ,D)
 #define out_pt                TOKEN_PASTE(out_pt_      ,D)
@@ -208,12 +209,18 @@ static void hash_build(struct hash_data *const p,
 
 static void hash_free(struct hash_data *p) { free(p->offset); }
 
+struct findpts_dummy_ms_data {
+    unsigned int *nsid;
+    double       *distfint;
+};
+
 struct findpts_data {
   struct crystal cr;
   struct findpts_local_data local;
   struct hash_data hash;
   struct array savpt;
-  uint         fevsetup;
+  struct findpts_dummy_ms_data fdms;
+  uint   fevsetup;
 };
 
 static void setupms_aux(
@@ -626,15 +633,12 @@ struct findpts_data *findpts_setup(
   const unsigned npt_max, const double newt_tol)
 { 
   uint ims=0;
-  unsigned int *nsid = tmalloc(uint,1);
-  double *distfint = tmalloc(double,1);
-  *nsid = 0;
-  *distfint = 0;
-
   struct findpts_data *const fd = tmalloc(struct findpts_data, 1);
+  fd->fdms.nsid     = 0;
+  fd->fdms.distfint = 0;
   crystal_init(&fd->cr,comm);
-  setupms_aux(fd,elx,n,nel,m,bbox_tol,
-  local_hash_size,global_hash_size,npt_max,newt_tol,nsid, distfint,ims);
+  setupms_aux(fd,elx,n,nel,m,bbox_tol,local_hash_size,global_hash_size,
+              npt_max,newt_tol,fd->fdms.nsid,fd->fdms.distfint,ims);
   return fd;
 }
 
@@ -655,11 +659,9 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
        printf("Please use findptsms\n");
        die(1);
     }
-    unsigned int *sess_base = tmalloc(uint,1);
-    *sess_base = 0;
+    unsigned int sess_base = 0;
+    unsigned int sess_match = 0;
     unsigned sess_stride = 0;
-    unsigned int *sess_match = tmalloc(uint,1);
-    *sess_match = 0;
 
     findptsms( code_base, code_stride,
                proc_base, proc_stride,
@@ -667,8 +669,8 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
                   r_base,    r_stride,
               dist2_base,dist2_stride,
                   x_base,    x_stride,
-               sess_base, sess_stride,
-              sess_match,    npt, fd);
+              &sess_base, sess_stride,
+             &sess_match,    npt, fd);
 }
 
 void findpts_eval(
@@ -703,6 +705,7 @@ void findpts_eval(
 #undef eval_src_pt
 #undef out_pt
 #undef src_pt
+#undef findpts_dummy_ms_data
 #undef findpts_data
 #undef findptsms_local_eval
 #undef findptsms_local

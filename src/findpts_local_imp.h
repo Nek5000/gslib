@@ -407,14 +407,12 @@ void findpts_local_setup(struct findpts_local_data *const fd,
                          const unsigned npt_max, const double newt_tol)
 {
   uint ims=0;
-  unsigned int *nsid = tmalloc(uint,1);
-  double *distfint = tmalloc(double,1);
-  *nsid = 0;
-  *distfint = 0;
+  unsigned int nsid = 0;
+  double distfint = 0.;
   findptsms_local_setup(fd,
                         elx,
-                        nsid,
-                        distfint,
+                       &nsid,
+                       &distfint,
                         n,nel,
                         m,bbox_tol,
                         max_hash_size,
