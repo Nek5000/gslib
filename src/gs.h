@@ -150,6 +150,7 @@ void gs_wait(int handle);
 
 struct gs_data *gs_setup(const slong *id, uint n, const struct comm *comm,
                          int unique, gs_method method, int verbose);
+void gs_exec_timings(struct gs_data *gsh,double time[3]);
 void gs_free(struct gs_data *gsh);
 void gs_unique(slong *id, uint n, const struct comm *comm);
 struct gs_data* gs_hf2c(const sint gsh);
