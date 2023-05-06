@@ -1,7 +1,7 @@
-#ifndef SARRAY_TRANSFER_H
-#define SARRAY_TRANSFER_H
+#ifndef GS_SARRAY_TRANSFER_H
+#define GS_SARRAY_TRANSFER_H
 
-#if !defined(CRYSTAL_H)
+#if !defined(GS_CRYSTAL_H)
 #warning "sarray_transfer.h" requires "crystal.h"
 #endif
 
@@ -70,9 +70,9 @@
 
 */
 
-#define sarray_transfer_many PREFIXED_NAME(sarray_transfer_many)
-#define sarray_transfer_     PREFIXED_NAME(sarray_transfer_    )
-#define sarray_transfer_ext_ PREFIXED_NAME(sarray_transfer_ext_)
+#define sarray_transfer_many GS_PREFIXED_NAME(sarray_transfer_many)
+#define sarray_transfer_     GS_PREFIXED_NAME(sarray_transfer_    )
+#define sarray_transfer_ext_ GS_PREFIXED_NAME(sarray_transfer_ext_)
 
 uint sarray_transfer_many(
   struct array *const *const A, const unsigned *const size, const unsigned An,

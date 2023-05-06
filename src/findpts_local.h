@@ -1,19 +1,19 @@
-#ifndef FINDPTS_LOCAL_H
-#define FINDPTS_LOCAL_H
+#ifndef GS_FINDPTS_LOCAL_H
+#define GS_FINDPTS_LOCAL_H
 
-#if !defined(MEM_H) || !defined(FINDPTS_EL_H) || !defined(OBBOX_H)
+#if !defined(GS_MEM_H) || !defined(GS_FINDPTS_EL_H) || !defined(GS_OBBOX_H)
 #warning "findpts_local.h" requires "mem.h", "findpts_el.h", "obbox.h"
 #endif
 
-#define findptsms_local_setup_2   PREFIXED_NAME(findptsms_local_setup_2)
-#define findptsms_local_free_2    PREFIXED_NAME(findptsms_local_free_2 )
-#define findptsms_local_2         PREFIXED_NAME(findptsms_local_2      )
-#define findptsms_local_eval_2    PREFIXED_NAME(findptsms_local_eval_2 )
+#define findptsms_local_setup_2   GS_PREFIXED_NAME(findptsms_local_setup_2)
+#define findptsms_local_free_2    GS_PREFIXED_NAME(findptsms_local_free_2 )
+#define findptsms_local_2         GS_PREFIXED_NAME(findptsms_local_2      )
+#define findptsms_local_eval_2    GS_PREFIXED_NAME(findptsms_local_eval_2 )
 
-#define findpts_local_setup_2   PREFIXED_NAME(findpts_local_setup_2)
-#define findpts_local_free_2    PREFIXED_NAME(findpts_local_free_2 )
-#define findpts_local_2         PREFIXED_NAME(findpts_local_2      )
-#define findpts_local_eval_2    PREFIXED_NAME(findpts_local_eval_2 )
+#define findpts_local_setup_2   GS_PREFIXED_NAME(findpts_local_setup_2)
+#define findpts_local_free_2    GS_PREFIXED_NAME(findpts_local_free_2 )
+#define findpts_local_2         GS_PREFIXED_NAME(findpts_local_2      )
+#define findpts_local_eval_2    GS_PREFIXED_NAME(findpts_local_eval_2 )
 
 struct findpts_local_hash_data_2 {
   uint hash_n;
@@ -85,15 +85,15 @@ void findpts_local_eval_2(
   const uint npt,
   const double *const in, struct findpts_local_data_2 *const fd);
 
-#define findptsms_local_setup_3   PREFIXED_NAME(findptsms_local_setup_3)
-#define findptsms_local_free_3    PREFIXED_NAME(findptsms_local_free_3 )
-#define findptsms_local_3         PREFIXED_NAME(findptsms_local_3      )
-#define findptsms_local_eval_3    PREFIXED_NAME(findptsms_local_eval_3 )
+#define findptsms_local_setup_3   GS_PREFIXED_NAME(findptsms_local_setup_3)
+#define findptsms_local_free_3    GS_PREFIXED_NAME(findptsms_local_free_3 )
+#define findptsms_local_3         GS_PREFIXED_NAME(findptsms_local_3      )
+#define findptsms_local_eval_3    GS_PREFIXED_NAME(findptsms_local_eval_3 )
 
-#define findpts_local_setup_3   PREFIXED_NAME(findpts_local_setup_3)
-#define findpts_local_free_3    PREFIXED_NAME(findpts_local_free_3 )
-#define findpts_local_3         PREFIXED_NAME(findpts_local_3      )
-#define findpts_local_eval_3    PREFIXED_NAME(findpts_local_eval_3 )
+#define findpts_local_setup_3   GS_PREFIXED_NAME(findpts_local_setup_3)
+#define findpts_local_free_3    GS_PREFIXED_NAME(findpts_local_free_3 )
+#define findpts_local_3         GS_PREFIXED_NAME(findpts_local_3      )
+#define findpts_local_eval_3    GS_PREFIXED_NAME(findpts_local_eval_3 )
 struct findpts_local_hash_data_3 {
   uint hash_n;
   struct dbl_range bnd[3];

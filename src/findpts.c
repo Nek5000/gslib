@@ -117,7 +117,7 @@ static uint count_bits(unsigned char *p, uint n)
                    approx number of cells per proc for the distributed
                      global geometric hash table
                    NOTE: gbl_hash_size*np needs to fit in a "global" integer
-                         (controlled by -DGLOBAL_LONG or -DGLOBAL_LONG_LONG;
+                         (controlled by -DGS_GLOBAL_LONG or -DGS_GLOBAL_LONG_LONG;
                           see "types.h")
                    actual number of cells per proc will be greater by
                      ~ 3 gbl_hash_size^(2/3) / np^(1/3)
@@ -227,17 +227,17 @@ static uint count_bits(unsigned char *p, uint n)
 
   --------------------------------------------------------------------------*/
 
-#define ffindptsms_setup      FORTRAN_NAME(findptsms_setup     ,FINDPTSMS_SETUP     )
-#define ffindptsms_free       FORTRAN_NAME(findptsms_free      ,FINDPTSMS_FREE      )
-#define ffindptsms            FORTRAN_NAME(findptsms           ,FINDPTSMS           )
-#define ffindptsms_eval       FORTRAN_NAME(findptsms_eval      ,FINDPTSMS_EVAL      )
-#define ffindptsms_eval_local FORTRAN_NAME(findptsms_eval_local,FINDPTSMS_EVAL_LOCAL)
+#define ffindptsms_setup      GS_FORTRAN_NAME(findptsms_setup     ,FINDPTSMS_SETUP     )
+#define ffindptsms_free       GS_FORTRAN_NAME(findptsms_free      ,FINDPTSMS_FREE      )
+#define ffindptsms            GS_FORTRAN_NAME(findptsms           ,FINDPTSMS           )
+#define ffindptsms_eval       GS_FORTRAN_NAME(findptsms_eval      ,FINDPTSMS_EVAL      )
+#define ffindptsms_eval_local GS_FORTRAN_NAME(findptsms_eval_local,FINDPTSMS_EVAL_LOCAL)
 
-#define ffindpts_setup      FORTRAN_NAME(findpts_setup     ,FINDPTS_SETUP     )
-#define ffindpts_free       FORTRAN_NAME(findpts_free      ,FINDPTS_FREE      )
-#define ffindpts            FORTRAN_NAME(findpts           ,FINDPTS           )
-#define ffindpts_eval       FORTRAN_NAME(findpts_eval      ,FINDPTS_EVAL      )
-#define ffindpts_eval_local FORTRAN_NAME(findpts_eval_local,FINDPTS_EVAL_LOCAL)
+#define ffindpts_setup      GS_FORTRAN_NAME(findpts_setup     ,FINDPTS_SETUP     )
+#define ffindpts_free       GS_FORTRAN_NAME(findpts_free      ,FINDPTS_FREE      )
+#define ffindpts            GS_FORTRAN_NAME(findpts           ,FINDPTS           )
+#define ffindpts_eval       GS_FORTRAN_NAME(findpts_eval      ,FINDPTS_EVAL      )
+#define ffindpts_eval_local GS_FORTRAN_NAME(findpts_eval_local,FINDPTS_EVAL_LOCAL)
 
 struct handle { void *data; unsigned ndim; };
 static struct handle *handle_array = 0;
@@ -363,9 +363,9 @@ void ffindptsms_free(const sint *const handle)
 {
   CHECK_HANDLE("findptsms_free");
   if(h->ndim==2)
-    PREFIXED_NAME(findptsms_free_2)(h->data);
+    GS_PREFIXED_NAME(findptsms_free_2)(h->data);
   else
-    PREFIXED_NAME(findptsms_free_3)(h->data);
+    GS_PREFIXED_NAME(findptsms_free_3)(h->data);
   h->data = 0;
 }
 
@@ -373,9 +373,9 @@ void ffindpts_free(const sint *const handle)
 {
   CHECK_HANDLE("findpts_free");
   if(h->ndim==2)
-    PREFIXED_NAME(findpts_free_2)(h->data);
+    GS_PREFIXED_NAME(findpts_free_2)(h->data);
   else
-    PREFIXED_NAME(findpts_free_3)(h->data);
+    GS_PREFIXED_NAME(findpts_free_3)(h->data);
   h->data = 0;
 }
 
@@ -405,7 +405,7 @@ void ffindptsms(const sint *const handle,
     sess_stride = *session_id_stride*sizeof(uint);
     sess_match  =  session_id_match;
      
-    PREFIXED_NAME(findptsms_2)(
+    GS_PREFIXED_NAME(findptsms_2)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
       (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
       (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
@@ -428,7 +428,7 @@ void ffindptsms(const sint *const handle,
     sess_stride = *session_id_stride*sizeof(uint);
     sess_match  =  session_id_match;
 
-    PREFIXED_NAME(findptsms_3)(
+    GS_PREFIXED_NAME(findptsms_3)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
       (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
       (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
@@ -459,7 +459,7 @@ void ffindpts(const sint *const handle,
     xv_stride[0] = *x_stride*sizeof(double),
     xv_stride[1] = *y_stride*sizeof(double);
 
-    PREFIXED_NAME(findpts_2)(
+    GS_PREFIXED_NAME(findpts_2)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
       (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
       (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
@@ -475,7 +475,7 @@ void ffindpts(const sint *const handle,
     xv_stride[1] = *y_stride*sizeof(double),
     xv_stride[2] = *z_stride*sizeof(double);
 
-    PREFIXED_NAME(findpts_3)(
+    GS_PREFIXED_NAME(findpts_3)(
       (uint*) code_base,(* code_stride)*sizeof(sint  ),
       (uint*) proc_base,(* proc_stride)*sizeof(sint  ),
       (uint*)   el_base,(*   el_stride)*sizeof(sint  ),
@@ -497,7 +497,7 @@ void ffindptsms_eval(const sint *const handle,
 {
   CHECK_HANDLE("findptsms_eval");
   if(h->ndim==2)
-    PREFIXED_NAME(findptsms_eval_2)(
+    GS_PREFIXED_NAME(findptsms_eval_2)(
               out_base,(* out_stride)*sizeof(double),
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
@@ -505,7 +505,7 @@ void ffindptsms_eval(const sint *const handle,
                 r_base,(*   r_stride)*sizeof(double),
       *npt, in, h->data);
   else
-    PREFIXED_NAME(findptsms_eval_3)(
+    GS_PREFIXED_NAME(findptsms_eval_3)(
               out_base,(* out_stride)*sizeof(double),
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
@@ -524,7 +524,7 @@ void ffindpts_eval(const sint *const handle,
 {
   CHECK_HANDLE("findpts_eval");
   if(h->ndim==2)
-    PREFIXED_NAME(findpts_eval_2)(
+    GS_PREFIXED_NAME(findpts_eval_2)(
               out_base,(* out_stride)*sizeof(double),
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),
@@ -532,7 +532,7 @@ void ffindpts_eval(const sint *const handle,
                 r_base,(*   r_stride)*sizeof(double),
       *npt, in, h->data);
   else
-    PREFIXED_NAME(findpts_eval_3)(
+    GS_PREFIXED_NAME(findpts_eval_3)(
               out_base,(* out_stride)*sizeof(double),
       (uint*)code_base,(*code_stride)*sizeof(sint  ),
       (uint*)proc_base,(*proc_stride)*sizeof(sint  ),

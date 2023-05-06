@@ -1,14 +1,14 @@
-#ifndef FINDPTS_EL_H
-#define FINDPTS_EL_H
+#ifndef GS_FINDPTS_EL_H
+#define GS_FINDPTS_EL_H
 
-#if !defined(NAME_H) || !defined(POLY_H)
+#if !defined(GS_NAME_H) || !defined(GS_POLY_H)
 #warning "findpts_el.h" requires "name.h", "poly.h"
 #endif
 
-#define findpts_el_setup_2   PREFIXED_NAME(findpts_el_setup_2)
-#define findpts_el_free_2    PREFIXED_NAME(findpts_el_free_2 )
-#define findpts_el_2         PREFIXED_NAME(findpts_el_2      )
-#define findpts_el_eval_2    PREFIXED_NAME(findpts_el_eval_2 )
+#define findpts_el_setup_2   GS_PREFIXED_NAME(findpts_el_setup_2)
+#define findpts_el_free_2    GS_PREFIXED_NAME(findpts_el_free_2 )
+#define findpts_el_2         GS_PREFIXED_NAME(findpts_el_2      )
+#define findpts_el_eval_2    GS_PREFIXED_NAME(findpts_el_eval_2 )
 
 struct findpts_el_pt_2 {
   double x[2],r[2],oldr[2],dist2,dist2p,tr;
@@ -60,10 +60,10 @@ static struct findpts_el_pt_2 *findpts_el_points_2(
   return fd->p;
 }
 
-#define findpts_el_setup_3   PREFIXED_NAME(findpts_el_setup_3)
-#define findpts_el_free_3    PREFIXED_NAME(findpts_el_free_3 )
-#define findpts_el_3         PREFIXED_NAME(findpts_el_3      )
-#define findpts_el_eval_3    PREFIXED_NAME(findpts_el_eval_3 )
+#define findpts_el_setup_3   GS_PREFIXED_NAME(findpts_el_setup_3)
+#define findpts_el_free_3    GS_PREFIXED_NAME(findpts_el_free_3 )
+#define findpts_el_3         GS_PREFIXED_NAME(findpts_el_3      )
+#define findpts_el_eval_3    GS_PREFIXED_NAME(findpts_el_eval_3 )
 
 struct findpts_el_pt_3 {
   double x[3],r[3],oldr[3],dist2,dist2p,tr;

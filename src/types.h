@@ -1,5 +1,5 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef GS_TYPES_H
+#define GS_TYPES_H
 #include <limits.h>
 
 /* 
@@ -10,20 +10,20 @@
   most frequently, e.g., for indexing into local arrays,
   and for processor ids. It can be one of
   
-    macro             sint/uint type
+    macro                sint/uint type
     
-    (default)         int
-    USE_LONG          long
-    USE_LONG_LONG     long long
+    (default)            int
+    GS_USE_LONG          long
+    GS_USE_LONG_LONG     long long
     
   The slong/ulong type is used in relatively few places
   for global identifiers and indices. It can be one of
 
-    macro             slong/ulong type
+    macro                slong/ulong type
     
-    (default)         int
-    GLOBAL_LONG       long
-    GLOBAL_LONG_LONG  long long
+    (default)            int
+    GS_GLOBAL_LONG       long
+    GS_GLOBAL_LONG_LONG  long long
 
   Since the long long type is not ISO C90, it is never
   used unless explicitly asked for.
@@ -34,9 +34,9 @@
 
 */
 
-#if defined(USE_LONG_LONG) || defined(GLOBAL_LONG_LONG)
+#if defined(GS_USE_LONG_LONG) || defined(GS_GLOBAL_LONG_LONG)
 typedef long long long_long;
-#  define WHEN_LONG_LONG(x) x
+#  define GS_WHEN_LONG_LONG(x) x
 #  if !defined(LLONG_MAX)
 #    if defined(LONG_LONG_MAX)
 #      define LLONG_MAX LONG_LONG_MAX
@@ -52,34 +52,34 @@ typedef long long long_long;
 #    endif
 #  endif
 #else
-#  define WHEN_LONG_LONG(x)
+#  define GS_WHEN_LONG_LONG(x)
 #endif
 
-#if !defined(USE_LONG) && !defined(USE_LONG_LONG)
-#  define TYPE_LOCAL(i,l,ll) i
-#elif defined(USE_LONG)
-#  define TYPE_LOCAL(i,l,ll) l
-#elif defined(USE_LONG_LONG)
-#  define TYPE_LOCAL(i,l,ll) ll
+#if !defined(GS_USE_LONG) && !defined(GS_USE_LONG_LONG)
+#  define GS_TYPE_LOCAL(i,l,ll) i
+#elif defined(GS_USE_LONG)
+#  define GS_TYPE_LOCAL(i,l,ll) l
+#elif defined(GS_USE_LONG_LONG)
+#  define GS_TYPE_LOCAL(i,l,ll) ll
 #endif
 
-#if !defined(GLOBAL_LONG) && !defined(GLOBAL_LONG_LONG)
-#  define TYPE_GLOBAL(i,l,ll) i
-#elif defined(GLOBAL_LONG)
-#  define TYPE_GLOBAL(i,l,ll) l
+#if !defined(GS_GLOBAL_LONG) && !defined(GS_GLOBAL_LONG_LONG)
+#  define GS_TYPE_GLOBAL(i,l,ll) i
+#elif defined(GS_GLOBAL_LONG)
+#  define GS_TYPE_GLOBAL(i,l,ll) l
 #else
-#  define TYPE_GLOBAL(i,l,ll) ll
+#  define GS_TYPE_GLOBAL(i,l,ll) ll
 #endif
 
 /* local integer type: for quantities O(N/P) */
-#define sint   signed TYPE_LOCAL(int,long,long long)
-#define uint unsigned TYPE_LOCAL(int,long,long long)
-#define iabs TYPE_LOCAL(abs,labs,llabs)
+#define sint   signed GS_TYPE_LOCAL(int,long,long long)
+#define uint unsigned GS_TYPE_LOCAL(int,long,long long)
+#define iabs GS_TYPE_LOCAL(abs,labs,llabs)
 
 /* global integer type: for quantities O(N) */
-#define slong   signed TYPE_GLOBAL(int,long,long long)
-#define ulong unsigned TYPE_GLOBAL(int,long,long long)
-#define iabsl TYPE_GLOBAL(abs,labs,llabs)
+#define slong   signed GS_TYPE_GLOBAL(int,long,long long)
+#define ulong unsigned GS_TYPE_GLOBAL(int,long,long long)
+#define iabsl GS_TYPE_GLOBAL(abs,labs,llabs)
 
 #endif
 

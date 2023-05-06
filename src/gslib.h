@@ -1,5 +1,5 @@
-#ifndef GSLIB_H
-#define GSLIB_H
+#ifndef GS_GSLIB_H
+#define GS_GSLIB_H
 
 #include <stdio.h>
 #include <stddef.h>

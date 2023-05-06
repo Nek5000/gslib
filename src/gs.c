@@ -19,19 +19,19 @@
 #include "sarray_sort.h"
 #include "sarray_transfer.h"
 
-#define gs         PREFIXED_NAME(gs       )
-#define gs_vec     PREFIXED_NAME(gs_vec   )
-#define gs_many    PREFIXED_NAME(gs_many  )
-#define igs        PREFIXED_NAME(igs      )
-#define igs_vec    PREFIXED_NAME(igs_vec  )
-#define igs_many   PREFIXED_NAME(igs_many )
-#define gs_wait    PREFIXED_NAME(gs_wait  )
-#define gs_setup   PREFIXED_NAME(gs_setup )
-#define gs_free    PREFIXED_NAME(gs_free  )
-#define gs_unique  PREFIXED_NAME(gs_unique)
-#define gs_hf2c    PREFIXED_NAME(gs_hf2c  )
-#define pw_data_nmsg PREFIXED_NAME(pw_data_nmsg )
-#define pw_data_size PREFIXED_NAME(pw_data_size )
+#define gs         GS_PREFIXED_NAME(gs       )
+#define gs_vec     GS_PREFIXED_NAME(gs_vec   )
+#define gs_many    GS_PREFIXED_NAME(gs_many  )
+#define igs        GS_PREFIXED_NAME(igs      )
+#define igs_vec    GS_PREFIXED_NAME(igs_vec  )
+#define igs_many   GS_PREFIXED_NAME(igs_many )
+#define gs_wait    GS_PREFIXED_NAME(gs_wait  )
+#define gs_setup   GS_PREFIXED_NAME(gs_setup )
+#define gs_free    GS_PREFIXED_NAME(gs_free  )
+#define gs_unique  GS_PREFIXED_NAME(gs_unique)
+#define gs_hf2c    GS_PREFIXED_NAME(gs_hf2c  )
+#define pw_data_nmsg GS_PREFIXED_NAME(pw_data_nmsg )
+#define pw_data_size GS_PREFIXED_NAME(pw_data_size )
 
 GS_DEFINE_DOM_SIZES()
 
@@ -1011,7 +1011,7 @@ static void allreduce_exec_wait(
   /* Why do I need this? Ugly */
   if (comm->np > 1)
     comm_wait(ard->req, 1);
-#ifdef GSLIB_USE_MPI
+#ifdef GS_MPI
   memcpy(buf,ardbuf,gvn*gs_dom_size[dom]);
 #endif
   /* buffer -> user array */
@@ -1497,29 +1497,29 @@ void pw_data_size(struct gs_data *gsh, int *n)
 #undef igs_many
 #undef gs_wait
 
-#define cgs         PREFIXED_NAME(gs      )
-#define cgs_vec     PREFIXED_NAME(gs_vec  )
-#define cgs_many    PREFIXED_NAME(gs_many )
-#define cgs_setup   PREFIXED_NAME(gs_setup)
-#define cgs_free    PREFIXED_NAME(gs_free )
-#define cgs_unique  PREFIXED_NAME(gs_unique)
-#define cigs        PREFIXED_NAME(igs     )
-#define cigs_vec    PREFIXED_NAME(igs_vec )
-#define cigs_many   PREFIXED_NAME(igs_many)
-#define cgs_wait    PREFIXED_NAME(gs_wait )
+#define cgs         GS_PREFIXED_NAME(gs      )
+#define cgs_vec     GS_PREFIXED_NAME(gs_vec  )
+#define cgs_many    GS_PREFIXED_NAME(gs_many )
+#define cgs_setup   GS_PREFIXED_NAME(gs_setup)
+#define cgs_free    GS_PREFIXED_NAME(gs_free )
+#define cgs_unique  GS_PREFIXED_NAME(gs_unique)
+#define cigs        GS_PREFIXED_NAME(igs     )
+#define cigs_vec    GS_PREFIXED_NAME(igs_vec )
+#define cigs_many   GS_PREFIXED_NAME(igs_many)
+#define cgs_wait    GS_PREFIXED_NAME(gs_wait )
 
-#define fgs_setup_pick FORTRAN_NAME(gs_setup_pick,GS_SETUP_PICK)
-#define fgs_setup      FORTRAN_NAME(gs_setup     ,GS_SETUP     )
-#define fgs            FORTRAN_NAME(gs_op        ,GS_OP        )
-#define fgs_vec        FORTRAN_NAME(gs_op_vec    ,GS_OP_VEC    )
-#define fgs_many       FORTRAN_NAME(gs_op_many   ,GS_OP_MANY   )
-#define figs           FORTRAN_NAME(igs_op       ,IGS_OP       )
-#define figs_vec       FORTRAN_NAME(igs_op_vec   ,IGS_OP_VEC   )
-#define figs_many      FORTRAN_NAME(igs_op_many  ,IGS_OP_MANY  )
-#define fgs_wait       FORTRAN_NAME(gs_op_wait   ,GS_OP_WAIT   )
-#define fgs_fields     FORTRAN_NAME(gs_op_fields ,GS_OP_FIELDS )
-#define fgs_free       FORTRAN_NAME(gs_free      ,GS_FREE      )
-#define fgs_unique     FORTRAN_NAME(gs_unique    ,GS_UNIQUE    )
+#define fgs_setup_pick GS_FORTRAN_NAME(gs_setup_pick,GS_SETUP_PICK)
+#define fgs_setup      GS_FORTRAN_NAME(gs_setup     ,GS_SETUP     )
+#define fgs            GS_FORTRAN_NAME(gs_op        ,GS_OP        )
+#define fgs_vec        GS_FORTRAN_NAME(gs_op_vec    ,GS_OP_VEC    )
+#define fgs_many       GS_FORTRAN_NAME(gs_op_many   ,GS_OP_MANY   )
+#define figs           GS_FORTRAN_NAME(igs_op       ,IGS_OP       )
+#define figs_vec       GS_FORTRAN_NAME(igs_op_vec   ,IGS_OP_VEC   )
+#define figs_many      GS_FORTRAN_NAME(igs_op_many  ,IGS_OP_MANY  )
+#define fgs_wait       GS_FORTRAN_NAME(gs_op_wait   ,GS_OP_WAIT   )
+#define fgs_fields     GS_FORTRAN_NAME(gs_op_fields ,GS_OP_FIELDS )
+#define fgs_free       GS_FORTRAN_NAME(gs_free      ,GS_FREE      )
+#define fgs_unique     GS_FORTRAN_NAME(gs_unique    ,GS_UNIQUE    )
 
 static struct gs_data **fgs_info = 0;
 static int fgs_max = 0;

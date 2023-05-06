@@ -1,7 +1,7 @@
-#ifndef SORT_H
-#define SORT_H
+#ifndef GS_SORT_H
+#define GS_SORT_H
 
-#if !defined(TYPES_H) || !defined(MEM_H)
+#if !defined(GS_TYPES_H) || !defined(GS_MEM_H)
 #warning "sort.h" requires "types.h" and "mem.h"
 /* types.h defines uint, ulong
    mem.h   defines buffer */
@@ -44,21 +44,21 @@
 
   ----------------------------------------------------------------------------*/
 
-#define sortv_ui     PREFIXED_NAME(sortv_ui)
-#define sortv_ul     PREFIXED_NAME(sortv_ul)
-#define sortv_ull    PREFIXED_NAME(sortv_ull)
-#define sortv_double PREFIXED_NAME(sortv_double)
-#define sortv_float PREFIXED_NAME(sortv_float)
-#define sortp_ui     PREFIXED_NAME(sortp_ui)
-#define sortp_ul     PREFIXED_NAME(sortp_ul)
-#define sortp_ull    PREFIXED_NAME(sortp_ull)
-#define sortp_double PREFIXED_NAME(sortp_double)
-#define sortp_float PREFIXED_NAME(sortp_float)
+#define sortv_ui     GS_PREFIXED_NAME(sortv_ui)
+#define sortv_ul     GS_PREFIXED_NAME(sortv_ul)
+#define sortv_ull    GS_PREFIXED_NAME(sortv_ull)
+#define sortv_double GS_PREFIXED_NAME(sortv_double)
+#define sortv_float GS_PREFIXED_NAME(sortv_float)
+#define sortp_ui     GS_PREFIXED_NAME(sortp_ui)
+#define sortp_ul     GS_PREFIXED_NAME(sortp_ul)
+#define sortp_ull    GS_PREFIXED_NAME(sortp_ull)
+#define sortp_double GS_PREFIXED_NAME(sortp_double)
+#define sortp_float GS_PREFIXED_NAME(sortp_float)
 
-#define sortv TYPE_LOCAL(sortv_ui,sortv_ul,sortv_ull)
-#define sortp TYPE_LOCAL(sortp_ui,sortp_ul,sortp_ull)
-#define sortv_long TYPE_GLOBAL(sortv_ui,sortv_ul,sortv_ull)
-#define sortp_long TYPE_GLOBAL(sortp_ui,sortp_ul,sortp_ull)
+#define sortv GS_TYPE_LOCAL(sortv_ui,sortv_ul,sortv_ull)
+#define sortp GS_TYPE_LOCAL(sortp_ui,sortp_ul,sortp_ull)
+#define sortv_long GS_TYPE_GLOBAL(sortv_ui,sortv_ul,sortv_ull)
+#define sortp_long GS_TYPE_GLOBAL(sortp_ui,sortp_ul,sortp_ull)
 
 void sortv_ui(unsigned *out, const unsigned *A, uint n, unsigned stride,
               buffer *restrict buf);
@@ -79,7 +79,7 @@ uint *sortp_double(buffer *restrict buf, int start_perm,
                const double *restrict A, uint n, unsigned stride);
 uint *sortp_float(buffer *restrict buf, int start_perm,
                const float *restrict A, uint n, unsigned stride);
-#if defined(USE_LONG_LONG) || defined(GLOBAL_LONG_LONG)
+#if defined(GS_USE_LONG_LONG) || defined(GS_GLOBAL_LONG_LONG)
 void sortv_ull(unsigned long long *out,
                const unsigned long long *A, uint n, unsigned stride,
                buffer *restrict buf);

@@ -2,10 +2,10 @@
 #include "name.h"
 #include "types.h"
 
-#if !defined(USE_CBLAS)
+#if !defined(GS_USE_CBLAS)
 
-#define tensor_dot  PREFIXED_NAME(tensor_dot )
-#define tensor_mtxm PREFIXED_NAME(tensor_mtxm)
+#define tensor_dot  GS_PREFIXED_NAME(tensor_dot )
+#define tensor_mtxm GS_PREFIXED_NAME(tensor_mtxm)
 
 /* Matrices are always column-major (FORTRAN style) */
 
@@ -16,10 +16,10 @@ double tensor_dot(const double *a, const double *b, uint n)
   return sum;
 }
 
-#  if defined(USE_NAIVE_BLAS)
-#    define tensor_mxv  PREFIXED_NAME(tensor_mxv )
-#    define tensor_mtxv PREFIXED_NAME(tensor_mtxv)
-#    define tensor_mxm  PREFIXED_NAME(tensor_mxm )
+#  if defined(GS_USE_NAIVE_BLAS)
+#    define tensor_mxv  GS_PREFIXED_NAME(tensor_mxv )
+#    define tensor_mtxv GS_PREFIXED_NAME(tensor_mtxv)
+#    define tensor_mxm  GS_PREFIXED_NAME(tensor_mxm )
 
 /* y = A x */
 void tensor_mxv(

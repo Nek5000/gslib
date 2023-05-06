@@ -8,14 +8,14 @@
 #include "fail.h"
 #include "mem.h"
 
-#define lagrange_size  PREFIXED_NAME(lagrange_size )
-#define lagrange_setup PREFIXED_NAME(lagrange_setup)
-#define gauss_nodes    PREFIXED_NAME(gauss_nodes   )
-#define gauss_quad     PREFIXED_NAME(gauss_quad    )
-#define lobatto_nodes  PREFIXED_NAME(lobatto_nodes )
-#define lobatto_quad   PREFIXED_NAME(lobatto_quad  )
-#define gll_lag_size   PREFIXED_NAME(gll_lag_size  )
-#define gll_lag_setup  PREFIXED_NAME(gll_lag_setup )
+#define lagrange_size  GS_PREFIXED_NAME(lagrange_size )
+#define lagrange_setup GS_PREFIXED_NAME(lagrange_setup)
+#define gauss_nodes    GS_PREFIXED_NAME(gauss_nodes   )
+#define gauss_quad     GS_PREFIXED_NAME(gauss_quad    )
+#define lobatto_nodes  GS_PREFIXED_NAME(lobatto_nodes )
+#define lobatto_quad   GS_PREFIXED_NAME(lobatto_quad  )
+#define gll_lag_size   GS_PREFIXED_NAME(gll_lag_size  )
+#define gll_lag_setup  GS_PREFIXED_NAME(gll_lag_setup )
 
 typedef void lagrange_fun(double *restrict p,
   double *restrict data, unsigned n, int d, double x);

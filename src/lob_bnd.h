@@ -1,17 +1,17 @@
-#ifndef LOB_BND_H
-#define LOB_BND_H
+#ifndef GS_LOB_BND_H
+#define GS_LOB_BND_H
 
-#if !defined(TYPES_H) || !defined(NAME_H)
+#if !defined(GS_TYPES_H) || !defined(GS_NAME_H)
 #warning "lob_bnd.h" requires "types.h" and "name.h"
 #endif
 
-#define lob_bnd_setup  PREFIXED_NAME(lob_bnd_setup)
-#define lob_bnd_lin_1  PREFIXED_NAME(lob_bnd_lin_1)
-#define lob_bnd_lin_2  PREFIXED_NAME(lob_bnd_lin_2)
-#define lob_bnd_lin_3  PREFIXED_NAME(lob_bnd_lin_3)
-#define lob_bnd_1      PREFIXED_NAME(lob_bnd_1    )
-#define lob_bnd_2      PREFIXED_NAME(lob_bnd_2    )
-#define lob_bnd_3      PREFIXED_NAME(lob_bnd_3    )
+#define lob_bnd_setup  GS_PREFIXED_NAME(lob_bnd_setup)
+#define lob_bnd_lin_1  GS_PREFIXED_NAME(lob_bnd_lin_1)
+#define lob_bnd_lin_2  GS_PREFIXED_NAME(lob_bnd_lin_2)
+#define lob_bnd_lin_3  GS_PREFIXED_NAME(lob_bnd_lin_3)
+#define lob_bnd_1      GS_PREFIXED_NAME(lob_bnd_1    )
+#define lob_bnd_2      GS_PREFIXED_NAME(lob_bnd_2    )
+#define lob_bnd_3      GS_PREFIXED_NAME(lob_bnd_3    )
 
 /*--------------------------------------------------------------------------
    Bounds for Polynomials on [-1,1]^d
@@ -85,7 +85,7 @@ void lob_bnd_lin_3(
   const double *lob_bnd_data_t, unsigned nt, unsigned mt,
   const double *restrict u, uint un, double *restrict work);
 
-#ifndef OBBOX_H
+#ifndef GS_OBBOX_H
 struct dbl_range { double min, max; };
 #endif
 

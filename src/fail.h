@@ -1,15 +1,15 @@
-#ifndef FAIL_H
-#define FAIL_H
+#ifndef GS_FAIL_H
+#define GS_FAIL_H
 
-#if !defined(NAME_H)
+#if !defined(GS_NAME_H)
 #warning "fail.h" requires "name.h"
 #endif
 
-#define  die        PREFIXED_NAME( die       )
-#define vdiagnostic PREFIXED_NAME(vdiagnostic)
-#define  diagnostic PREFIXED_NAME( diagnostic)
-#define vfail       PREFIXED_NAME(vfail      )
-#define  fail       PREFIXED_NAME( fail      )
+#define  die        GS_PREFIXED_NAME( die       )
+#define vdiagnostic GS_PREFIXED_NAME(vdiagnostic)
+#define  diagnostic GS_PREFIXED_NAME( diagnostic)
+#define vfail       GS_PREFIXED_NAME(vfail      )
+#define  fail       GS_PREFIXED_NAME( fail      )
 
 #ifdef __GNUC__
 #  define ATTRBD   __attribute__ ((noreturn))

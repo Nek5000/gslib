@@ -11,10 +11,10 @@
 #include "tensor.h"
 #include "poly.h"
 
-#define findpts_el_setup_3   PREFIXED_NAME(findpts_el_setup_3)
-#define findpts_el_free_3    PREFIXED_NAME(findpts_el_free_3 )
-#define findpts_el_3         PREFIXED_NAME(findpts_el_3      )
-#define findpts_el_eval_3    PREFIXED_NAME(findpts_el_eval_3 )
+#define findpts_el_setup_3   GS_PREFIXED_NAME(findpts_el_setup_3)
+#define findpts_el_free_3    GS_PREFIXED_NAME(findpts_el_free_3 )
+#define findpts_el_3         GS_PREFIXED_NAME(findpts_el_3      )
+#define findpts_el_eval_3    GS_PREFIXED_NAME(findpts_el_eval_3 )
 /*
 #define DIAGNOSTICS_1
 #define DIAGNOSTICS_2

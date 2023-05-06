@@ -108,7 +108,7 @@ void comm_allreduce(const struct comm *com, gs_dom dom, gs_op op,
                           void *v, uint vn, void *buf)
 {
   if(vn==0) return;
-#ifdef GSLIB_USE_MPI
+#ifdef GS_MPI
   {
     MPI_Datatype mpitype;
     MPI_Op mpiop;
@@ -117,8 +117,8 @@ void comm_allreduce(const struct comm *com, gs_dom dom, gs_op op,
                     case gs_float:     mpitype=MPI_FLOAT;     break; \
                     case gs_int:       mpitype=MPI_INT;       break; \
                     case gs_long:      mpitype=MPI_LONG;      break; \
-     WHEN_LONG_LONG(case gs_long_long: mpitype=MPI_LONG_LONG; break;) \
-                  default:        goto comm_allreduce_byhand; \
+  GS_WHEN_LONG_LONG(case gs_long_long: mpitype=MPI_LONG_LONG; break;) \
+                    default:           goto comm_allreduce_byhand; \
       } \
     } while(0)
     DOMAIN_SWITCH();
@@ -134,7 +134,7 @@ void comm_allreduce(const struct comm *com, gs_dom dom, gs_op op,
     return;
   }
 #endif
-#ifdef GSLIB_USE_MPI
+#ifdef GS_MPI
 comm_allreduce_byhand:
   allreduce_imp(com,dom,op, v,vn, buf);
 #endif
@@ -144,7 +144,7 @@ void comm_iallreduce(comm_req *req, const struct comm *com, gs_dom dom, gs_op op
                           void *v, uint vn, void *buf)
 {
   if(vn==0) return;
-#ifdef GSLIB_USE_MPI
+#ifdef GS_MPI
   {
     MPI_Datatype mpitype;
     MPI_Op mpiop;
@@ -153,8 +153,8 @@ void comm_iallreduce(comm_req *req, const struct comm *com, gs_dom dom, gs_op op
                     case gs_float:     mpitype=MPI_FLOAT;     break; \
                     case gs_int:       mpitype=MPI_INT;       break; \
                     case gs_long:      mpitype=MPI_LONG;      break; \
-     WHEN_LONG_LONG(case gs_long_long: mpitype=MPI_LONG_LONG; break;) \
-                  default:        goto comm_allreduce_byhand; \
+  GS_WHEN_LONG_LONG(case gs_long_long: mpitype=MPI_LONG_LONG; break;) \
+                    default:           goto comm_allreduce_byhand; \
       } \
     } while(0)
     DOMAIN_SWITCH();
@@ -165,7 +165,7 @@ void comm_iallreduce(comm_req *req, const struct comm *com, gs_dom dom, gs_op op
                  case gs_max: mpiop=MPI_MAX;  break;
                  default:        goto comm_allreduce_byhand;
     }
-#ifdef USE_NBC
+#ifdef GS_USE_NBC
     MPI_Iallreduce(v,buf,vn,mpitype,mpiop,com->c,req);
 #else
     fail(1,"comm_iallreduce",__LINE__,"Invalid call to MPI_Iallreduce!\n");
@@ -174,7 +174,7 @@ void comm_iallreduce(comm_req *req, const struct comm *com, gs_dom dom, gs_op op
     return;
   }
 #endif
-#ifdef GSLIB_USE_MPI
+#ifdef GS_MPI
 comm_allreduce_byhand:
   allreduce_imp(com,dom,op, v,vn, buf);
 #endif
@@ -197,7 +197,7 @@ double comm_dot(const struct comm *comm, double *v, double *w, uint n)
   do { T v = *in++; GS_DO_##OP(accum,v); } while(--n)
 
 #define DEFINE_REDUCE(T) \
-T PREFIXED_NAME(comm_reduce__##T)( \
+T GS_PREFIXED_NAME(comm_reduce__##T)( \
     const struct comm *comm, gs_op op, const T *in, uint n) \
 {                                                           \
   T accum = gs_identity_##T[op], buf;                       \

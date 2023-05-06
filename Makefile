@@ -3,6 +3,7 @@ ADDUS ?= 1
 USREXIT ?= 0
 NBC ?= 0
 BLAS ?= 0
+MKL ?= 0
 
 CFLAGS ?= -O2
 FFLAGS ?= -O2
@@ -49,7 +50,7 @@ endif
 
 $(shell >config.h)
 ifneq (0,$(MPI))
-  SN = GSLIB_USE_MPI
+  SN = GS_MPI
   G := $(G) -D$(SN)
   $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
   ifeq ($(origin CC),default)
@@ -61,41 +62,46 @@ ifneq (0,$(MPI))
 endif
 
 ifneq (0,$(ADDUS))
-  SN = UNDERSCORE
+  SN = GS_UNDERSCORE
   G := $(G) -D$(SN)
   $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
 endif
 
-SN = PREFIX
+SN = GS_PREFIX
 G := $(G) -D$(SN)=$(CPREFIX)
 $(shell printf "#ifndef ${SN}\n#define ${SN} ${CPREFIX}\n#endif\n" >>config.h)
 
-SN = FPREFIX
+SN = GS_FPREFIX
 G := $(G) -D$(SN)=$(FPREFIX)
 $(shell printf "#ifndef ${SN}\n#define ${SN} ${FPREFIX}\n#endif\n" >>config.h)
 
-SN = GLOBAL_LONG_LONG
+SN = GS_GLOBAL_LONG_LONG
 G := $(G) -D$(SN)
 $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
 
 ifneq (0,$(USREXIT))
-  G += -DUSE_USR_EXIT
+  G += -DGS_USE_USR_EXIT
 endif
 
 ifneq (0,$(NBC))
-  G += -DUSE_NBC
+  G += -DGS_USE_NBC
 endif
 
 ifeq (0,$(BLAS))
-  SN = USE_NAIVE_BLAS
+  SN = GS_USE_NAIVE_BLAS
   G := $(G) -D$(SN)
   $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
 endif
 
 ifeq (1,$(BLAS))
-  SN = USE_CBLAS
+  SN = GS_USE_CBLAS
   G := $(G) -D$(SN)
   $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
+  ifeq (1,$(MKL))
+    SN = GS_USE_MKL
+    G := $(G) -D$(SN)
+    $(shell printf "#ifndef ${SN}\n#define ${SN}\n#endif\n" >>config.h)
+  endif
 endif
 
 CCCMD = $(CC) $(CFLAGS) -I$(INCDIR) $(G)

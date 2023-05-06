@@ -1,12 +1,16 @@
-#ifndef TENSOR_H
-#define TENSOR_H
+#ifndef GS_TENSOR_H
+#define GS_TENSOR_H
 
-#if !defined(TYPES_H) || !defined(NAME_H)
+#if !defined(GS_TYPES_H) || !defined(GS_NAME_H)
 #warning "tensor.h" requires "types.h" and "name.h"
 #endif
 
-#if defined(USE_CBLAS)
+#if defined(GS_USE_CBLAS)
+#if defined(GS_USE_MKL)
+#  include <mkl_cblas.h>
+#else
 #  include <cblas.h>
+#endif
 #  define tensor_dot(a,b,n) cblas_ddot((int)(n),a,1,b,1)
 #  define tensor_mxv(y,ny,A,x,nx) \
      cblas_dgemv(CblasColMajor,CblasNoTrans,(int)ny,(int)nx, \
@@ -23,17 +27,17 @@
                  (int)nc,(int)nb,(int)na,1.0, \
                  A,(int)na,B,(int)na,0.0,C,(int)nc)
 #else
-#  define tensor_dot  PREFIXED_NAME(tensor_dot )
-#  define tensor_mtxm PREFIXED_NAME(tensor_mtxm)
+#  define tensor_dot  GS_PREFIXED_NAME(tensor_dot )
+#  define tensor_mtxm GS_PREFIXED_NAME(tensor_mtxm)
 double tensor_dot(const double *a, const double *b, uint n);
 
 /* C (nc x nb) = [A (na x nc)]^T * B (na x nb); all column-major */
 void tensor_mtxm(double *C, uint nc,
                  const double *A, uint na, const double *B, uint nb);
-#  if defined(USE_NAIVE_BLAS)
-#    define tensor_mxv  PREFIXED_NAME(tensor_mxv )
-#    define tensor_mtxv PREFIXED_NAME(tensor_mtxv)
-#    define tensor_mxm  PREFIXED_NAME(tensor_mxm )
+#  if defined(GS_USE_NAIVE_BLAS)
+#    define tensor_mxv  GS_PREFIXED_NAME(tensor_mxv )
+#    define tensor_mtxv GS_PREFIXED_NAME(tensor_mtxv)
+#    define tensor_mxm  GS_PREFIXED_NAME(tensor_mxm )
 /* y = A x */
 void tensor_mxv(double *y, uint ny, const double *A, const double *x, uint nx);
 
@@ -44,7 +48,7 @@ void tensor_mtxv(double *y, uint ny, const double *A, const double *x, uint nx);
 void tensor_mxm(double *C, uint nc,
                 const double *A, uint na, const double *B, uint nb);
 #  else
-#    define mxm FORTRAN_NAME(mxm,MXM)
+#    define mxm GS_FORTRAN_NAME(mxm,MXM)
 /* C (na x nc) = A (na x nb) * B (nb x nc); all column-major */
 void mxm(const double *A, const uint *na,
          const double *B, const uint *nb,

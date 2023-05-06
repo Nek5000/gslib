@@ -10,13 +10,13 @@
 #include "mem.h"
 #include "poly.h"
 
-#define lob_bnd_setup  PREFIXED_NAME(lob_bnd_setup)
-#define lob_bnd_lin_1  PREFIXED_NAME(lob_bnd_lin_1)
-#define lob_bnd_lin_2  PREFIXED_NAME(lob_bnd_lin_2)
-#define lob_bnd_lin_3  PREFIXED_NAME(lob_bnd_lin_3)
-#define lob_bnd_1      PREFIXED_NAME(lob_bnd_1    )
-#define lob_bnd_2      PREFIXED_NAME(lob_bnd_2    )
-#define lob_bnd_3      PREFIXED_NAME(lob_bnd_3    )
+#define lob_bnd_setup  GS_PREFIXED_NAME(lob_bnd_setup)
+#define lob_bnd_lin_1  GS_PREFIXED_NAME(lob_bnd_lin_1)
+#define lob_bnd_lin_2  GS_PREFIXED_NAME(lob_bnd_lin_2)
+#define lob_bnd_lin_3  GS_PREFIXED_NAME(lob_bnd_lin_3)
+#define lob_bnd_1      GS_PREFIXED_NAME(lob_bnd_1    )
+#define lob_bnd_2      GS_PREFIXED_NAME(lob_bnd_2    )
+#define lob_bnd_3      GS_PREFIXED_NAME(lob_bnd_3    )
 
 struct dbl_range { double min,max; };
 

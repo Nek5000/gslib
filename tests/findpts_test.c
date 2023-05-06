@@ -291,7 +291,7 @@ int main(int narg, char *arg[])
   comm_ext world;
   struct comm comm;
   
-#ifdef GSLIB_USE_MPI
+#ifdef GS_MPI
   MPI_Init(&narg,&arg);
   world = MPI_COMM_WORLD;
 #else
@@ -310,7 +310,7 @@ int main(int narg, char *arg[])
   
   comm_free(&comm);
 
-#ifdef GSLIB_USE_MPI
+#ifdef GS_MPI
   MPI_Finalize();
 #endif
 

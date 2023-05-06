@@ -8,8 +8,8 @@
 #include "mem.h"
 #include "sort.h"
 
-#define sarray_permute_     PREFIXED_NAME(sarray_permute_)
-#define sarray_permute_buf_ PREFIXED_NAME(sarray_permute_buf_)
+#define sarray_permute_     GS_PREFIXED_NAME(sarray_permute_)
+#define sarray_permute_buf_ GS_PREFIXED_NAME(sarray_permute_buf_)
 
 void sarray_permute_(size_t size, void *A, size_t n, uint *perm, void *work)
 {
