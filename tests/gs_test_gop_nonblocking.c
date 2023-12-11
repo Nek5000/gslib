@@ -92,7 +92,7 @@ int main(int narg, char *arg[])
   comm_ext world; int rank, result;
   struct comm comm;
 
-#ifdef MPI
+#ifdef GSLIB_USE_MPI
   MPI_Init(&narg,&arg);
   world = MPI_COMM_WORLD;
   MPI_Comm_size(world,&np);
@@ -112,7 +112,7 @@ int main(int narg, char *arg[])
 
   if (rank == 0) printf("\n");
 
-#ifdef MPI
+#ifdef GSLIB_USE_MPI
   MPI_Finalize();
 #endif
 

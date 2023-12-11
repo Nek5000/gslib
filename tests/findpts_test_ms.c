@@ -430,7 +430,7 @@ int main(int narg, char *arg[])
   struct comm comm;
   comm_ext world1;
   struct comm comm1;
-#ifdef MPI
+#ifdef GSLIB_USE_MPI
   MPI_Init(&narg,&arg);
   world = MPI_COMM_WORLD;
 #else
@@ -442,7 +442,7 @@ int main(int narg, char *arg[])
 
   if (np<2) {
   printf("Please use atleast 2 processors\n");
-  #ifdef MPI
+  #ifdef GSLIB_USE_MPI
     MPI_Finalize();
   #endif
   return 0;
@@ -468,7 +468,7 @@ int main(int narg, char *arg[])
   comm_free(&comm);
   comm_free(&comm1);
 
-#ifdef MPI
+#ifdef GSLIB_USE_MPI
   MPI_Finalize();
 #endif
 
