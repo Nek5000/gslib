@@ -1,4 +1,4 @@
-GSLIB_USE_MPI ?= 1
+MPI ?= 1
 ADDUS ?= 1
 USREXIT ?= 0
 NBC ?= 0
@@ -24,7 +24,7 @@ INSTALL_ROOT = $(SRCROOT)/build
 endif
 
 $(shell >config.h)
-ifneq (0,$(GSLIB_USE_MPI))
+ifneq (0,$(MPI))
   SN=GSLIB_USE_MPI
   G:=$(G) -D$(SN)
   ifeq ($(origin CC),default)
