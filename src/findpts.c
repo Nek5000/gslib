@@ -117,8 +117,8 @@ static uint count_bits(unsigned char *p, uint n)
                    approx number of cells per proc for the distributed
                      global geometric hash table
                    NOTE: gbl_hash_size*np needs to fit in a "global" integer
-                         (controlled by -DGS_GLOBAL_LONG or -DGS_GLOBAL_LONG_LONG;
-                          see "types.h")
+                         (controlled by -DGSLIB_USE_GLOBAL_LONG or
+                          -DGSLIB_USE_GLOBAL_LONG_LONG; see "types.h")
                    actual number of cells per proc will be greater by
                      ~ 3 gbl_hash_size^(2/3) / np^(1/3)
   

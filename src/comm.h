@@ -15,8 +15,8 @@
 #endif
 
 /*
-  When the preprocessor macro GS_MPI is defined, defines (very) thin wrappers
-  for the handful of used MPI routines. Alternatively, when GS_MPI is not defined,
+  When the preprocessor macro GSLIB_USE_MPI is defined, defines (very) thin wrappers
+  for the handful of used MPI routines. Alternatively, when GSLIB_USE_MPI is not defined,
   these wrappers become dummy routines suitable for a single process run.
 
   Basic usage:
@@ -62,7 +62,7 @@
          
 */
 
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
 #include <mpi.h>
 typedef MPI_Comm comm_ext;
 typedef MPI_Request comm_req;
@@ -141,7 +141,7 @@ GS_FOR_EACH_DOMAIN(DEFINE_REDUCE)
 
 static void comm_init(struct comm *c, comm_ext ce)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   int i;
   MPI_Comm_dup(ce, &c->c);
   MPI_Comm_rank(c->c,&i), comm_gbl_id=c->id=i;
@@ -154,7 +154,7 @@ static void comm_init(struct comm *c, comm_ext ce)
 static void comm_init_check_(struct comm *c, MPI_Fint ce, uint np,
                              const char *file, unsigned line)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   comm_init(c,MPI_Comm_f2c(ce));
   if(c->np != np)
     fail(1,file,line,"comm_init_check: passed P=%u, "
@@ -174,7 +174,7 @@ static void comm_dup_(struct comm *d, const struct comm *s,
                       const char *file, unsigned line)
 {
   d->id = s->id, d->np = s->np;
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Comm_dup(s->c,&d->c);
 #else
   if(s->np!=1) fail(1,file,line,"%s not compiled with -DMPI\n",file);
@@ -184,7 +184,7 @@ static void comm_dup_(struct comm *d, const struct comm *s,
 
 static void comm_split_(const struct comm *s, int bin, int key, struct comm *d,
                         const char *file, unsigned line) {
-#if defined(GS_MPI)
+#if defined(GSLIB_USE_MPI)
   MPI_Comm nc;
   MPI_Comm_split(s->c, bin, key, &nc);
   comm_init(d, nc);
@@ -197,14 +197,14 @@ static void comm_split_(const struct comm *s, int bin, int key, struct comm *d,
 
 static void comm_free(struct comm *c)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Comm_free(&c->c);
 #endif
 }
 
 static double comm_time(void)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   return MPI_Wtime();
 #else
   return 0;
@@ -213,7 +213,7 @@ static double comm_time(void)
 
 static void comm_barrier(const struct comm *c)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Barrier(c->c);
 #endif
 }
@@ -221,7 +221,7 @@ static void comm_barrier(const struct comm *c)
 static void comm_recv(const struct comm *c, void *p, size_t n,
                       uint src, int tag)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
 # ifndef MPI_STATUS_IGNORE
   MPI_Status stat;
   MPI_Recv(p,n,MPI_UNSIGNED_CHAR,src,tag,c->c,&stat);
@@ -234,7 +234,7 @@ static void comm_recv(const struct comm *c, void *p, size_t n,
 static void comm_send(const struct comm *c, void *p, size_t n,
                       uint dst, int tag)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Send(p,n,MPI_UNSIGNED_CHAR,dst,tag,c->c);
 #endif
 }
@@ -242,7 +242,7 @@ static void comm_send(const struct comm *c, void *p, size_t n,
 static void comm_irecv(comm_req *req, const struct comm *c,
                        void *p, size_t n, uint src, int tag)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Irecv(p,n,MPI_UNSIGNED_CHAR,src,tag,c->c,req);
 #endif
 }
@@ -250,14 +250,14 @@ static void comm_irecv(comm_req *req, const struct comm *c,
 static void comm_isend(comm_req *req, const struct comm *c,
                        void *p, size_t n, uint dst, int tag)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Isend(p,n,MPI_UNSIGNED_CHAR,dst,tag,c->c,req);
 #endif
 }
 
 static void comm_wait(comm_req *req, int n)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
 # ifndef MPI_STATUSES_IGNORE
   MPI_Status status[8];
   while(n>=8) MPI_Waitall(8,req,status), req+=8, n-=8;
@@ -270,7 +270,7 @@ static void comm_wait(comm_req *req, int n)
 
 static void comm_bcast(const struct comm *c, void *p, size_t n, uint root)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Bcast(p,n,MPI_UNSIGNED_CHAR,root,c->c);
 #endif
 }
@@ -278,7 +278,7 @@ static void comm_bcast(const struct comm *c, void *p, size_t n, uint root)
 static void comm_gather(const struct comm *c, void *out, size_t out_n,
 		void *in, size_t in_n, uint root)
 {
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Gather(out,out_n,MPI_UNSIGNED_CHAR,in,in_n,MPI_UNSIGNED_CHAR,root,c->c);
 #else
   assert(out_n == in_n);

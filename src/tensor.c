@@ -2,7 +2,7 @@
 #include "name.h"
 #include "types.h"
 
-#if !defined(GS_USE_CBLAS)
+#if !defined(GSLIB_USE_CBLAS)
 
 #define tensor_dot  GS_PREFIXED_NAME(tensor_dot )
 #define tensor_mtxm GS_PREFIXED_NAME(tensor_mtxm)
@@ -16,7 +16,7 @@ double tensor_dot(const double *a, const double *b, uint n)
   return sum;
 }
 
-#  if defined(GS_USE_NAIVE_BLAS)
+#  if defined(GSLIB_USE_NAIVE_BLAS)
 #    define tensor_mxv  GS_PREFIXED_NAME(tensor_mxv )
 #    define tensor_mtxv GS_PREFIXED_NAME(tensor_mtxv)
 #    define tensor_mxm  GS_PREFIXED_NAME(tensor_mxm )

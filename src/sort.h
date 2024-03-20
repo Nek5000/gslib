@@ -79,7 +79,7 @@ uint *sortp_double(buffer *restrict buf, int start_perm,
                const double *restrict A, uint n, unsigned stride);
 uint *sortp_float(buffer *restrict buf, int start_perm,
                const float *restrict A, uint n, unsigned stride);
-#if defined(GS_USE_LONG_LONG) || defined(GS_GLOBAL_LONG_LONG)
+#if defined(GSLIB_USE_LONG_LONG) || defined(GSLIB_USE_GLOBAL_LONG_LONG)
 void sortv_ull(unsigned long long *out,
                const unsigned long long *A, uint n, unsigned stride,
                buffer *restrict buf);

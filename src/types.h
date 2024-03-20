@@ -1,5 +1,6 @@
 #ifndef GS_TYPES_H
 #define GS_TYPES_H
+
 #include <limits.h>
 
 /* 
@@ -10,20 +11,20 @@
   most frequently, e.g., for indexing into local arrays,
   and for processor ids. It can be one of
   
-    macro                sint/uint type
+    macro                       sint/uint type
     
-    (default)            int
-    GS_USE_LONG          long
-    GS_USE_LONG_LONG     long long
+    (default)                   int
+    GSLIB_USE_LONG              long
+    GSLIB_USE_LONG_LONG         long long
     
   The slong/ulong type is used in relatively few places
   for global identifiers and indices. It can be one of
 
-    macro                slong/ulong type
+    macro                       slong/ulong type
     
-    (default)            int
-    GS_GLOBAL_LONG       long
-    GS_GLOBAL_LONG_LONG  long long
+    (default)                   int
+    GSLIB_USE_GLOBAL_LONG       long
+    GSLIB_USE_GLOBAL_LONG_LONG  long long
 
   Since the long long type is not ISO C90, it is never
   used unless explicitly asked for.
@@ -34,7 +35,7 @@
 
 */
 
-#if defined(GS_USE_LONG_LONG) || defined(GS_GLOBAL_LONG_LONG)
+#if defined(GSLIB_USE_LONG_LONG) || defined(GSLIB_USE_GLOBAL_LONG_LONG)
 typedef long long long_long;
 #  define GS_WHEN_LONG_LONG(x) x
 #  if !defined(LLONG_MAX)
@@ -55,17 +56,17 @@ typedef long long long_long;
 #  define GS_WHEN_LONG_LONG(x)
 #endif
 
-#if !defined(GS_USE_LONG) && !defined(GS_USE_LONG_LONG)
+#if !defined(GSLIB_USE_LONG) && !defined(GSLIB_USE_LONG_LONG)
 #  define GS_TYPE_LOCAL(i,l,ll) i
-#elif defined(GS_USE_LONG)
+#elif defined(GSLIB_USE_LONG)
 #  define GS_TYPE_LOCAL(i,l,ll) l
-#elif defined(GS_USE_LONG_LONG)
+#elif defined(GSLIB_USE_LONG_LONG)
 #  define GS_TYPE_LOCAL(i,l,ll) ll
 #endif
 
-#if !defined(GS_GLOBAL_LONG) && !defined(GS_GLOBAL_LONG_LONG)
+#if !defined(GSLIB_USE_GLOBAL_LONG) && !defined(GSLIB_USE_GLOBAL_LONG_LONG)
 #  define GS_TYPE_GLOBAL(i,l,ll) i
-#elif defined(GS_GLOBAL_LONG)
+#elif defined(GSLIB_USE_GLOBAL_LONG)
 #  define GS_TYPE_GLOBAL(i,l,ll) l
 #else
 #  define GS_TYPE_GLOBAL(i,l,ll) ll

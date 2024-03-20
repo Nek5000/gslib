@@ -5,8 +5,8 @@
 #warning "tensor.h" requires "types.h" and "name.h"
 #endif
 
-#if defined(GS_USE_CBLAS)
-#if defined(GS_USE_MKL)
+#if defined(GSLIB_USE_CBLAS)
+#if defined(GSLIB_USE_MKL)
 #  include <mkl_cblas.h>
 #else
 #  include <cblas.h>
@@ -34,7 +34,7 @@ double tensor_dot(const double *a, const double *b, uint n);
 /* C (nc x nb) = [A (na x nc)]^T * B (na x nb); all column-major */
 void tensor_mtxm(double *C, uint nc,
                  const double *A, uint na, const double *B, uint nb);
-#  if defined(GS_USE_NAIVE_BLAS)
+#  if defined(GSLIB_USE_NAIVE_BLAS)
 #    define tensor_mxv  GS_PREFIXED_NAME(tensor_mxv )
 #    define tensor_mtxv GS_PREFIXED_NAME(tensor_mtxv)
 #    define tensor_mxm  GS_PREFIXED_NAME(tensor_mxm )

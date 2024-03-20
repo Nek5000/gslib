@@ -106,7 +106,7 @@ int main(int narg, char *arg[])
   comm_ext world; int np;
   struct comm comm;
 
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Init(&narg,&arg);
   world = MPI_COMM_WORLD;
   MPI_Comm_size(world,&np);
@@ -121,7 +121,7 @@ int main(int narg, char *arg[])
 
   comm_free(&comm);
 
-#ifdef GS_MPI
+#ifdef GSLIB_USE_MPI
   MPI_Finalize();
 #endif
 

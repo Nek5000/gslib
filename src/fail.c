@@ -7,7 +7,7 @@
 #include "types.h"
 #include "comm.h"
 
-#ifdef GS_USE_USR_EXIT
+#ifdef GSLIB_USE_USR_EXIT
 #define userExitHandler GS_FORTRAN_NAME(userexithandler,USEREXITHANDLER)
 #define USEREXIT 1
 extern void userExitHandler(int status);
