@@ -278,7 +278,10 @@ void findptsms(        uint   *const        code_base, const unsigned       code
                  const uint   *const session_id_match, const uint                   npt,
                        struct findpts_data *const fd)
 {
-  if (fd->fevsetup==1) array_free(&fd->savpt); fd->fevsetup=0;
+  if (fd->fevsetup==1) {
+    array_free(&fd->savpt);
+    fd->fevsetup=0;
+  }
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
   struct array hash_pt, src_pt, out_pt;
   double *distv = tmalloc(double,npt);
