@@ -466,7 +466,7 @@ void findpts_local_eval(
   const uint npt,
   const double *const in, struct findpts_local_data *const fd)
 {
-  findpts_local_eval(
+  findptsms_local_eval(
   out_base,out_stride,
    el_base,el_stride,
     r_base,r_stride,

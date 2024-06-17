@@ -38,7 +38,6 @@
 #define findpts_free          TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
 #define findpts               TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
 #define findpts_eval          TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
-#define findpts_local_eval    TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
 #define setup_fev_aux         TOKEN_PASTE(setup_fev_aux_,D)
 
 struct hash_data {
