@@ -11,9 +11,9 @@
 #include "crystal.h"
 #include "sort.h"
 
-#define sarray_transfer_many PREFIXED_NAME(sarray_transfer_many)
-#define sarray_transfer_     PREFIXED_NAME(sarray_transfer_    )
-#define sarray_transfer_ext_ PREFIXED_NAME(sarray_transfer_ext_)
+#define sarray_transfer_many GS_PREFIXED_NAME(sarray_transfer_many)
+#define sarray_transfer_     GS_PREFIXED_NAME(sarray_transfer_    )
+#define sarray_transfer_ext_ GS_PREFIXED_NAME(sarray_transfer_ext_)
 
 static void pack_int(
   buffer *const data, const unsigned row_size, const uint id,

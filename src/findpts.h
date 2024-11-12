@@ -1,27 +1,27 @@
-#ifndef FINDPTSMS_H
-#define FINDPTSMS_H
+#ifndef GS_FINDPTSMS_H
+#define GS_FINDPTSMS_H
 
-#if !defined(COMM_H)
+#if !defined(GS_COMM_H)
 #warning "findpts.h" requires "comm.h"
 #endif
 
-#define findptsms_setup_2   PREFIXED_NAME(findptsms_setup_2)
-#define findptsms_free_2    PREFIXED_NAME(findptsms_free_2 )
-#define findptsms_2         PREFIXED_NAME(findptsms_2      )
-#define findptsms_eval_2    PREFIXED_NAME(findptsms_eval_2 )
-#define findptsms_setup_3   PREFIXED_NAME(findptsms_setup_3)
-#define findptsms_free_3    PREFIXED_NAME(findptsms_free_3 )
-#define findptsms_3         PREFIXED_NAME(findptsms_3      )
-#define findptsms_eval_3    PREFIXED_NAME(findptsms_eval_3 )
+#define findptsms_setup_2   GS_PREFIXED_NAME(findptsms_setup_2)
+#define findptsms_free_2    GS_PREFIXED_NAME(findptsms_free_2 )
+#define findptsms_2         GS_PREFIXED_NAME(findptsms_2      )
+#define findptsms_eval_2    GS_PREFIXED_NAME(findptsms_eval_2 )
+#define findptsms_setup_3   GS_PREFIXED_NAME(findptsms_setup_3)
+#define findptsms_free_3    GS_PREFIXED_NAME(findptsms_free_3 )
+#define findptsms_3         GS_PREFIXED_NAME(findptsms_3      )
+#define findptsms_eval_3    GS_PREFIXED_NAME(findptsms_eval_3 )
 
-#define findpts_setup_2   PREFIXED_NAME(findpts_setup_2)
-#define findpts_free_2    PREFIXED_NAME(findpts_free_2 )
-#define findpts_2         PREFIXED_NAME(findpts_2      )
-#define findpts_eval_2    PREFIXED_NAME(findpts_eval_2 )
-#define findpts_setup_3   PREFIXED_NAME(findpts_setup_3)
-#define findpts_free_3    PREFIXED_NAME(findpts_free_3 )
-#define findpts_3         PREFIXED_NAME(findpts_3      )
-#define findpts_eval_3    PREFIXED_NAME(findpts_eval_3 )
+#define findpts_setup_2   GS_PREFIXED_NAME(findpts_setup_2)
+#define findpts_free_2    GS_PREFIXED_NAME(findpts_free_2 )
+#define findpts_2         GS_PREFIXED_NAME(findpts_2      )
+#define findpts_eval_2    GS_PREFIXED_NAME(findpts_eval_2 )
+#define findpts_setup_3   GS_PREFIXED_NAME(findpts_setup_3)
+#define findpts_free_3    GS_PREFIXED_NAME(findpts_free_3 )
+#define findpts_3         GS_PREFIXED_NAME(findpts_3      )
+#define findpts_eval_3    GS_PREFIXED_NAME(findpts_eval_3 )
 
 struct findpts_data_2;
 struct findpts_data_3;

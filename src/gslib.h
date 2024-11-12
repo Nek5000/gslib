@@ -1,5 +1,7 @@
-#ifndef GSLIB_H
-#define GSLIB_H
+#ifndef GS_GSLIB_H
+#define GS_GSLIB_H
+
+#define GSLIB_RELEASE_VERSION 10009
 
 #include <stdio.h>
 #include <stddef.h>

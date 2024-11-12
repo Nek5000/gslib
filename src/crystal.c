@@ -45,9 +45,9 @@
 #include "mem.h"
 #include <stdio.h>
 
-#define crystal_init   PREFIXED_NAME(crystal_init  )
-#define crystal_free   PREFIXED_NAME(crystal_free  )
-#define crystal_router PREFIXED_NAME(crystal_router)
+#define crystal_init   GS_PREFIXED_NAME(crystal_init  )
+#define crystal_free   GS_PREFIXED_NAME(crystal_free  )
+#define crystal_router GS_PREFIXED_NAME(crystal_router)
 
 struct crystal {
   struct comm comm;

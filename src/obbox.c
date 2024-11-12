@@ -10,8 +10,8 @@
 #include "poly.h"
 #include "lob_bnd.h"
 
-#define obbox_calc_2  PREFIXED_NAME(obbox_calc_2)
-#define obbox_calc_3  PREFIXED_NAME(obbox_calc_3)
+#define obbox_calc_2  GS_PREFIXED_NAME(obbox_calc_2)
+#define obbox_calc_3  GS_PREFIXED_NAME(obbox_calc_3)
 
 struct obbox_2 { double c0[2], A[4];
                  struct dbl_range x[2]; };

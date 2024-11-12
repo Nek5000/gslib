@@ -1,5 +1,5 @@
-#ifndef COMM_H
-#define COMM_H
+#ifndef GS_COMM_H
+#define GS_COMM_H
 
 /* requires:
      <stddef.h>            for size_t
@@ -10,7 +10,7 @@
 
 #include <assert.h>
 #include <string.h>
-#if !defined(FAIL_H) || !defined(TYPES_H)
+#if !defined(GS_FAIL_H) || !defined(GS_TYPES_H)
 #warning "comm.h" requires "fail.h" and "types.h"
 #endif
 
@@ -72,15 +72,15 @@ typedef int comm_req;
 typedef int MPI_Fint;
 #endif
 
-#define comm_allreduce  PREFIXED_NAME(comm_allreduce )
-#define comm_iallreduce PREFIXED_NAME(comm_iallreduce)
-#define comm_scan       PREFIXED_NAME(comm_scan      )
-#define comm_dot        PREFIXED_NAME(comm_dot       )
+#define comm_allreduce  GS_PREFIXED_NAME(comm_allreduce )
+#define comm_iallreduce GS_PREFIXED_NAME(comm_iallreduce)
+#define comm_scan       GS_PREFIXED_NAME(comm_scan      )
+#define comm_dot        GS_PREFIXED_NAME(comm_dot       )
 
 /* global id, np vars strictly for diagnostic messages (fail.c) */
 #ifndef comm_gbl_id
-#define comm_gbl_id PREFIXED_NAME(comm_gbl_id)
-#define comm_gbl_np PREFIXED_NAME(comm_gbl_np)
+#define comm_gbl_id GS_PREFIXED_NAME(comm_gbl_id)
+#define comm_gbl_np GS_PREFIXED_NAME(comm_gbl_np)
 extern uint comm_gbl_id, comm_gbl_np;
 #endif
 
@@ -121,17 +121,17 @@ void comm_scan(void *scan, const struct comm *com, gs_dom dom, gs_op op,
                const void *v, uint vn, void *buffer);
 
 #define DEFINE_REDUCE(T) \
-T PREFIXED_NAME(comm_reduce__##T)( \
+T GS_PREFIXED_NAME(comm_reduce__##T)( \
     const struct comm *comm, gs_op op, const T *in, uint n); \
 static T comm_reduce_##T(const struct comm *c, gs_op op, const T *v, uint vn) \
-{ return PREFIXED_NAME(comm_reduce__##T)(c,op,v,vn); }
+{ return GS_PREFIXED_NAME(comm_reduce__##T)(c,op,v,vn); }
 GS_FOR_EACH_DOMAIN(DEFINE_REDUCE)
 #undef DEFINE_REDUCE
 
 #define comm_reduce_sint \
-    TYPE_LOCAL(comm_reduce_int,comm_reduce_long,comm_reduce_long_long)
+    GS_TYPE_LOCAL(comm_reduce_int,comm_reduce_long,comm_reduce_long_long)
 #define comm_reduce_slong \
-   TYPE_GLOBAL(comm_reduce_int,comm_reduce_long,comm_reduce_long_long)
+    GS_TYPE_GLOBAL(comm_reduce_int,comm_reduce_long,comm_reduce_long_long)
 
 #endif
 

@@ -1,7 +1,7 @@
-#ifndef SARRAY_SORT_H
-#define SARRAY_SORT_H
+#ifndef GS_SARRAY_SORT_H
+#define GS_SARRAY_SORT_H
 
-#if !defined(SORT_H)
+#if !defined(GS_SORT_H)
 #warning "sarray_sort.h" requires "sort.h"
 #endif
 
@@ -33,8 +33,8 @@
   ----------------------------------------------------------------------------*/
 
 
-#define sarray_permute_     PREFIXED_NAME(sarray_permute_)
-#define sarray_permute_buf_ PREFIXED_NAME(sarray_permute_buf_)
+#define sarray_permute_     GS_PREFIXED_NAME(sarray_permute_)
+#define sarray_permute_buf_ GS_PREFIXED_NAME(sarray_permute_buf_)
 
 void sarray_permute_(size_t size, void *A, size_t n, uint *perm, void *work);
 void sarray_permute_buf_(

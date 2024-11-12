@@ -1,7 +1,7 @@
 #ifndef GS_H
 #define GS_H
 
-#if !defined(COMM_H) || !defined(GS_DEFS_H) || !defined(MEM_H)
+#if !defined(GS_COMM_H) || !defined(GS_DEFS_H) || !defined(GS_MEM_H)
 #warning "gs.h" requires "comm.h", "gs_defs.h", and "mem.h"
 #endif
 
@@ -116,19 +116,19 @@
 
 */  
 
-#define gs           PREFIXED_NAME(gs       )
-#define gs_vec       PREFIXED_NAME(gs_vec   )
-#define gs_many      PREFIXED_NAME(gs_many  )
-#define igs          PREFIXED_NAME(igs      )
-#define igs_vec      PREFIXED_NAME(igs_vec  )
-#define igs_many     PREFIXED_NAME(igs_many )
-#define gs_wait      PREFIXED_NAME(gs_wait  )
-#define gs_setup     PREFIXED_NAME(gs_setup )
-#define gs_free      PREFIXED_NAME(gs_free  )
-#define gs_unique    PREFIXED_NAME(gs_unique)
-#define gs_hf2c      PREFIXED_NAME(gs_hf2c  )
-#define pw_data_nmsg PREFIXED_NAME(pw_data_nmsg )
-#define pw_data_size PREFIXED_NAME(pw_data_size )
+#define gs           GS_PREFIXED_NAME(gs       )
+#define gs_vec       GS_PREFIXED_NAME(gs_vec   )
+#define gs_many      GS_PREFIXED_NAME(gs_many  )
+#define igs          GS_PREFIXED_NAME(igs      )
+#define igs_vec      GS_PREFIXED_NAME(igs_vec  )
+#define igs_many     GS_PREFIXED_NAME(igs_many )
+#define gs_wait      GS_PREFIXED_NAME(gs_wait  )
+#define gs_setup     GS_PREFIXED_NAME(gs_setup )
+#define gs_free      GS_PREFIXED_NAME(gs_free  )
+#define gs_unique    GS_PREFIXED_NAME(gs_unique)
+#define gs_hf2c      GS_PREFIXED_NAME(gs_hf2c  )
+#define pw_data_nmsg GS_PREFIXED_NAME(pw_data_nmsg )
+#define pw_data_size GS_PREFIXED_NAME(pw_data_size )
 
 struct gs_data;
 typedef enum {gs_auto, gs_pairwise, gs_crystal_router, gs_all_reduce} gs_method;

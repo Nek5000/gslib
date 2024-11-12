@@ -1,45 +1,44 @@
 #include <stdio.h>
 #include <float.h>
-#define obbox           TOKEN_PASTE(obbox_,D)
-#define local_hash_data TOKEN_PASTE(findpts_local_hash_data_,D)
-#define hash_data       TOKEN_PASTE(findpts_hash_data_,D)
-#define hash_index      TOKEN_PASTE(hash_index_       ,D)
-#define hash_setfac     TOKEN_PASTE(hash_setfac_      ,D)
-#define hash_range      TOKEN_PASTE(hash_range_       ,D)
-#define hash_bb         TOKEN_PASTE(hash_bb_          ,D)
-#define set_local_mask  TOKEN_PASTE(set_local_mask_   ,D)
-#define fill_hash       TOKEN_PASTE(fill_hash_        ,D)
-#define table_from_hash TOKEN_PASTE(table_from_hash_  ,D)
-#define hash_build      TOKEN_PASTE(hash_build_       ,D)
-#define hash_free       TOKEN_PASTE(hash_free_        ,D)
+#define obbox           GS_TOKEN_PASTE(obbox_,D)
+#define local_hash_data GS_TOKEN_PASTE(findpts_local_hash_data_,D)
+#define hash_data       GS_TOKEN_PASTE(findpts_hash_data_,D)
+#define hash_index      GS_TOKEN_PASTE(hash_index_       ,D)
+#define hash_setfac     GS_TOKEN_PASTE(hash_setfac_      ,D)
+#define hash_range      GS_TOKEN_PASTE(hash_range_       ,D)
+#define hash_bb         GS_TOKEN_PASTE(hash_bb_          ,D)
+#define set_local_mask  GS_TOKEN_PASTE(set_local_mask_   ,D)
+#define fill_hash       GS_TOKEN_PASTE(fill_hash_        ,D)
+#define table_from_hash GS_TOKEN_PASTE(table_from_hash_  ,D)
+#define hash_build      GS_TOKEN_PASTE(hash_build_       ,D)
+#define hash_free       GS_TOKEN_PASTE(hash_free_        ,D)
 
-#define findptsms_local_setup TOKEN_PASTE(PREFIXED_NAME(findptsms_local_setup_),D)
-#define findptsms_local_free  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_free_ ),D)
-#define findptsms_local       TOKEN_PASTE(PREFIXED_NAME(findptsms_local_      ),D)
-#define findptsms_local_eval  TOKEN_PASTE(PREFIXED_NAME(findptsms_local_eval_ ),D)
-#define findpts_dummy_ms_data TOKEN_PASTE(findpts_dummy_ms_data_,D)
-#define findpts_data          TOKEN_PASTE(findpts_data_,D)
-#define src_pt                TOKEN_PASTE(src_pt_      ,D)
-#define out_pt                TOKEN_PASTE(out_pt_      ,D)
-#define eval_src_pt           TOKEN_PASTE(eval_src_pt_ ,D)
-#define eval_out_pt           TOKEN_PASTE(eval_out_pt_ ,D)
-#define setupms_aux           TOKEN_PASTE(setupms_aux_,D)
-#define findptsms_setup       TOKEN_PASTE(PREFIXED_NAME(findptsms_setup_),D)
-#define findptsms_free        TOKEN_PASTE(PREFIXED_NAME(findptsms_free_ ),D)
-#define findptsms             TOKEN_PASTE(PREFIXED_NAME(findptsms_      ),D)
-#define findptsms_eval        TOKEN_PASTE(PREFIXED_NAME(findptsms_eval_ ),D)
+#define findptsms_local_setup GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_local_setup_),D)
+#define findptsms_local_free  GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_local_free_ ),D)
+#define findptsms_local       GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_local_      ),D)
+#define findptsms_local_eval  GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_local_eval_ ),D)
+#define findpts_dummy_ms_data GS_TOKEN_PASTE(findpts_dummy_ms_data_,D)
+#define findpts_data          GS_TOKEN_PASTE(findpts_data_,D)
+#define src_pt                GS_TOKEN_PASTE(src_pt_      ,D)
+#define out_pt                GS_TOKEN_PASTE(out_pt_      ,D)
+#define eval_src_pt           GS_TOKEN_PASTE(eval_src_pt_ ,D)
+#define eval_out_pt           GS_TOKEN_PASTE(eval_out_pt_ ,D)
+#define setupms_aux           GS_TOKEN_PASTE(setupms_aux_,D)
+#define findptsms_setup       GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_setup_),D)
+#define findptsms_free        GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_free_ ),D)
+#define findptsms             GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_      ),D)
+#define findptsms_eval        GS_TOKEN_PASTE(GS_PREFIXED_NAME(findptsms_eval_ ),D)
 
-#define findpts_local_data    TOKEN_PASTE(findpts_local_data_,D)
-#define findpts_local_setup   TOKEN_PASTE(PREFIXED_NAME(findpts_local_setup_),D)
-#define findpts_local_free    TOKEN_PASTE(PREFIXED_NAME(findpts_local_free_ ),D)
-#define findpts_local         TOKEN_PASTE(PREFIXED_NAME(findpts_local_      ),D)
-#define findpts_local_eval    TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
-#define findpts_setup         TOKEN_PASTE(PREFIXED_NAME(findpts_setup_),D)
-#define findpts_free          TOKEN_PASTE(PREFIXED_NAME(findpts_free_ ),D)
-#define findpts               TOKEN_PASTE(PREFIXED_NAME(findpts_      ),D)
-#define findpts_eval          TOKEN_PASTE(PREFIXED_NAME(findpts_eval_ ),D)
-#define findpts_local_eval    TOKEN_PASTE(PREFIXED_NAME(findpts_local_eval_ ),D)
-#define setup_fev_aux         TOKEN_PASTE(setup_fev_aux_,D)
+#define findpts_local_data    GS_TOKEN_PASTE(findpts_local_data_,D)
+#define findpts_local_setup   GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_local_setup_),D)
+#define findpts_local_free    GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_local_free_ ),D)
+#define findpts_local         GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_local_      ),D)
+#define findpts_local_eval    GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_local_eval_ ),D)
+#define findpts_setup         GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_setup_),D)
+#define findpts_free          GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_free_ ),D)
+#define findpts               GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_      ),D)
+#define findpts_eval          GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_eval_ ),D)
+#define setup_fev_aux         GS_TOKEN_PASTE(setup_fev_aux_,D)
 
 struct hash_data {
   ulong hash_n;
@@ -279,7 +278,10 @@ void findptsms(        uint   *const        code_base, const unsigned       code
                  const uint   *const session_id_match, const uint                   npt,
                        struct findpts_data *const fd)
 {
-  if (fd->fevsetup==1) array_free(&fd->savpt); fd->fevsetup=0;
+  if (fd->fevsetup==1) {
+    array_free(&fd->savpt);
+    fd->fevsetup=0;
+  }
   const uint np = fd->cr.comm.np, id=fd->cr.comm.id;
   struct array hash_pt, src_pt, out_pt;
   double *distv = tmalloc(double,npt);

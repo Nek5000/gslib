@@ -20,7 +20,7 @@
   macro(float ) \
   macro(int   ) \
   macro(long  ) \
-  WHEN_LONG_LONG(macro(long_long))
+  GS_WHEN_LONG_LONG(macro(long_long))
   
 /* the supported ops */
 #define GS_FOR_EACH_OP(T,macro) \
@@ -49,7 +49,7 @@
   GS_DEFINE_MONOID_ID(float , -FLT_MAX,  FLT_MAX) \
   GS_DEFINE_MONOID_ID(int   ,  INT_MIN,  INT_MAX) \
   GS_DEFINE_MONOID_ID(long  , LONG_MIN, LONG_MAX) \
-  WHEN_LONG_LONG(GS_DEFINE_MONOID_ID(long_long,LLONG_MIN,LLONG_MAX))
+  GS_WHEN_LONG_LONG(GS_DEFINE_MONOID_ID(long_long,LLONG_MIN,LLONG_MAX))
 
 /*------------------------------------------------------------------------------
   Enums and constants
@@ -62,8 +62,8 @@ typedef enum { LIST } gs_dom;
 #undef ITEM
 #undef LIST
 
-#define gs_sint   TYPE_LOCAL(gs_int,gs_long,gs_long_long)
-#define gs_slong TYPE_GLOBAL(gs_int,gs_long,gs_long_long)
+#define gs_sint   GS_TYPE_LOCAL(gs_int,gs_long,gs_long_long)
+#define gs_slong GS_TYPE_GLOBAL(gs_int,gs_long,gs_long_long)
 
 /* domain type size array */
 #define GS_DOM_SIZE_ITEM(T) sizeof(T),

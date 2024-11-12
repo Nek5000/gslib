@@ -1,12 +1,12 @@
-#ifndef OBBOX_H
-#define OBBOX_H
+#ifndef GS_OBBOX_H
+#define GS_OBBOX_H
 
-#if !defined(TYPES_H) || !defined(NAME_H)
+#if !defined(GS_TYPES_H) || !defined(GS_NAME_H)
 #warning "obbox.h" requires "types.h" and "name.h"
 #endif
 
-#define obbox_calc_2  PREFIXED_NAME(obbox_calc_2)
-#define obbox_calc_3  PREFIXED_NAME(obbox_calc_3)
+#define obbox_calc_2  GS_PREFIXED_NAME(obbox_calc_2)
+#define obbox_calc_3  GS_PREFIXED_NAME(obbox_calc_3)
 
 /*--------------------------------------------------------------------------
    Oriented and axis-aligned bounding box computation for spectral elements
@@ -45,7 +45,7 @@
     
   --------------------------------------------------------------------------*/
 
-#ifndef LOB_BND_H
+#ifndef GS_LOB_BND_H
 struct dbl_range { double min, max; };
 #endif
 

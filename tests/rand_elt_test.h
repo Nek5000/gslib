@@ -1,5 +1,6 @@
 #ifndef RAND_ELT_TEST_H
 #define RAND_ELT_TEST_H
+
 #include <math.h>
 
 static double det_2(const double A[4]) { return A[0]*A[3]-A[1]*A[2]; }
