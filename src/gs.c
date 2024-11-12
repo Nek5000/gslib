@@ -7,6 +7,7 @@
 #include "name.h"
 #include "fail.h"
 #include "types.h"
+#include "float.h"
 
 #define gs_op gs_op_t   /* fix conflict with fortran */
 
@@ -392,6 +393,7 @@ struct gs_remote {
   exec_fun *exec_isend;
   exec_fun *exec_wait;
   fin_fun *fin;
+  double exec_timings[3]; // time[0]-pw,time[1]-cr,time[2]-allreduce
 };
 
 typedef void setup_fun(struct gs_remote *r, struct gs_topology *top,
@@ -1089,10 +1091,10 @@ static void allreduce_setup(struct gs_remote *r, struct gs_topology *top,
   Automatic Setup --- dynamically picks the fastest method
 ------------------------------------------------------------------------------*/
 
-static void dry_run_time(double times[3], const struct gs_remote *r,
+static double dry_run_time(double times[3], const struct gs_remote *r,
                          const struct comm *comm, buffer *buf)
 {
-  int i; double t;
+  int i; double t,tout;
   buffer_reserve(buf,gs_dom_size[gs_double]*r->buffer_size);
   for(i= 2;i;--i)
     r->exec(0,mode_dry_run,1,gs_double,gs_add,0,r->data,comm,buf->ptr);
@@ -1101,12 +1103,16 @@ static void dry_run_time(double times[3], const struct gs_remote *r,
   for(i=10;i;--i)
     r->exec(0,mode_dry_run,1,gs_double,gs_add,0,r->data,comm,buf->ptr);
   t = (comm_time() - t)/10;
+  tout = t;
   times[0] = t/comm->np, times[1] = t, times[2] = t;
   comm_allreduce(comm,gs_double,gs_add, &times[0],1, &t);
   comm_allreduce(comm,gs_double,gs_min, &times[1],1, &t);
   comm_allreduce(comm,gs_double,gs_max, &times[2],1, &t);
+
+  return tout;
 }
 
+static int _global_verbose; // used by auto_setup, initialized in gs_setup_aux
 static void auto_setup(struct gs_remote *r, struct gs_topology *top,
                        const struct comm *comm, buffer *buf)
 {
@@ -1117,10 +1123,15 @@ static void auto_setup(struct gs_remote *r, struct gs_topology *top,
     struct gs_remote r_alt;
     double time[2][3];
 
+    double tt[3];
+    int i; for(i=0; i<3; i++)
+      tt[i]=DBL_MAX;
+    int n=0;
+
     #define DRY_RUN(i,gsr,str) do { \
-      if(comm->id==0) printf("   " str ": "); \
-      dry_run_time(time[i],gsr,comm,buf); \
-      if(comm->id==0) \
+      if(comm->id==0 && _global_verbose) printf("   " str ": "); \
+      tt[n]=dry_run_time(time[i],gsr,comm,buf); \
+      if(comm->id==0 && _global_verbose) \
         printf("%g %g %g\n",time[i][0],time[i][1],time[i][2]); \
     } while(0)
 
@@ -1134,19 +1145,25 @@ static void auto_setup(struct gs_remote *r, struct gs_topology *top,
     } while(0)
 
     DRY_RUN(0, r, "pairwise times (avg, min, max)");
+    n++;
 
     cr_setup(&r_alt, top,comm,buf);
     DRY_RUN_CHECK(      "crystal router                ", "crystal router");
+    n++;
 
     if(top->total_shared<100000) {
       allreduce_setup(&r_alt, top,comm,buf);
       DRY_RUN_CHECK(    "all reduce                    ", "allreduce");
+      n++;
     }
 
     #undef DRY_RUN_CHECK
     #undef DRY_RUN
 
-    if(comm->id==0) printf("   used all_to_all method: %s\n",name);
+    if(comm->id==0 && _global_verbose)
+      printf("   used all_to_all method: %s\n",name);
+
+    memcpy(r->exec_timings,tt,3*sizeof(double));
   }
 }
 
@@ -1410,6 +1427,7 @@ static void gs_setup_aux(struct gs_data *gsh, const slong *id, uint n,
   if(verbose && gsh->comm.id==0)
     printf("gs_setup: %ld unique labels shared\n",(long)top.total_shared);
 
+  _global_verbose=verbose;
   remote_setup[method](&gsh->r, &top,&gsh->comm,&cr.data);
   gsh->handle_size += gsh->r.mem_size;
 
@@ -1442,6 +1460,11 @@ struct gs_data *gs_setup(const slong *id, uint n, const struct comm *comm,
   comm_dup(&gsh->comm,comm);
   gs_setup_aux(gsh,id,n,unique,method,verbose);
   return gsh;
+}
+
+void gs_exec_timings(struct gs_data *gsh,double time[3])
+{
+  memcpy(time,gsh->r.exec_timings,3*sizeof(double));
 }
 
 void gs_free(struct gs_data *gsh)
