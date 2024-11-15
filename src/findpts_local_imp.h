@@ -7,7 +7,7 @@
 #define hash_setfac         GS_TOKEN_PASTE(hash_setfac_       ,D)
 #define hash_range          GS_TOKEN_PASTE(hash_range_        ,D)
 #define hash_count          GS_TOKEN_PASTE(hash_count_        ,D)
-#define hash_opt_size       GS_TOKEN_PASTE(hash_opt_size_     ,D)
+#define hash_opt_size       GS_TOKEN_PASTE(hash_opt_size_,D)
 #define hash_bb             GS_TOKEN_PASTE(hash_bb_           ,D)
 #define hash_build          GS_TOKEN_PASTE(hash_build_        ,D)
 #define hash_free           GS_TOKEN_PASTE(hash_free_         ,D)
@@ -114,9 +114,9 @@ static uint hash_count(struct hash_data *p,
   return count;
 }
 
-static uint hash_opt_size(struct hash_data *p,
-                          const struct obbox *const obb, const uint nel,
-                          const uint max_size)
+uint hash_opt_size(struct hash_data *p,
+                   const struct obbox *const obb, const uint nel,
+                   const uint max_size)
 {
   uint nl=1, nu=ceil(pow(max_size-nel,1.0/D));
   uint size_low=2+nel;
