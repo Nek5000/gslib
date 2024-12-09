@@ -141,7 +141,7 @@ void crystal_router(struct crystal *p)
       fprintf(stderr, "Error in crystal_router: rank = %d send_n = %lld (> "
         "INT_MAX)\n", p->comm.id, send_n_long);
       fflush(stderr);
-      MPI_Abort(p->comm.c, EXIT_FAILURE);
+      die(EXIT_FAILURE);
     }
 
     recvn = 1, targ = n-1-(id-bl)+bl;

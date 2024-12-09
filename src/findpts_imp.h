@@ -658,8 +658,8 @@ void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
              const uint npt, struct findpts_data *const fd)
 {
     if (fd->local.ims==1) {
-       printf("Please use findptsms\n");
-       die(1);
+       printf("call findptsms for multi-session support\n");
+       die(EXIT_FAILURE);
     }
     unsigned int sess_base = 0;
     unsigned int sess_match = 0;
