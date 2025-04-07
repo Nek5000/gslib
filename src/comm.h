@@ -169,6 +169,7 @@ static void comm_init_check_(struct comm *c, MPI_Fint ce, uint np,
 }
 #define comm_init_check(c,ce,np) comm_init_check_(c,ce,np,__FILE__,__LINE__)
 
+#define GS_UNUSED(x) (void)(x)
 
 static void comm_dup_(struct comm *d, const struct comm *s,
                       const char *file, unsigned line)
@@ -176,6 +177,8 @@ static void comm_dup_(struct comm *d, const struct comm *s,
   d->id = s->id, d->np = s->np;
 #ifdef GSLIB_USE_MPI
   MPI_Comm_dup(s->c,&d->c);
+  GS_UNUSED(file);
+  GS_UNUSED(line);
 #else
   if(s->np!=1) fail(1,file,line,"%s not compiled with -DMPI\n",file);
 #endif
@@ -189,11 +192,15 @@ static void comm_split_(const struct comm *s, int bin, int key, struct comm *d,
   MPI_Comm_split(s->c, bin, key, &nc);
   comm_init(d, nc);
   MPI_Comm_free(&nc);
+  GS_UNUSED(file);
+  GS_UNUSED(line);
 #else
   if(s->np!=1) fail(1,file,line,"%s not compiled with -DMPI\n",file);
 #endif
 }
 #define comm_split(s, bin, key, d) comm_split_(s, bin, key, d, __FILE__, __LINE__)
+
+#undef GS_UNUSED
 
 static void comm_free(struct comm *c)
 {
