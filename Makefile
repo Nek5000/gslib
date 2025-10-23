@@ -163,7 +163,7 @@ $(TESTS): % : %.c | lib install
 $(FTESTS): % : %.o | lib install
 	$(FCCMD) $^ -o $@ -L$(SRCDIR) -l$(LIBNAME)
 
-%.o: %.c ; $(CCCMD) -c $< -o $@
+%.o: %.c config.h; $(CCCMD) -c $< -o $@
 %.o: %.f ; $(FCCMD) -c $< -o $@
-%.s: %.c ; $(CCCMD) -S $< -o $@
+%.s: %.c config.h; $(CCCMD) -S $< -o $@
 objects: $(OBJECTS) ;
