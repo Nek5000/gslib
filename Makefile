@@ -109,7 +109,8 @@ FCCMD = $(FC) $(FFLAGS) -I$(INCDIR) $(G)
 
 TESTS = $(TESTDIR)/sort_test $(TESTDIR)/sort_test2 $(TESTDIR)/sarray_sort_test \
         $(TESTDIR)/comm_test $(TESTDIR)/crystal_test \
-        $(TESTDIR)/sarray_transfer_test $(TESTDIR)/gs_test \
+        $(TESTDIR)/sarray_transfer_test $(TESTDIR)/sarray_transfer_soa_test \
+        $(TESTDIR)/gs_test \
         $(TESTDIR)/gs_test_gop_blocking $(TESTDIR)/gs_test_gop_nonblocking \
         $(TESTDIR)/gs_unique_test \
         $(TESTDIR)/findpts_el_2_test \
