@@ -38,7 +38,7 @@ GS_DEFINE_DOM_SIZES()
 typedef enum { mode_plain, mode_vec, mode_many,
                mode_dry_run } gs_mode;
 
-static buffer static_buffer = null_buffer;
+static _Thread_local buffer static_buffer = null_buffer;
 
 static void gather_noop(
   void *out, const void *in, const unsigned vn,
