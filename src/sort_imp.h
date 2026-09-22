@@ -27,7 +27,7 @@
 typedef struct { T v; uint i; } sort_data;
 
 #define INC_PTR(A,stride) ((A)=(T*)((char*)(A)+(stride)))
-#define INDEX_PTR(A,stride,i) (*(T*)((char*)(A)+(i)*(stride)))
+#define INDEX_PTR(A,stride,i) (*(T*)((char*)(A)+(size_t)(i)*(stride)))
 
 /*------------------------------------------------------------------------------
   
