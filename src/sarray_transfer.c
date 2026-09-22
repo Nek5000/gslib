@@ -29,7 +29,9 @@ static void pack_int(
 #define PACK_BODY() do {                                                  \
   uint dummy, *len_ptr=&dummy;                                            \
   uint i, p,lp = UINT_MAX, len=0;                                         \
-  uint *restrict out = buffer_reserve(data, n*(row_size+3)*sizeof(uint)); \
+  /* 64-bit reserve: n*(row_size+3) can exceed UINT_MAX even when n fits */\
+  uint *restrict out =                                                    \
+    buffer_reserve(data, (size_t)n*(row_size+3)*sizeof(uint));            \
   for(i=0;i<n;++i) {                                                      \
     const char *row = input + size*perm[i];                               \
     GET_P();                                                              \
@@ -148,7 +150,18 @@ uint sarray_transfer_many(
   if(!ext) off1 -= sizeof(uint);
   row_size=off1; for(i=1;i<An;++i) row_size += size[i];
   row_size = (row_size+sizeof(uint)-1)/sizeof(uint);
-  
+
+  /* This layer accounts rows and packed-uints in 32-bit (uint n, buf[2],
+     num_rows/cap_rows). The crystal router transports 64-bit buffers, but
+     packing here silently truncates above UINT_MAX. Fail loudly rather than
+     corrupt. (Lifting this cap = widening the pack/unpack layer; see LOGBOOK_A) */
+  if(A[0]->n > (size_t)UINT_MAX ||
+     (size_t)A[0]->n*(row_size+3) > (size_t)UINT_MAX)
+    fail(1,__FILE__,__LINE__,
+         "sarray_transfer: rank %u packs %llu rows * %u uints/row > UINT_MAX; "
+         "pack/unpack layer is 32-bit (see LOGBOOK_A.md)",
+         (unsigned)cr->comm.id, (unsigned long long)A[0]->n, row_size+3);
+
   perm = sortp(&cr->work,0, proc,A[0]->n,proc_stride);
 
   if(!ext) pack_int(&cr->data, row_size, cr->comm.id, A[0]->ptr,A[0]->n,size[0],
@@ -159,7 +172,15 @@ uint sarray_transfer_many(
     pack_more(&cr->data,off,row_size, A[i]->ptr,size[i], perm),off+=size[i];
     
   crystal_router(cr);
-  
+
+  /* num_rows/cap_rows accumulate total received uints in a uint; the router
+     may have delivered a 64-bit cr->data.n. Guard before they silently wrap. */
+  if(cr->data.n > (size_t)UINT_MAX)
+    fail(1,__FILE__,__LINE__,
+         "sarray_transfer: rank %u received %llu uints > UINT_MAX; "
+         "row accounting is 32-bit (see LOGBOOK_A.md)",
+         (unsigned)cr->comm.id, (unsigned long long)cr->data.n);
+
   if(!fixed) {
     n = num_rows(&cr->data,row_size);
     for(i=0;i<An;++i)

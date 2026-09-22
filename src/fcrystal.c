@@ -67,8 +67,20 @@
 #undef   crystal_free
 #define ccrystal_free  GS_PREFIXED_NAME(crystal_free)
 
+/* crystal_set_max_msg / crystal_set_verbose are macro-aliased to the prefixed C
+   names in crystal.h; undef so the Fortran-name macros below don't double-prefix
+   them (as done for crystal_free above), and keep C aliases to the real fns. */
+#undef   crystal_set_max_msg
+#define ccrystal_set_max_msg  GS_PREFIXED_NAME(crystal_set_max_msg)
+#undef   crystal_set_verbose
+#define ccrystal_set_verbose  GS_PREFIXED_NAME(crystal_set_verbose)
+
 #define fcrystal_setup           \
   GS_FORTRAN_NAME(crystal_setup          ,CRYSTAL_SETUP          )
+#define fcrystal_set_max_msg     \
+  GS_FORTRAN_NAME(crystal_set_max_msg    ,CRYSTAL_SET_MAX_MSG    )
+#define fcrystal_set_verbose     \
+  GS_FORTRAN_NAME(crystal_set_verbose    ,CRYSTAL_SET_VERBOSE    )
 #define fcrystal_ituple_sort     \
   GS_FORTRAN_NAME(crystal_ituple_sort    ,CRYSTAL_ITUPLE_SORT    )
 #define fcrystal_tuple_sort      \
@@ -94,6 +106,8 @@ void fcrystal_setup(sint *handle, const MPI_Fint *comm, const sint *np)
   comm_init_check(&p->comm, *comm, *np);
   buffer_init(&p->data,1000);
   buffer_init(&p->work,1000);
+  p->verbose = 0;   /* hand-rolled init (not crystal_init): set all fields */
+  p->max_msg = 0;
   *handle = handle_n++;
 }
 
@@ -101,6 +115,23 @@ void fcrystal_setup(sint *handle, const MPI_Fint *comm, const sint *np)
   if(*handle<0 || *handle>=handle_n || !handle_array[*handle]) \
     fail(1,__FILE__,__LINE__,func ": invalid handle"); \
 while(0)
+
+/* Fortran: call crystal_set_max_msg(h, nbytes)  ! nbytes is integer*8 (slong).
+   0 restores the default; validation/clamping happens in the C setter. */
+void fcrystal_set_max_msg(const sint *handle, const slong *max_msg_bytes)
+{
+  CHECK_HANDLE("crystal_set_max_msg");
+  ccrystal_set_max_msg(handle_array[*handle],
+                       (*max_msg_bytes>0) ? (ulong)*max_msg_bytes : 0);
+}
+
+/* Fortran: call crystal_set_verbose(h, lvl)  ! lvl integer (sint): 0 off, 1 on,
+   >=2 also prints per-round/per-chunk traffic. Parity with the C-only setter. */
+void fcrystal_set_verbose(const sint *handle, const sint *verbose)
+{
+  CHECK_HANDLE("crystal_set_verbose");
+  ccrystal_set_verbose(handle_array[*handle], *verbose);
+}
 
 void fcrystal_ituple_sort(const sint *handle,
                           sint A[], const sint *m, const sint *n,

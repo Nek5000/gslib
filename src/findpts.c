@@ -142,9 +142,22 @@ static uint count_bits(unsigned char *p, uint n)
             nodal field which will be maximized during search in findpts. 
 
   --------------------------------------------------------------------------
+  call findpts_set_verbose(h, lvl)
+  call findpts_set_max_msg(h, nbytes)
+
+    runtime knobs for the crystal router embedded in the findpts handle.
+    call after setup. valid from either findpts_setup or findptsms_setup
+
+    lvl:    integer. 0 = off (default), 1 = banner + batching notices,
+            >=2 = per-round (CRFLOW) and per-chunk (CR) traffic.
+    nbytes: integer*8 per-MPI-call byte cap; 0 restores the compile-time
+            default. Validated/clamped by crystal_set_max_msg. Must be called
+            collectively with the same value on every rank.
+
+  --------------------------------------------------------------------------
   call findpts_free(h)
   call findptsms_free(h)
-  
+
   --------------------------------------------------------------------------
   call findpts(h, code_base,  code_stride,
                   proc_base,  proc_stride,
@@ -239,6 +252,12 @@ static uint count_bits(unsigned char *p, uint n)
 #define ffindpts_eval       GS_FORTRAN_NAME(findpts_eval      ,FINDPTS_EVAL      )
 #define ffindpts_eval_local GS_FORTRAN_NAME(findpts_eval_local,FINDPTS_EVAL_LOCAL)
 
+/* serves both findpts and findptsms handles */
+#define ffindpts_set_verbose \
+  GS_FORTRAN_NAME(findpts_set_verbose,FINDPTS_SET_VERBOSE)
+#define ffindpts_set_max_msg \
+  GS_FORTRAN_NAME(findpts_set_max_msg,FINDPTS_SET_MAX_MSG)
+
 struct handle { void *data; unsigned ndim; };
 static struct handle *handle_array = 0;
 static int handle_max = 0;
@@ -276,6 +295,7 @@ void ffindptsms_setup(sint *const handle,
     comm_init_check(&fd->cr.comm, *comm, *np);
     buffer_init(&fd->cr.data,1000);
     buffer_init(&fd->cr.work,1000);
+    fd->cr.verbose = 0; fd->cr.max_msg = 0; /* hand-rolled: set all fields */
     setupms_aux_2(fd, elx,n,*nel,m,*bbox_tol,
                 *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ims);
   } else if(h->ndim==3) {
@@ -289,6 +309,7 @@ void ffindptsms_setup(sint *const handle,
     comm_init_check(&fd->cr.comm, *comm, *np);
     buffer_init(&fd->cr.data,1000);
     buffer_init(&fd->cr.work,1000);
+    fd->cr.verbose = 0; fd->cr.max_msg = 0; /* hand-rolled: set all fields */
     setupms_aux_3(fd, elx,n,*nel,m,*bbox_tol,
                 *loc_hash_size,*gbl_hash_size, *npt_max, *newt_tol, nsid, distfint,ims);
   } else
@@ -327,6 +348,7 @@ void ffindpts_setup(sint *const handle,
     comm_init_check(&fd->cr.comm, *comm, *np);
     buffer_init(&fd->cr.data,1000);
     buffer_init(&fd->cr.work,1000);
+    fd->cr.verbose = 0; fd->cr.max_msg = 0; /* hand-rolled: set all fields */
     unsigned int *nsid = tmalloc(uint,1);
     double *distfint = tmalloc(double,1);
     *nsid = 0;
@@ -344,6 +366,7 @@ void ffindpts_setup(sint *const handle,
     comm_init_check(&fd->cr.comm, *comm, *np);
     buffer_init(&fd->cr.data,1000);
     buffer_init(&fd->cr.work,1000);
+    fd->cr.verbose = 0; fd->cr.max_msg = 0; /* hand-rolled: set all fields */
     const uint *nsid;
     const double *distfint;
     setupms_aux_3(fd, elx,n,*nel,m,*bbox_tol,
@@ -377,6 +400,25 @@ void ffindpts_free(const sint *const handle)
   else
     GS_PREFIXED_NAME(findpts_free_3)(h->data);
   h->data = 0;
+}
+
+void ffindpts_set_verbose(const sint *const handle, const sint *const verbose)
+{
+  CHECK_HANDLE("findpts_set_verbose");
+  if(h->ndim==2)
+    GS_PREFIXED_NAME(findpts_set_verbose_2)(h->data,*verbose);
+  else
+    GS_PREFIXED_NAME(findpts_set_verbose_3)(h->data,*verbose);
+}
+
+void ffindpts_set_max_msg(const sint *const handle, const slong *const max_msg_bytes)
+{
+  CHECK_HANDLE("findpts_set_max_msg");
+  const ulong nb = (*max_msg_bytes>0) ? (ulong)*max_msg_bytes : 0;
+  if(h->ndim==2)
+    GS_PREFIXED_NAME(findpts_set_max_msg_2)(h->data,nb);
+  else
+    GS_PREFIXED_NAME(findpts_set_max_msg_3)(h->data,nb);
 }
 
 void ffindptsms(const sint *const handle,

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { test: crystal_test,            np: 2 }
+          - { test: crystal_test2,           np: 2 }
+          - { test: crystal_test2,           np: 2, cflags: "-O2 -DCR_MAX_MSG=4096UL", args: "-E 64 -n 2" }
+          - { test: crystal_test2,           np: 2, args: "-E 64 -n 2 -M 4096" }
+          - { test: findpts_el_2_test,       np: 2 }
+          - { test: findpts_el_2_test2,      np: 2 }
+          - { test: findpts_el_3_test,       np: 2 }
+          - { test: findpts_el_3_test2,      np: 2 }
+          - { test: findpts_local_test,      np: 2 }
+          - { test: findpts_test,            np: 2 }
+          - { test: findpts_test_ms,         np: 2 }
+          - { test: gs_test,                 np: 2 }
+          - { test: gs_test_gop_nonblocking, np: 2 }
+          - { test: gs_test_gop_blocking,    np: 2 }
+          - { test: gs_unique_test,          np: 2 }
+          - { test: lob_bnd_test,            np: 2 }
+          - { test: obbox_test,              np: 2 }
+          - { test: poly_test,               np: 2 }
+          - { test: sarray_sort_test,        np: 2 }
+          - { test: sarray_transfer_test,    np: 2 }
+          - { test: sort_test,               np: 2 }
+          - { test: sort_test2,              np: 2 }
+
+    env:
+      TEST: ${{ matrix.test }}
+      NP: ${{ matrix.np }}
+      CFLAGS: ${{ matrix.cflags }}
+      ARGS: ${{ matrix.args }}
+      # ubuntu-latest (24.04) mpich uses the ch4:ucx device; on hardware without
+      # RDMA/InfiniBand, UCX aborts MPI_Init in ibv_create_srq() ("Operation not
+      # supported"). Restrict UCX to shared-memory / loopback / tcp transports.
+      UCX_TLS: sm,self,tcp
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install MPI
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libmpich-dev mpich
+
+      - name: Build test
+        run: make NBC=1 CC=mpicc ${CFLAGS:+CFLAGS="$CFLAGS"} tests/$TEST
+
+      - name: Run test
+        run: mpiexec -np $NP ./tests/$TEST $ARGS

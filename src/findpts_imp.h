@@ -38,6 +38,8 @@
 #define findpts_free          GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_free_ ),D)
 #define findpts               GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_      ),D)
 #define findpts_eval          GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_eval_ ),D)
+#define findpts_set_verbose   GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_set_verbose_),D)
+#define findpts_set_max_msg   GS_TOKEN_PASTE(GS_PREFIXED_NAME(findpts_set_max_msg_),D)
 #define setup_fev_aux         GS_TOKEN_PASTE(setup_fev_aux_,D)
 
 struct hash_data {
@@ -220,6 +222,8 @@ struct findpts_data {
   struct array savpt;
   struct findpts_dummy_ms_data fdms;
   uint   fevsetup;
+  sint   verbose;  /* forwarded to cr; reserved for findpts-level diagnostics */
+  ulong  max_msg;  /* forwarded to cr; per-MPI-call byte cap, 0 = default */
 };
 
 static void setupms_aux(
@@ -232,6 +236,7 @@ static void setupms_aux(
   const uint *const nsid, const double *const distfint, const uint ims
   )
 {
+  fd->verbose = 0, fd->max_msg = 0; /* init here as all setups funnels throug here */
   findptsms_local_setup(&fd->local,elx,nsid,distfint,n,nel,m,bbox_tol,local_hash_size,
                       npt_max, newt_tol,ims);
   hash_build(&fd->hash,&fd->local.hd,fd->local.obb,nel,
@@ -649,6 +654,16 @@ void findpts_free(struct findpts_data *fd)
   findptsms_free(fd);
 }
 
+void findpts_set_verbose(struct findpts_data *const fd, const sint verbose)
+{
+  fd->verbose = verbose, crystal_set_verbose(&fd->cr,verbose);
+}
+
+void findpts_set_max_msg(struct findpts_data *const fd, const ulong max_msg_bytes)
+{
+  fd->max_msg = max_msg_bytes, crystal_set_max_msg(&fd->cr,max_msg_bytes);
+}
+
 void findpts(      uint   *const  code_base   , const unsigned  code_stride   ,
                    uint   *const  proc_base   , const unsigned  proc_stride   ,
                    uint   *const    el_base   , const unsigned    el_stride   ,
@@ -699,6 +714,8 @@ void findpts_eval(
 #undef findptsms_setup
 #undef setupms_aux
 #undef findpts
+#undef findpts_set_max_msg
+#undef findpts_set_verbose
 #undef findpts_free
 #undef findpts_setup
 #undef setup_aux
